@@ -5,8 +5,8 @@
   "scripts": {
     "doctor": "node plugins/triphos-frontend-bootstrap/scripts/doctor.mjs",
     "validate:structure": "node plugins/triphos-frontend-bootstrap/scripts/validate-plugin-structure.mjs",
+    "check:template": "node plugins/triphos-frontend-bootstrap/scripts/check-app-constraints.mjs --target plugins/triphos-frontend-bootstrap/templates/app",
     "register:codex": "node plugins/triphos-frontend-bootstrap/scripts/register-codex-local.mjs",
     "smoke:init": "node plugins/triphos-frontend-bootstrap/scripts/smoke-init.mjs"
   }
 }
-

@@ -26,10 +26,23 @@ if (scaffold.status !== 0) {
   process.exit(scaffold.status ?? 1);
 }
 
+const constraints = spawnSync(
+  "node",
+  [resolve(scriptDir, "check-app-constraints.mjs"), "--target", appDir],
+  { stdio: "inherit" },
+);
+if (constraints.status !== 0) {
+  process.exit(constraints.status ?? 1);
+}
+
 const typecheck = spawnSync("pnpm", ["typecheck"], { cwd: appDir, stdio: "inherit" });
 if (typecheck.status !== 0) {
   process.exit(typecheck.status ?? 1);
 }
 
-console.log(`Smoke init passed: ${appDir}`);
+const build = spawnSync("pnpm", ["build"], { cwd: appDir, stdio: "inherit" });
+if (build.status !== 0) {
+  process.exit(build.status ?? 1);
+}
 
+console.log(`Smoke init passed: ${appDir}`);

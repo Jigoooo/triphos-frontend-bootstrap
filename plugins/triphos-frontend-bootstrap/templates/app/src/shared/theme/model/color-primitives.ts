@@ -1,6 +1,8 @@
 export const colorPrimitives = {
   neutral: {
+    0: '#000000',
     100: '#111111',
+    150: '#161616',
     700: '#6b7280',
     800: '#aaaaaa',
     1000: '#e5e5e5',
@@ -21,12 +23,14 @@ export const colorPrimitives = {
   blue: { 500: '#3b82f6' },
   purple: { 500: '#8b5cf6' },
   whiteAlpha: {
+    5: 'rgba(255,255,255,0.05)',
     10: 'rgba(255,255,255,0.1)',
+    20: 'rgba(255,255,255,0.2)',
   },
   blackAlpha: {
+    3: 'rgba(0,0,0,0.03)',
     5: 'rgba(0,0,0,0.05)',
     10: 'rgba(0,0,0,0.1)',
     20: 'rgba(0,0,0,0.2)',
   },
 } as const;
-

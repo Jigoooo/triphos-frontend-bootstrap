@@ -1,11 +1,12 @@
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import { Sparkles, Workflow } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
 import { create } from 'zustand';
-import { toast } from 'sonner';
 
 import { usePreferReducedMotion } from '@/shared/hooks';
 import { useColors } from '@/shared/theme';
+import { toast } from '@/shared/ui/toast';
 
 type UiState = {
   launches: number;
@@ -35,8 +36,12 @@ export function homePage() {
     >
       <motion.section
         initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
-        animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-        transition={prefersReducedMotion ? undefined : { duration: 0.4, ease: 'easeOut' }}
+        {...(!prefersReducedMotion
+          ? {
+              animate: { opacity: 1, y: 0 },
+              transition: { duration: 0.4, ease: 'easeOut' as const },
+            }
+          : {})}
         style={{
           width: 'min(72rem, 100%)',
           border: `1px solid ${colors.border.default}`,
@@ -172,10 +177,9 @@ export function homePage() {
           >
             Increment
           </button>
-          <button
-            type='button'
+          <Link
+            to='/starter'
             style={{
-              border: 0,
               borderRadius: '999px',
               background: colors.bg.subtle,
               color: colors.text.primary,
@@ -186,14 +190,12 @@ export function homePage() {
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
-            }}
-            onClick={() => {
-              toast('Next step: run triphos-frontend-init inside your agent.');
+              textDecoration: 'none',
             }}
           >
             <Workflow size={16} />
-            Next step
-          </button>
+            Starter route
+          </Link>
         </div>
       </motion.section>
     </main>

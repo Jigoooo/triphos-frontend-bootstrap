@@ -1,3 +1,5 @@
+[English](README.md) | [한국어](README.ko.md)
+
 # triphos-frontend-bootstrap
 
 Git-first dual plugin marketplace for Triphos frontend bootstrapping.
@@ -39,4 +41,13 @@ Public aliases are preserved in descriptions:
 - `api-client-setup`
 - `fsd-update`
 - `fsd-skill-update`
+
+## Generated app baseline
+
+Apps scaffolded by `triphos-frontend-init` include:
+
+- `AGENTS.md` and `CLAUDE.md` guidance files
+- `shared/theme`, `shared/constants`, `shared/types`, and starter `shared/ui`
+- `/starter` showcase route for component and overlay validation
+- inline-style-first UI rules with `className` blocked except narrow utility cases
 

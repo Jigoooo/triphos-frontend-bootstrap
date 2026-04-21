@@ -1,7 +1,6 @@
 import babel from '@rolldown/plugin-babel';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
-import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
   server: {
@@ -9,8 +8,10 @@ export default defineConfig({
     port: 4000,
     open: true,
   },
+  resolve: {
+    tsconfigPaths: true,
+  },
   plugins: [
-    tsconfigPaths({ projects: ['./tsconfig.json'] }),
     react(),
     babel({ presets: [reactCompilerPreset()] }),
   ],

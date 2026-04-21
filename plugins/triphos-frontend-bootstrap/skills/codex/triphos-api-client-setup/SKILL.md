@@ -9,6 +9,7 @@ description: Triphos API client setup for `@jigoooo/api-client`. Use when the us
 
 - [../../../references/shared/stack.md](../../../references/shared/stack.md)
 - [../../../references/shared/init-contract.md](../../../references/shared/init-contract.md)
+- [../../../references/shared/latest-stack.md](../../../references/shared/latest-stack.md)
 
 ## Modes
 

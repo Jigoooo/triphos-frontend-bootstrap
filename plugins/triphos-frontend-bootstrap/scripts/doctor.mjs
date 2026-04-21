@@ -57,6 +57,20 @@ const structure = spawnSync("node", [resolve(scriptDir, "validate-plugin-structu
 });
 pushCheck("plugin structure", structure.status === 0, structure.stdout.trim() || structure.stderr.trim());
 
+const constraints = spawnSync(
+  "node",
+  [resolve(scriptDir, "check-app-constraints.mjs"), "--target", resolve(pluginRoot, "templates", "app")],
+  {
+    stdio: "pipe",
+    encoding: "utf8",
+  },
+);
+pushCheck(
+  "template constraints",
+  constraints.status === 0,
+  constraints.stdout.trim() || constraints.stderr.trim(),
+);
+
 for (const check of checks) {
   const status = check.ok ? "OK" : "FAIL";
   console.log(`[${status}] ${check.label}: ${check.detail}`);
@@ -65,4 +79,3 @@ for (const check of checks) {
 if (checks.some((check) => !check.ok)) {
   process.exit(1);
 }
-

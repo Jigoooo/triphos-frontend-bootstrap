@@ -2,6 +2,11 @@ import { createRootRoute, createRoute, createRouter, Outlet } from '@tanstack/re
 
 import { getQueryClient } from '@/app/providers/query-client';
 import { homePage } from '@/pages/home';
+import { starterPage } from '@/pages/starter';
+import { AlertDialogRenderer } from '@/shared/ui/alert-dialog';
+import { BottomSheetRenderer } from '@/shared/ui/bottom-sheet';
+import { ModalDialogRenderer } from '@/shared/ui/modal-dialog';
+import { OverlayStackManager } from '@/shared/ui/overlay-stack';
 
 function RootComponent() {
   return (
@@ -11,6 +16,10 @@ function RootComponent() {
       }}
     >
       <Outlet />
+      <OverlayStackManager />
+      <AlertDialogRenderer />
+      <ModalDialogRenderer />
+      <BottomSheetRenderer />
     </div>
   );
 }
@@ -25,7 +34,13 @@ const indexRoute = createRoute({
   component: homePage,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute]);
+const starterRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/starter',
+  component: starterPage,
+});
+
+const routeTree = rootRoute.addChildren([indexRoute, starterRoute]);
 
 export const router = createRouter({
   routeTree,

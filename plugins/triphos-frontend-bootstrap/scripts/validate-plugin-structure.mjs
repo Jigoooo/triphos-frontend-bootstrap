@@ -22,8 +22,22 @@ const requiredPaths = [
   resolve(pluginRoot, "skills", "claude", "triphos-frontend-doctor", "SKILL.md"),
   resolve(pluginRoot, "skills", "claude", "triphos-theme-setup", "SKILL.md"),
   resolve(pluginRoot, "templates", "app", "package.json"),
+  resolve(pluginRoot, "templates", "app", "AGENTS.md"),
+  resolve(pluginRoot, "templates", "app", "AGENTS.en.md"),
+  resolve(pluginRoot, "templates", "app", "CLAUDE.md"),
+  resolve(pluginRoot, "templates", "app", "CLAUDE.en.md"),
   resolve(pluginRoot, "templates", "app", "vite.config.ts"),
   resolve(pluginRoot, "templates", "app", "src", "shared", "theme", "index.ts"),
+  resolve(pluginRoot, "templates", "app", "src", "shared", "constants", "index.ts"),
+  resolve(pluginRoot, "templates", "app", "src", "shared", "types", "index.ts"),
+  resolve(pluginRoot, "templates", "app", "src", "shared", "hooks", "index.ts"),
+  resolve(pluginRoot, "templates", "app", "src", "shared", "ui", "button", "index.ts"),
+  resolve(pluginRoot, "templates", "app", "src", "shared", "ui", "overlay-stack", "index.ts"),
+  resolve(pluginRoot, "templates", "app", "src", "pages", "starter", "ui", "starter-page.tsx"),
+  resolve(pluginRoot, "references", "shared", "latest-stack.md"),
+  resolve(repoRoot, "README.ko.md"),
+  resolve(repoRoot, "AGENTS.md"),
+  resolve(repoRoot, "CLAUDE.md"),
 ];
 
 const missing = requiredPaths.filter((path) => !existsSync(path));

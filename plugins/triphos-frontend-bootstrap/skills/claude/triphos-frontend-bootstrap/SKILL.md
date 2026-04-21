@@ -11,12 +11,14 @@ argument-hint: "[doctor|init|rules]"
 - [../../../references/shared/stack.md](../../../references/shared/stack.md)
 - [../../../references/shared/collision-policy.md](../../../references/shared/collision-policy.md)
 - [../../../references/shared/init-contract.md](../../../references/shared/init-contract.md)
+- [../../../references/shared/latest-stack.md](../../../references/shared/latest-stack.md)
 
 ## Routing table
 
 - plugin install verification -> `triphos-frontend-doctor`
 - new project scaffold -> `triphos-frontend-init`
 - theme tokens or `src/shared/theme` setup -> `triphos-theme-setup`
+- starter UI kit or `/starter` showcase work -> `triphos-frontend-init` then `triphos-theme-setup`
 - FSD cleanup -> `triphos-fsd-refactor`
 - React Compiler or styling rules -> `triphos-react-lint-rules`
 - API client bootstrap -> `triphos-api-client-setup`
@@ -31,3 +33,8 @@ argument-hint: "[doctor|init|rules]"
 - `fsd-skill-update` -> `triphos-fsd-skill-update`
 
 Do not overwrite or depend on the user's global skills.
+
+## Language policy
+
+- human-facing markdown may exist in Korean and English mirrors
+- execution skills stay canonical per tool; do not duplicate skills by language

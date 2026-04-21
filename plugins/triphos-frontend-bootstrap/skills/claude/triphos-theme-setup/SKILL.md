@@ -11,6 +11,8 @@ argument-hint: "[theme-task]"
 - keep the default `src/shared/theme/` skeleton present
 - evolve color primitives and semantic tokens without breaking `useColors()`
 - keep component styling inline while letting theme values flow through hooks and stores
+- ensure starter UI components consume theme values through `useColors()`
+- keep the `/starter` showcase aligned with the current theme contract
 
 ## Contract
 
@@ -18,4 +20,5 @@ argument-hint: "[theme-task]"
 - components consume theme values through `useColors()`
 - global CSS stays limited to resets, font-face, and browser normalization
 - theme work must not reintroduce broad `className` styling
-
+- theme changes must remain compatible with the starter kit renderers and controls
+- if theme tokens change, keep `AGENTS.md` and `CLAUDE.md` guidance aligned with the new contract

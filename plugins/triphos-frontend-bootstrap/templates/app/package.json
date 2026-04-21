@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@jigoooo/api-client": "^0.2.4",
+    "@floating-ui/react": "^0.27.19",
     "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-router": "^1.167.2",
     "@tanstack/react-virtual": "^3.13.22",
@@ -43,10 +44,9 @@
     "globals": "^17.4.0",
     "jsdom": "^29.0.0",
     "prettier": "^3.8.1",
-    "typescript": "~5.9.3",
+    "typescript": "^6.0.0",
     "typescript-eslint": "^8.57.0",
     "vite": "^8.0.0",
-    "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.0"
   }
 }

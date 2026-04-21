@@ -9,11 +9,13 @@ export function bootstrapApi() {
 
   initApi({
     baseURL: import.meta.env.DEV ? import.meta.env.VITE_API_PREFIX || '/api' : API_BASE_URL,
-    axiosOptions: useDevMocks
+    ...(useDevMocks
       ? {
-          adapter: mockApiAdapter,
+          axiosOptions: {
+            adapter: mockApiAdapter,
+          },
         }
-      : undefined,
+      : {}),
     retryConfig: {
       maxRetries: 1,
       retryDelay: 0,

@@ -14,8 +14,16 @@ export enum ResolvedThemeMode {
   Dark = 'dark',
 }
 
-function resolveMode(_mode: ThemeMode): ResolvedThemeMode {
-  return ResolvedThemeMode.Light;
+function getSystemMode(): ResolvedThemeMode {
+  if (typeof window === 'undefined') return ResolvedThemeMode.Light;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? ResolvedThemeMode.Dark
+    : ResolvedThemeMode.Light;
+}
+
+function resolveMode(mode: ThemeMode): ResolvedThemeMode {
+  if (mode === ThemeMode.System) return getSystemMode();
+  return mode === ThemeMode.Dark ? ResolvedThemeMode.Dark : ResolvedThemeMode.Light;
 }
 
 function resolveColors(resolved: ResolvedThemeMode): SemanticColors {
@@ -25,6 +33,8 @@ function resolveColors(resolved: ResolvedThemeMode): SemanticColors {
 function applyToDocument(resolved: ResolvedThemeMode) {
   if (typeof document === 'undefined') return;
   document.documentElement.setAttribute('data-theme', resolved);
+  document.body.style.backgroundColor =
+    resolved === ResolvedThemeMode.Dark ? darkColors.bg.base : lightColors.bg.base;
 }
 
 type ThemeStore = {
@@ -37,10 +47,10 @@ type ThemeStore = {
 export const useThemeStore = create<ThemeStore>()(
   persist(
     (set) => {
-      const initialResolved = resolveMode(ThemeMode.Light);
+      const initialResolved = resolveMode(ThemeMode.System);
 
       return {
-        themeMode: ThemeMode.Light,
+        themeMode: ThemeMode.System,
         resolvedMode: initialResolved,
         colors: resolveColors(initialResolved),
         setThemeMode: (mode: ThemeMode) => {
@@ -70,6 +80,25 @@ export const useThemeStore = create<ThemeStore>()(
 );
 
 export function initSystemThemeListener(): () => void {
-  return () => {};
-}
+  if (typeof window === 'undefined') return () => {};
 
+  const media = window.matchMedia('(prefers-color-scheme: dark)');
+  const handleChange = () => {
+    const state = useThemeStore.getState();
+    if (state.themeMode !== ThemeMode.System) return;
+
+    const resolved = resolveMode(ThemeMode.System);
+    applyToDocument(resolved);
+    useThemeStore.setState({
+      resolvedMode: resolved,
+      colors: resolveColors(resolved),
+    });
+  };
+
+  handleChange();
+  media.addEventListener('change', handleChange);
+
+  return () => {
+    media.removeEventListener('change', handleChange);
+  };
+}

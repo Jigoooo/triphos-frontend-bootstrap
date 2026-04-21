@@ -10,6 +10,7 @@ argument-hint: "[target-directory]"
 
 - [../../../references/shared/stack.md](../../../references/shared/stack.md)
 - [../../../references/shared/init-contract.md](../../../references/shared/init-contract.md)
+- [../../../references/shared/latest-stack.md](../../../references/shared/latest-stack.md)
 
 ## Workflow
 
@@ -25,9 +26,11 @@ node ../../../scripts/scaffold-app.mjs --target <directory> --name <package-name
 
 ## Template rules
 
-- include `src/shared/adapter/`, `src/shared/hooks/`, `src/shared/lib/dev/`, `src/shared/theme/`, `src/app/declare/`, and `public/robots.txt`
+- include `src/shared/constants/`, `src/shared/adapter/`, `src/shared/hooks/`, `src/shared/lib/dev/`, `src/shared/lib/formatter/`, `src/shared/types/`, `src/shared/theme/`, `src/shared/ui/` starter kit, `src/app/declare/`, `public/robots.txt`, `AGENTS.md`, and `CLAUDE.md`
 - copy Pretendard and the global `index.css` reset
 - default UI code to inline `style` props
 - ban `className` except for unavoidable utility hooks
 - keep API bootstrap minimal; deeper API setup belongs to `triphos-api-client-setup`
 - route deeper theme work to `triphos-theme-setup`
+- create and wire the `/starter` showcase route for starter UI verification
+- keep TypeScript on the 6.0 baseline with strict optional/indexed-access checks enabled

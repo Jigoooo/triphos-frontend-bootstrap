@@ -26,9 +26,8 @@ export class ResponseAdapter<TData> {
       code: this.statusCode,
       success: true,
       message: this.value.message ?? 'Success',
-      data: this.value.data,
+      ...(this.value.data !== undefined ? { data: this.value.data } : {}),
       timestamp: this.value.timestamp,
     };
   }
 }
-

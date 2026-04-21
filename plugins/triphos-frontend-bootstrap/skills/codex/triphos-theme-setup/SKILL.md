@@ -9,12 +9,15 @@ description: Triphos theme setup skill. Use when initializing or extending `src/
 
 - [../../../references/shared/stack.md](../../../references/shared/stack.md)
 - [../../../references/shared/init-contract.md](../../../references/shared/init-contract.md)
+- [../../../references/shared/latest-stack.md](../../../references/shared/latest-stack.md)
 
 ## Responsibility
 
 - keep the default `src/shared/theme/` skeleton present
 - evolve color primitives and semantic tokens without breaking `useColors()`
 - keep component styling inline while letting theme values flow through hooks and stores
+- ensure starter UI components consume theme values through `useColors()`
+- keep the `/starter` showcase aligned with the current theme contract
 
 ## Contract
 
@@ -22,4 +25,5 @@ description: Triphos theme setup skill. Use when initializing or extending `src/
 - components consume theme values through `useColors()`
 - global CSS stays limited to resets, font-face, and browser normalization
 - theme work must not reintroduce broad `className` styling
-
+- theme changes must remain compatible with the starter kit renderers and controls
+- if theme tokens change, keep `AGENTS.md` and `CLAUDE.md` guidance aligned with the new contract
