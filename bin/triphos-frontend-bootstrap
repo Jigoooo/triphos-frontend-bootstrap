@@ -6,6 +6,7 @@ import { stdin as input, stdout as output } from "node:process";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  ensureZshRegistration,
   getPackageVersion,
   installGlobalPackage,
   installClaudePlugin,
@@ -20,6 +21,16 @@ import {
 } from "../scripts/install-lib.mjs";
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+
+function printShellRefreshHint(registrationResult) {
+  if (!registrationResult?.zshrcPath) {
+    return;
+  }
+
+  console.log("");
+  console.log(`zsh configuration updated: ${registrationResult.zshrcPath}`);
+  console.log("Run `source ~/.zshrc` or open a new terminal to use `tfb` immediately.");
+}
 
 function printUsage() {
   console.log(`Usage:
@@ -471,11 +482,14 @@ async function main() {
     const pinnedPackageSpec = `${PACKAGE_NAME}@${currentVersion}`;
 
     try {
+      let zshRegistrationResult = null;
       installGlobalPackage({
         packageSpec: pinnedPackageSpec,
         env: process.env,
         cwd: process.cwd(),
       });
+      zshRegistrationResult = ensureZshRegistration({ env: process.env });
+      printShellRefreshHint(zshRegistrationResult);
     } catch (error) {
       throw new Error(
         `${error.message}\nRun \`npm install -g ${pinnedPackageSpec}\` and retry.`,
@@ -490,6 +504,8 @@ async function main() {
       env: process.env,
       cwd: process.cwd(),
     });
+    const zshRegistrationResult = ensureZshRegistration({ env: process.env });
+    printShellRefreshHint(zshRegistrationResult);
 
     const syncCommand =
       options.runtime === "claude"

@@ -8,6 +8,8 @@ import { dirname, resolve } from "node:path";
 export const PLUGIN_NAME = "triphos-frontend-bootstrap";
 export const PACKAGE_NAME = "@jigoooo/triphos-frontend-bootstrap";
 export const GITHUB_REPOSITORY = "Jigoooo/triphos-frontend-bootstrap";
+const ZSH_BLOCK_START = "# >>> triphos-frontend-bootstrap >>>";
+const ZSH_BLOCK_END = "# <<< triphos-frontend-bootstrap <<<";
 
 export function isEphemeralExecution(env = process.env) {
   return env.npm_command === "exec" && env.npm_package_name === PACKAGE_NAME;
@@ -312,6 +314,57 @@ export function installGlobalPackage({
   return {
     packageSpec,
     binaryPath: resolveGlobalBinaryPath("tfb", env, cwd),
+  };
+}
+
+export function ensureZshRegistration({
+  env = process.env,
+  homeDir = os.homedir(),
+}) {
+  const shell = env.SHELL ?? "";
+  const zshrcPath = resolve(homeDir, ".zshrc");
+  const shouldManageZsh = shell.includes("zsh") || existsSync(zshrcPath);
+
+  if (!shouldManageZsh) {
+    return null;
+  }
+
+  const existing = existsSync(zshrcPath) ? readFileSync(zshrcPath, "utf8") : "";
+  const managedBlock = [
+    ZSH_BLOCK_START,
+    'if [ -z "$NVM_DIR" ] && [ -d "$HOME/.nvm" ]; then',
+    '  export NVM_DIR="$HOME/.nvm"',
+    "fi",
+    'if [ -n "$NVM_DIR" ] && [ -s "$NVM_DIR/nvm.sh" ]; then',
+    '  . "$NVM_DIR/nvm.sh"',
+    "fi",
+    'if command -v npm >/dev/null 2>&1; then',
+    '  _tfb_npm_bin="$(npm prefix -g 2>/dev/null)/bin"',
+    '  case ":$PATH:" in',
+    '    *":$_tfb_npm_bin:"*) ;;',
+    '    *) export PATH="$_tfb_npm_bin:$PATH" ;;',
+    "  esac",
+    "  unset _tfb_npm_bin",
+    "fi",
+    ZSH_BLOCK_END,
+  ].join("\n");
+
+  const blockPattern = new RegExp(
+    `${ZSH_BLOCK_START.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}[\\s\\S]*?${ZSH_BLOCK_END.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`,
+    "m",
+  );
+
+  const nextContent = blockPattern.test(existing)
+    ? existing.replace(blockPattern, managedBlock)
+    : `${existing.replace(/\s*$/, "")}${existing.trim().length > 0 ? "\n\n" : ""}${managedBlock}\n`;
+
+  if (nextContent !== existing) {
+    writeFileSync(zshrcPath, nextContent);
+  }
+
+  return {
+    zshrcPath,
+    changed: nextContent !== existing,
   };
 }
 
