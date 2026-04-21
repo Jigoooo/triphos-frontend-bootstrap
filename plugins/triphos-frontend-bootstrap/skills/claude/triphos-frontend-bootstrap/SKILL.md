@@ -2,6 +2,7 @@
 name: triphos-frontend-bootstrap
 description: Triphos frontend plugin router. Use when bootstrapping or verifying a Triphos frontend workspace, or when the user mentions `fsd-refactor`, `react-lint-rules`, `api-client-setup`, `fsd-update`, or `fsd-skill-update` inside this plugin. Route work to `triphos-frontend-doctor`, `triphos-frontend-init`, or the bundled namespaced policy skills.
 argument-hint: "[doctor|init|rules]"
+user-invocable: false
 ---
 
 # triphos-frontend-bootstrap
