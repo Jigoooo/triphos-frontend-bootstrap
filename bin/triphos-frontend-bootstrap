@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import {
   ensureZshRegistration,
   getPackageVersion,
+  getGlobalInstalledPackageVersion,
   hasGlobalBinary,
   installGlobalPackage,
   installClaudePlugin,
@@ -34,10 +35,15 @@ function printShellRefreshHint(registrationResult) {
   console.log("Run `source ~/.zshrc` or open a new terminal to use `tfb` immediately.");
 }
 
+function printVersion() {
+  console.log(getPackageVersion(packageRoot));
+}
+
 function printUsage() {
   console.log(`Usage:
   triphos-frontend-bootstrap
   update        Update the global tfb CLI, then resync plugins
+  version       Show the installed CLI version
 
 Install:
   npx ${PACKAGE_NAME}@latest
@@ -472,22 +478,39 @@ async function resolveInstallerOptions(command, argv) {
 }
 
 async function main() {
+  const rawArgs = process.argv.slice(2);
+  if (rawArgs.includes("--version") || rawArgs.includes("-v")) {
+    printVersion();
+    return;
+  }
+
   const defaultCommand = isNpmLauncherExecution(process.env) ? "setup" : "help";
-  const { command, rest } = extractCommand(process.argv.slice(2), defaultCommand);
-  const knownCommands = new Set(["setup", "claude-setup", "codex-setup", "both-setup", "update", "help"]);
+  const { command, rest } = extractCommand(rawArgs, defaultCommand);
+  const knownCommands = new Set(["setup", "claude-setup", "codex-setup", "both-setup", "update", "help", "version"]);
 
   if (!knownCommands.has(command)) {
     throw new Error(`Unknown command: ${command}`);
   }
 
+  if (command === "version") {
+    printVersion();
+    return;
+  }
+
+  const currentVersion = getPackageVersion(packageRoot);
+  const globalInstalledVersion = getGlobalInstalledPackageVersion(
+    PACKAGE_NAME,
+    process.env,
+    process.cwd(),
+  );
   const shouldBootstrapGlobalCli =
     command !== "help" &&
     command !== "update" &&
     isNpmLauncherExecution(process.env) &&
-    !hasGlobalBinary("tfb", process.env, process.cwd());
+    (!hasGlobalBinary("tfb", process.env, process.cwd()) ||
+      globalInstalledVersion !== currentVersion);
 
   if (shouldBootstrapGlobalCli) {
-    const currentVersion = getPackageVersion(packageRoot);
     const pinnedPackageSpec = `${PACKAGE_NAME}@${currentVersion}`;
 
     try {

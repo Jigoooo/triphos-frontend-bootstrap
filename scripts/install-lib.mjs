@@ -16,11 +16,11 @@ const PUBLIC_CODEX_SKILLS = [
   "triphos-react-lint-rules",
   "triphos-api-client-setup",
   "triphos-fsd-skill-update",
+  "triphos-theme-setup",
 ];
 const HIDDEN_CODEX_SKILLS = [
   "triphos-frontend-bootstrap",
   "triphos-frontend-doctor",
-  "triphos-theme-setup",
 ];
 
 export function isEphemeralExecution(env = process.env) {
@@ -372,6 +372,20 @@ export function resolveGlobalBinaryPath(command, env = process.env, cwd = proces
 
 export function hasGlobalBinary(command, env = process.env, cwd = process.cwd()) {
   return existsSync(resolveGlobalBinaryPath(command, env, cwd));
+}
+
+export function resolveGlobalNpmRoot(env = process.env, cwd = process.cwd()) {
+  return runCommandOrThrow("npm", ["root", "-g"], { cwd, env }).stdout.trim();
+}
+
+export function getGlobalInstalledPackageVersion(packageName, env = process.env, cwd = process.cwd()) {
+  const packageJsonPath = resolve(resolveGlobalNpmRoot(env, cwd), packageName, "package.json");
+  if (!existsSync(packageJsonPath)) {
+    return null;
+  }
+
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
+  return packageJson.version ?? null;
 }
 
 export function updateGlobalPackage({
