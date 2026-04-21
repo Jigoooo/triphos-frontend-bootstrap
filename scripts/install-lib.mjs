@@ -225,7 +225,6 @@ export function syncCodexSkills({
   skillsRoot,
 }) {
   const sourceSkillsRoot = resolve(pluginInstallRoot, "skills", "codex");
-  const sharedReferencesRoot = resolve(pluginInstallRoot, "references", "shared");
 
   mkdirSync(skillsRoot, { recursive: true });
 
@@ -240,19 +239,7 @@ export function syncCodexSkills({
     const targetSkillFile = resolve(targetSkillRoot, "SKILL.md");
 
     rmSync(targetSkillRoot, { recursive: true, force: true });
-    mkdirSync(targetSkillRoot, { recursive: true });
-
-    if (existsSync(resolve(sourceSkillRoot, "agents"))) {
-      cpSync(resolve(sourceSkillRoot, "agents"), resolve(targetSkillRoot, "agents"), {
-        recursive: true,
-      });
-    }
-
-    if (existsSync(sharedReferencesRoot)) {
-      cpSync(sharedReferencesRoot, resolve(targetSkillRoot, "references", "shared"), {
-        recursive: true,
-      });
-    }
+    cpSync(sourceSkillRoot, targetSkillRoot, { recursive: true });
 
     const skillContent = readFileSync(sourceSkillFile, "utf8");
     const rewritten = rewriteInstalledSkillMarkdown(skillContent, pluginInstallRoot);
