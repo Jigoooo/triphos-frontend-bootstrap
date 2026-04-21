@@ -243,7 +243,8 @@ export function installClaudePlugin({ scope, cwd = process.cwd() }) {
 
   const claudeScope = mapScopeToClaudeScope(scope);
   const marketplaces = getClaudeMarketplaces(cwd);
-  const hasMarketplace = marketplaces.some((item) => item?.repo === GITHUB_REPOSITORY);
+  const matchingMarketplace = marketplaces.find((item) => item?.repo === GITHUB_REPOSITORY);
+  const hasMarketplace = Boolean(matchingMarketplace);
 
   if (!hasMarketplace) {
     runClaudeStep(
@@ -256,11 +257,13 @@ export function installClaudePlugin({ scope, cwd = process.cwd() }) {
   const existing = installedPlugins.find(
     (item) => item?.id?.startsWith(`${PLUGIN_NAME}@`) && item?.scope === claudeScope,
   );
+  const marketplaceName = matchingMarketplace?.name ?? PLUGIN_NAME;
+  const pluginSpecifier = existing?.id ?? `${PLUGIN_NAME}@${marketplaceName}`;
 
   if (existing) {
-    runClaudeStep(["plugin", "update", PLUGIN_NAME, "--scope", claudeScope], cwd);
+    runClaudeStep(["plugin", "update", pluginSpecifier, "--scope", claudeScope], cwd);
   } else {
-    runClaudeStep(["plugin", "install", PLUGIN_NAME, "--scope", claudeScope], cwd);
+    runClaudeStep(["plugin", "install", pluginSpecifier, "--scope", claudeScope], cwd);
   }
 
   return {
