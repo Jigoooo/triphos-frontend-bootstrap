@@ -33,8 +33,11 @@ function resolveColors(resolved: ResolvedThemeMode): SemanticColors {
 function applyToDocument(resolved: ResolvedThemeMode) {
   if (typeof document === 'undefined') return;
   document.documentElement.setAttribute('data-theme', resolved);
+  document.documentElement.style.colorScheme = resolved;
   document.body.style.backgroundColor =
     resolved === ResolvedThemeMode.Dark ? darkColors.bg.base : lightColors.bg.base;
+  document.body.style.color =
+    resolved === ResolvedThemeMode.Dark ? darkColors.text.primary : lightColors.text.primary;
 }
 
 type ThemeStore = {

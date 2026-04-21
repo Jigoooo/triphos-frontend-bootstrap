@@ -1,7 +1,12 @@
 import { BaseDatePicker } from './base-date-picker';
-import type { DatePickerProps } from '../model/types';
+import { DatePickerCalendar } from './date-picker-calendar';
+import { DatePickerContent } from './date-picker-content';
+import { DatePickerRoot } from './date-picker-root';
+import { DatePickerTrigger } from './date-picker-trigger';
 
-export function DatePicker(props: DatePickerProps) {
-  return <BaseDatePicker {...props} />;
-}
-
+export const DatePicker = Object.assign(BaseDatePicker, {
+  Root: DatePickerRoot,
+  Trigger: DatePickerTrigger,
+  Content: DatePickerContent,
+  Calendar: DatePickerCalendar,
+});

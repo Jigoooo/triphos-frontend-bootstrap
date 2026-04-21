@@ -1,44 +1,50 @@
 ---
 name: triphos-frontend-init
-description: Create a new Triphos frontend app in a new directory with React 19, React Compiler, TanStack Router/Query/Virtual, Zustand, Vitest, Framer Motion, `@jigoooo/api-client`, Pretendard, and the Triphos FSD skeleton. Use when bootstrapping a new project or when the user asks to initialize the standard frontend stack.
+description: 새 디렉터리에 React 19, React Compiler, TanStack Router/Query/Virtual, Zustand, Vitest, Framer Motion, `@jigoooo/api-client`, Pretendard, Triphos FSD 스켈레톤이 포함된 Triphos 프론트엔드 앱을 생성한다. 새 프로젝트를 부트스트랩하거나 표준 프론트엔드 스택 초기화를 요청받았을 때 사용한다.
 ---
 
 # triphos-frontend-init
 
-Use this skill only for new-directory scaffolding.
+새 디렉터리를 스캐폴딩할 때만 이 스킬을 사용한다.
 
-## Read first
+## 언어 규칙
+
+- 사용자에게 보여주는 설명, 진행 보고, 계획, 검증 요약은 기본적으로 한국어로 작성한다.
+- 코드, 명령어, 패키지명, 파일 경로는 원문을 유지한다.
+- 사용자가 다른 언어를 명시하면 그 요청을 따른다.
+
+## 먼저 읽기
 
 - [../../../references/shared/stack.md](../../../references/shared/stack.md)
 - [../../../references/shared/init-contract.md](../../../references/shared/init-contract.md)
 - [../../../references/shared/latest-stack.md](../../../references/shared/latest-stack.md)
 
-## Workflow
+## 워크플로우
 
-1. Validate the environment with `triphos-frontend-doctor` if the repo or machine state is unclear.
-2. Confirm the target directory is new or empty.
-3. Run the scaffold script:
+1. 레포 또는 머신 상태가 불명확하면 `triphos-frontend-doctor`로 환경을 먼저 확인한다.
+2. 대상 디렉터리가 새 디렉터리이거나 비어 있는지 확인한다.
+3. 다음 스캐폴드 스크립트를 실행한다.
 
 ```bash
 node ../../../scripts/scaffold-app.mjs --target <directory> --name <package-name> --install
 ```
 
-4. Prefer `pnpm typecheck` or `pnpm build` as the first verification pass.
+4. 1차 검증은 `pnpm typecheck` 또는 `pnpm build`를 우선 사용한다.
 
-## Template rules
+## 템플릿 규칙
 
-- copy the bundled `templates/app/` output as the base
-- include `src/shared/constants/`, `src/shared/adapter/`, `src/shared/hooks/`, `src/shared/lib/dev/`, `src/shared/lib/formatter/`, `src/shared/types/`, `src/shared/theme/`, `src/shared/ui/` starter kit, `src/app/declare/`, `public/robots.txt`, `AGENTS.md`, and `CLAUDE.md`
-- keep Pretendard font assets and the copied global `index.css`
-- default UI styling to inline `style` props
-- treat `className` as banned except for truly unavoidable utility hooks such as scrollbar helpers
-- keep generated API bootstrap minimal; deeper API work belongs to `triphos-api-client-setup`
-- route deeper theme work to `triphos-theme-setup`
-- create and wire the `/starter` showcase route for starter UI verification
+- 기본 베이스는 번들된 `templates/app/` 출력물을 그대로 복사한다.
+- `src/shared/constants/`, `src/shared/adapter/`, `src/shared/hooks/`, `src/shared/lib/dev/`, `src/shared/lib/formatter/`, `src/shared/types/`, `src/shared/theme/`, `src/shared/ui/` starter kit, `src/app/declare/`, `public/robots.txt`, `AGENTS.md`, `CLAUDE.md`를 포함한다.
+- Pretendard 폰트 asset과 복사된 전역 `index.css`를 유지한다.
+- UI 스타일링은 inline `style` props를 기본으로 한다.
+- `className`은 scrollbar helper 같은 정말 불가피한 utility hook 외에는 금지로 취급한다.
+- 생성되는 API bootstrap은 최소 범위로 유지하고, 더 깊은 API 작업은 `triphos-api-client-setup`으로 넘긴다.
+- 더 깊은 테마 작업은 `triphos-theme-setup`으로 연결한다.
+- starter UI 검증용 `/starter` showcase route를 생성하고 연결한다.
 
-## Latest-tech posture
+## 최신 스택 기준
 
-- keep the template aligned with Vite 8 / Rolldown-era assumptions
-- prefer React 19 hooks such as `useEffectEvent`, `useOptimistic`, and `useActionState` where they genuinely improve the flow
-- keep TypeScript on the 6.0 baseline with strict optional/indexed-access checks enabled
-- keep Browser Mode as a testing upgrade path, not a mandatory requirement for every generated app
+- 템플릿은 Vite 8 / Rolldown 시대 가정을 기준으로 유지한다.
+- 흐름을 실제로 개선할 때만 React 19 훅(`useEffectEvent`, `useOptimistic`, `useActionState`)을 우선 검토한다.
+- TypeScript는 6.0 기준선을 유지하고 strict optional/indexed-access checks를 켠다.
+- Browser Mode는 테스트 확장 경로로 유지하되, 모든 생성 앱의 필수 요구사항으로 강제하지는 않는다.

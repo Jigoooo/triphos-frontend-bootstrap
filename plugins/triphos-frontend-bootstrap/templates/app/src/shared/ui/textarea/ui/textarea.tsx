@@ -2,7 +2,7 @@ import { type ChangeEvent, type KeyboardEvent, useCallback, useLayoutEffect, use
 
 import { BaseTextarea } from './base-textarea';
 import type { TextareaProps } from '../model/types';
-import { useColors } from '@/shared/theme';
+import { ResolvedThemeMode, useColors, useThemeStore } from '@/shared/theme';
 
 const SIZE_FONT: Record<string, string> = {
   sm: '1.4rem',
@@ -38,6 +38,7 @@ export function Textarea({
   ...props
 }: TextareaProps) {
   const colors = useColors();
+  const resolvedMode = useThemeStore((state) => state.resolvedMode);
   const internalTextareaRef = useRef<HTMLTextAreaElement>(null);
   const textareaRef = externalTextareaRef ?? internalTextareaRef;
 
@@ -102,6 +103,8 @@ export function Textarea({
         lineHeight: `${LINE_HEIGHT}px`,
         fontFamily: 'inherit',
         color: colors.text.primary,
+        caretColor: colors.interactive.primary,
+        colorScheme: resolvedMode === ResolvedThemeMode.Dark ? 'dark' : 'light',
         ...(autoResize && {
           maxHeight: `${LINE_HEIGHT * maxRows + PADDING}px`,
           overflow: typeof value === 'string' && value.split('\n').length > maxRows ? 'auto' : 'hidden',
@@ -112,4 +115,3 @@ export function Textarea({
     />
   );
 }
-

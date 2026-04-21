@@ -75,7 +75,8 @@ export function AlertDialogRenderer(): ReactNode {
               position: 'fixed',
               inset: 0,
               zIndex: Z_INDEX.ALERT_BACKDROP,
-              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              backgroundColor: colors.overlay.modalBackdrop,
+              backdropFilter: 'blur(4px)',
             }}
             onClick={() => {
               if (config.closeOnBackdropClick !== false) handleClose(false);
@@ -93,10 +94,11 @@ export function AlertDialogRenderer(): ReactNode {
               zIndex: Z_INDEX.ALERT,
               width: '27rem',
               maxWidth: 'calc(100vw - 4rem)',
-              backgroundColor: `color-mix(in srgb, ${accentColor} 4%, rgba(255, 255, 255, 0.82))`,
+              backgroundColor: `color-mix(in srgb, ${colors.bg.elevated} 92%, ${accentColor} 8%)`,
+              border: `1px solid ${colors.border.default}`,
               borderRadius: '1.4rem',
               overflow: 'hidden',
-              boxShadow: `0 8px 32px rgba(0, 0, 0, 0.08)`,
+              boxShadow: `0 24px 64px ${colors.shadow.modal}`,
             }}
             onClick={(event) => event.stopPropagation()}
           >
@@ -170,4 +172,3 @@ export function AlertDialogRenderer(): ReactNode {
     document.body,
   );
 }
-

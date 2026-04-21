@@ -4,7 +4,7 @@ import { Sparkles, Workflow } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { create } from 'zustand';
 
-import { usePreferReducedMotion } from '@/shared/hooks';
+import { useMediaQuery, usePreferReducedMotion } from '@/shared/hooks';
 import { useColors } from '@/shared/theme';
 import { toast } from '@/shared/ui/toast';
 

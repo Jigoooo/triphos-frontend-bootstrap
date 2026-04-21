@@ -1,23 +1,24 @@
 import { Link } from '@tanstack/react-router';
-import { CalendarDays, Check, ChevronDown, LoaderCircle, MessageSquare, MousePointer2, Palette, Plus, Sparkles } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
+import { CalendarDays, ChevronDown, LoaderCircle, MessageSquare, MousePointer2, Palette, Plus, Sparkles } from 'lucide-react';
+import { useRef, useState } from 'react';
 
 import { useBottomSheet } from '@/shared/ui/bottom-sheet';
 import { Button } from '@/shared/ui/button';
 import { Checkbox } from '@/shared/ui/checkbox';
 import { DatePicker } from '@/shared/ui/date-picker';
-import { EmptyState } from '@/shared/ui/empty-state';
 import { FormField } from '@/shared/ui/form-field';
 import { Input } from '@/shared/ui/input';
 import { BouncingDotsLoader, DelayedFallback, Skeleton, Spinner } from '@/shared/ui/loader';
 import { useModalDialog } from '@/shared/ui/modal-dialog';
-import { Select } from '@/shared/ui/select';
+import { RadioGroup } from '@/shared/ui/radio';
+import { MultiSelect, Select } from '@/shared/ui/select';
 import { SpeedDial } from '@/shared/ui/speed-dial';
 import { Switch } from '@/shared/ui/switch';
 import { Textarea } from '@/shared/ui/textarea';
 import { ThemeToggle } from '@/shared/ui/theme-toggle';
 import { toast } from '@/shared/ui/toast';
 import { ToggleButton } from '@/shared/ui/toggle-button';
+import { Typography } from '@/shared/ui/typography';
 import { Tooltip } from '@/shared/ui/tooltip';
 import { alertDialog } from '@/shared/ui/alert-dialog';
 import { useColors } from '@/shared/theme';
@@ -38,30 +39,13 @@ export function starterPage() {
   const [switchOn, setSwitchOn] = useState(true);
   const [date, setDate] = useState('2026-04-21');
   const [selectValue, setSelectValue] = useState('starter');
+  const [radioValue, setRadioValue] = useState('starter');
+  const [selectedSurfaces, setSelectedSurfaces] = useState(['checkbox', 'toast']);
   const [text, setText] = useState('');
   const { formState, onFormChange } = useFormState({
     name: 'Triphos',
     count: '12000',
   });
-
-  const starterCards = useMemo(
-    () => [
-      'button',
-      'input',
-      'select',
-      'checkbox',
-      'textarea',
-      'theme-toggle',
-      'toast',
-      'tooltip',
-      'loader',
-      'modal',
-      'alert',
-      'bottom-sheet',
-      'speed-dial',
-    ],
-    [],
-  );
 
   const cardStyle = {
     border: `1px solid ${colors.border.default}`,
@@ -171,15 +155,45 @@ export function starterPage() {
               />
             </FormField>
             <FormField label='Phone preview' description={formatPhoneNumber('01012341234')}>
-              <Select
-                value={selectValue}
-                onChange={(event) => setSelectValue(event.target.value)}
-                options={[
-                  { label: 'Starter', value: 'starter' },
-                  { label: 'Admin', value: 'admin' },
-                  { label: 'Marketing', value: 'marketing' },
-                ]}
-              />
+              <Select.Root value={selectValue} onValueChange={setSelectValue}>
+                <Select.Trigger>
+                  <Select.Value placeholder='Select a workspace' />
+                </Select.Trigger>
+                <Select.Content>
+                  <Select.Item value='starter'>Starter</Select.Item>
+                  <Select.Item value='admin'>Admin</Select.Item>
+                  <Select.Item value='marketing'>Marketing</Select.Item>
+                </Select.Content>
+              </Select.Root>
+            </FormField>
+            <FormField label='Multi select' description='Compound pattern + simple multi selection'>
+              <MultiSelect.Root values={selectedSurfaces} onValuesChange={setSelectedSurfaces}>
+                <MultiSelect.Trigger>
+                  <MultiSelect.Value placeholder='Select shared surfaces' />
+                </MultiSelect.Trigger>
+                <MultiSelect.Content>
+                  <MultiSelect.Item value='checkbox'>Checkbox</MultiSelect.Item>
+                  <MultiSelect.Item value='select'>Select</MultiSelect.Item>
+                  <MultiSelect.Item value='toast'>Toast</MultiSelect.Item>
+                  <MultiSelect.Item value='dialog'>Dialog</MultiSelect.Item>
+                </MultiSelect.Content>
+              </MultiSelect.Root>
+            </FormField>
+            <FormField label='Radio group' description={`Current choice: ${radioValue}`}>
+              <RadioGroup.Root value={radioValue} onValueChange={setRadioValue} orientation='horizontal'>
+                <RadioGroup.Item value='starter'>
+                  <RadioGroup.Indicator />
+                  <RadioGroup.Label>Starter</RadioGroup.Label>
+                </RadioGroup.Item>
+                <RadioGroup.Item value='admin'>
+                  <RadioGroup.Indicator />
+                  <RadioGroup.Label>Admin</RadioGroup.Label>
+                </RadioGroup.Item>
+                <RadioGroup.Item value='marketing'>
+                  <RadioGroup.Indicator />
+                  <RadioGroup.Label>Marketing</RadioGroup.Label>
+                </RadioGroup.Item>
+              </RadioGroup.Root>
             </FormField>
             <FormField label='Date picker'>
               <DatePicker value={date} onChange={setDate} />
@@ -188,7 +202,10 @@ export function starterPage() {
               <Textarea value={text} onChange={(event) => setText(event.target.value)} autoResize />
             </FormField>
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-              <Checkbox checked={checked} onChange={setChecked} label='Checkbox starter' />
+              <Checkbox.Root checked={checked} onCheckedChange={setChecked}>
+                <Checkbox.Indicator />
+                <Checkbox.Label>Checkbox starter</Checkbox.Label>
+              </Checkbox.Root>
               <Switch checked={switchOn} onChange={setSwitchOn} />
               <ToggleButton selected={selected} onClick={() => setSelected((current) => !current)}>
                 Toggle button
@@ -274,17 +291,43 @@ export function starterPage() {
           </section>
 
           <section style={cardStyle}>
-            <strong style={{ fontSize: '1.8rem', color: colors.text.primary }}>Empty/scroll utilities</strong>
-            <EmptyState
-              title='Starter route baseline'
-              description={`Included cards: ${starterCards.length}`}
-              action={
-                <Button variant='outline' onClick={() => toast.info('Empty state action')}>
-                  <Check size={16} />
-                  Action
-                </Button>
-              }
-            />
+            <strong style={{ fontSize: '1.8rem', color: colors.text.primary }}>Typography</strong>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+              <Typography
+                style={{
+                  fontSize: '2.4rem',
+                  fontWeight: 700,
+                  color: colors.text.primary,
+                  lineHeight: 1.2,
+                }}
+              >
+                Triphos starter headline
+              </Typography>
+              <Typography
+                style={{
+                  fontSize: '1.6rem',
+                  color: colors.text.secondary,
+                  lineHeight: 1.6,
+                }}
+              >
+                A minimal text primitive mirrored from the shared-ui package and ready for template-level reuse.
+              </Typography>
+              <Typography
+                style={{
+                  fontSize: '1.3rem',
+                  fontWeight: 600,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  color: colors.interactive.primary,
+                }}
+              >
+                Caption / Meta
+              </Typography>
+            </div>
+          </section>
+
+          <section style={cardStyle}>
+            <strong style={{ fontSize: '1.8rem', color: colors.text.primary }}>Scroll utilities</strong>
             <div
               ref={containerRef}
               style={{

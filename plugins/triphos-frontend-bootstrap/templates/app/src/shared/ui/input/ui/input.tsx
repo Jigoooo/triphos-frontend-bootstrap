@@ -2,7 +2,7 @@ import { type KeyboardEvent, useRef } from 'react';
 
 import { BaseInput } from './base-input';
 import type { InputProps } from '../model/types';
-import { useColors } from '@/shared/theme';
+import { ResolvedThemeMode, useColors, useThemeStore } from '@/shared/theme';
 
 const SIZE_HEIGHT: Record<string, string> = {
   sm: '3.6rem',
@@ -29,6 +29,7 @@ export function Input({
   ...props
 }: InputProps) {
   const colors = useColors();
+  const resolvedMode = useThemeStore((state) => state.resolvedMode);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -75,6 +76,8 @@ export function Input({
           fontSize: SIZE_FONT[size] || SIZE_FONT.md,
           lineHeight: 1.5,
           color: colors.text.primary,
+          caretColor: colors.interactive.primary,
+          colorScheme: resolvedMode === ResolvedThemeMode.Dark ? 'dark' : 'light',
           cursor: disabled ? 'default' : 'text',
         }}
         {...props}
@@ -83,4 +86,3 @@ export function Input({
     </div>
   );
 }
-
