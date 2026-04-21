@@ -59,7 +59,6 @@ Triphos frontend bootstrap CLI
 Commands:
   update        Update the global tfb CLI, then resync plugins
   version       Show the installed CLI version
-  --version     Show the installed CLI version
 `);
 }
 
