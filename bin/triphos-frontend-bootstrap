@@ -13,7 +13,6 @@ import {
   installGlobalPackage,
   installClaudePlugin,
   installCodexPlugin,
-  isEphemeralExecution,
   isNpmLauncherExecution,
   normalizeRuntime,
   normalizeScope,
