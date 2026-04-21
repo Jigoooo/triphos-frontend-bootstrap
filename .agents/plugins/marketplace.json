@@ -8,7 +8,7 @@
       "name": "triphos-frontend-bootstrap",
       "source": {
         "source": "local",
-        "path": "/Users/kimjigoooo/workspace/plugin/triphos-frontend-bootstrap/.triphos/plugins/triphos-frontend-bootstrap"
+        "path": "./plugins/triphos-frontend-bootstrap"
       },
       "policy": {
         "installation": "AVAILABLE",
