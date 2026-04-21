@@ -1,6 +1,6 @@
 {
   "name": "@jigoooo/triphos-frontend-bootstrap",
-  "version": "0.5.6",
+  "version": "0.5.7",
   "description": "npx installer and dual-plugin marketplace source for Triphos frontend bootstrapping.",
   "author": "Jigoooo",
   "license": "MIT",

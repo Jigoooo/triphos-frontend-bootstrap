@@ -47,10 +47,10 @@ Update:
 `);
 }
 
-function extractCommand(argv) {
+function extractCommand(argv, defaultCommand) {
   if (argv.length === 0) {
     return {
-      command: "setup",
+      command: defaultCommand,
       rest: [],
     };
   }
@@ -58,7 +58,7 @@ function extractCommand(argv) {
   const [first, ...rest] = argv;
   if (first.startsWith("-")) {
     return {
-      command: "setup",
+      command: defaultCommand,
       rest: argv,
     };
   }
@@ -472,7 +472,8 @@ async function resolveInstallerOptions(command, argv) {
 }
 
 async function main() {
-  const { command, rest } = extractCommand(process.argv.slice(2));
+  const defaultCommand = isNpmLauncherExecution(process.env) ? "setup" : "help";
+  const { command, rest } = extractCommand(process.argv.slice(2), defaultCommand);
   const knownCommands = new Set(["setup", "claude-setup", "codex-setup", "both-setup", "update", "help"]);
 
   if (!knownCommands.has(command)) {
