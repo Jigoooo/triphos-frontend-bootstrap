@@ -1,0 +1,248 @@
+@charset "utf-8";
+
+@font-face {
+  font-family: 'Pretendard Variable';
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/PretendardVariable.woff2') format('woff2-variations');
+}
+
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  @supports (-webkit-touch-callout: none) {
+    body,
+    * {
+      font-family:
+        'Pretendard-iOS-Fix',
+        'Pretendard Variable',
+        Pretendard,
+        -apple-system,
+        BlinkMacSystemFont,
+        system-ui,
+        sans-serif !important;
+    }
+  }
+}
+
+* {
+  -webkit-touch-callout: none;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+*:focus {
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+}
+
+:root {
+  color-scheme: light;
+}
+
+::selection {
+  background: rgba(37, 99, 235, 0.3);
+  color: #0f172a;
+}
+
+.bubble-mine ::selection {
+  background: rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+}
+
+div,
+button {
+  -webkit-tap-highlight-color: transparent;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+}
+
+html {
+  font-size: 62.5%;
+  font-synthesis: none;
+  font-synthesis-weight: none;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: auto;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html,
+body {
+  font-family:
+    'Pretendard Variable',
+    Pretendard,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    'Noto Sans KR',
+    'Apple SD Gothic Neo',
+    sans-serif;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-weight: 500;
+}
+
+body {
+  overflow: hidden;
+  line-height: 1.5;
+  background-color: #ffffff;
+  color: #111111;
+}
+
+input::placeholder,
+textarea::placeholder {
+  font-size: 1.4rem;
+  font-weight: 500;
+  opacity: 1;
+  color: #aaaaaa;
+}
+
+.placeholder::placeholder {
+  font-size: 1.4rem;
+}
+
+.placeholder-md::placeholder {
+  font-size: 1.3rem;
+}
+
+.placeholder-sm::placeholder {
+  font-size: 1.2rem;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+textarea:-webkit-autofill:active {
+  -webkit-text-fill-color: #111111 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.selection-none {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+::-webkit-scrollbar {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(128, 128, 128, 0.2);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 1rem;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+::-webkit-scrollbar-corner {
+  display: none;
+}
+
+::-webkit-resizer {
+  display: none;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+img,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+pre {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+pre::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-only {
+  display: block;
+}
+
+.desktop-only {
+  display: none !important;
+}
+
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none !important;
+  }
+
+  .desktop-only {
+    display: flex !important;
+  }
+}
+
+[contenteditable][data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: #aaaaaa;
+  pointer-events: none;
+}

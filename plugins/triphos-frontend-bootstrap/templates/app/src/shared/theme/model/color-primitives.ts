@@ -1,0 +1,32 @@
+export const colorPrimitives = {
+  neutral: {
+    100: '#111111',
+    700: '#6b7280',
+    800: '#aaaaaa',
+    1000: '#e5e5e5',
+    1050: '#e5e7eb',
+    1200: '#fcfcfc',
+    1300: '#ffffff',
+  },
+  brand: {
+    50: '#ecfdf5',
+    100: '#d1fae5',
+    600: '#059669',
+    700: '#047857',
+    800: '#065f46',
+  },
+  green: { 500: '#10b981' },
+  red: { 500: '#ef4444' },
+  amber: { 500: '#f59e0b' },
+  blue: { 500: '#3b82f6' },
+  purple: { 500: '#8b5cf6' },
+  whiteAlpha: {
+    10: 'rgba(255,255,255,0.1)',
+  },
+  blackAlpha: {
+    5: 'rgba(0,0,0,0.05)',
+    10: 'rgba(0,0,0,0.1)',
+    20: 'rgba(0,0,0,0.2)',
+  },
+} as const;
+

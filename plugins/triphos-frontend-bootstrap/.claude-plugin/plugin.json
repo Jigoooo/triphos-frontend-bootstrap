@@ -1,0 +1,28 @@
+{
+  "name": "triphos-frontend-bootstrap",
+  "version": "0.1.0",
+  "description": "Triphos frontend bootstrap plugin with doctor, init, and bundled frontend policy skills.",
+  "author": {
+    "name": "Jigoooo",
+    "email": "opensource@triphos.dev",
+    "url": "https://github.com/Jigoooo"
+  },
+  "repository": "https://github.com/Jigoooo/triphos-frontend-bootstrap",
+  "homepage": "https://github.com/Jigoooo/triphos-frontend-bootstrap",
+  "license": "MIT",
+  "keywords": [
+    "triphos",
+    "frontend",
+    "bootstrap",
+    "fsd",
+    "react"
+  ],
+  "skills": "./skills/claude/",
+  "agents": [
+    "./agents/frontend-bootstrap-planner.md",
+    "./agents/frontend-bootstrap-executor.md",
+    "./agents/frontend-bootstrap-verifier.md",
+    "./agents/frontend-bootstrap-refactor-reviewer.md"
+  ]
+}
+

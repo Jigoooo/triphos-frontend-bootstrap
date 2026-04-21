@@ -1,0 +1,4 @@
+interface:
+  display_name: "Triphos Init"
+  short_description: "Scaffold a Triphos frontend app"
+  default_prompt: "Use triphos-frontend-init to scaffold a new Triphos frontend app with React 19, React Compiler, Framer Motion, and the Triphos FSD template."

@@ -1,0 +1,13 @@
+{
+  "name": "triphos-fixture-app",
+  "relativeTarget": "typescript-pnpm",
+  "expectedFiles": [
+    "package.json",
+    "vite.config.ts",
+    "eslint.config.js",
+    "tsconfig.json",
+    "src/main.tsx",
+    "src/app/router.tsx",
+    "src/app/providers/api-bootstrap.ts"
+  ]
+}

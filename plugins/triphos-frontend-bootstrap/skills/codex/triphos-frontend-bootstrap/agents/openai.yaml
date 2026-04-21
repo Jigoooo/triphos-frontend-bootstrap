@@ -1,0 +1,4 @@
+interface:
+  display_name: "Triphos Bootstrap"
+  short_description: "Route Triphos bootstrap tasks"
+  default_prompt: "Use triphos-frontend-bootstrap to route Triphos bootstrap, doctor, init, or policy-skill work."

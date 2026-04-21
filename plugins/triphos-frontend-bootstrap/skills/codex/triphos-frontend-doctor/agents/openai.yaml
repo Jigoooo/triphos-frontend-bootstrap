@@ -1,0 +1,4 @@
+interface:
+  display_name: "Triphos Doctor"
+  short_description: "Validate Triphos plugin health"
+  default_prompt: "Use triphos-frontend-doctor to validate Triphos plugin structure, pnpm/corepack readiness, and template health before init."

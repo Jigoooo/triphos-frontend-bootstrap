@@ -1,0 +1,44 @@
+{
+  "name": "triphos-frontend-bootstrap",
+  "version": "0.1.0",
+  "description": "Triphos frontend bootstrap plugin with doctor, init, and plugin-local rules skills.",
+  "author": {
+    "name": "Jigoooo",
+    "email": "opensource@triphos.dev",
+    "url": "https://github.com/Jigoooo"
+  },
+  "homepage": "https://github.com/Jigoooo/triphos-frontend-bootstrap",
+  "repository": "https://github.com/Jigoooo/triphos-frontend-bootstrap",
+  "license": "MIT",
+  "keywords": [
+    "triphos",
+    "frontend",
+    "bootstrap",
+    "react",
+    "fsd"
+  ],
+  "skills": "./skills/codex/",
+  "interface": {
+    "displayName": "Triphos Frontend Bootstrap",
+    "shortDescription": "Bootstrap and verify Triphos-standard frontend projects.",
+    "longDescription": "Install a Triphos-standard frontend bootstrap plugin with doctor, init, namespaced rules skills, template scaffolding, and validation helpers.",
+    "developerName": "Jigoooo",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/Jigoooo/triphos-frontend-bootstrap",
+    "privacyPolicyURL": "https://github.com/Jigoooo/triphos-frontend-bootstrap",
+    "termsOfServiceURL": "https://github.com/Jigoooo/triphos-frontend-bootstrap",
+    "defaultPrompt": [
+      "Use triphos-frontend-bootstrap to decide whether I should run doctor or init.",
+      "Use triphos-frontend-doctor to validate this Triphos plugin checkout.",
+      "Use triphos-frontend-init to scaffold a new Triphos frontend app."
+    ],
+    "brandColor": "#0F766E",
+    "composerIcon": "./assets/icon.svg",
+    "logo": "./assets/icon.svg",
+    "screenshots": []
+  }
+}
