@@ -52,6 +52,17 @@ Update:
 `);
 }
 
+function printDefaultOverview() {
+  console.log(`tfb
+Triphos frontend bootstrap CLI
+
+Commands:
+  update        Update the global tfb CLI, then resync plugins
+  version       Show the installed CLI version
+  --version     Show the installed CLI version
+`);
+}
+
 function extractCommand(argv, defaultCommand) {
   if (argv.length === 0) {
     return {
@@ -480,6 +491,11 @@ async function main() {
   const rawArgs = process.argv.slice(2);
   if (rawArgs.includes("--version") || rawArgs.includes("-v")) {
     printVersion();
+    return;
+  }
+
+  if (rawArgs.length === 0 && !isNpmLauncherExecution(process.env)) {
+    printDefaultOverview();
     return;
   }
 
