@@ -126,7 +126,7 @@ function buildMultiSelectLines(message, options, currentIndex, selectedIndexes) 
       const isCurrent = index === currentIndex;
       const isChecked = selectedIndexes.has(index);
       const pointer = isCurrent ? colorize(">", ansi.cyan, ansi.bold) : " ";
-      const checked = isChecked ? colorize("x", ansi.green, ansi.bold) : " ";
+      const checked = isChecked ? colorize("v", ansi.green, ansi.bold) : " ";
       const label = isCurrent ? colorize(option.label, ansi.cyan, ansi.bold) : option.label;
       return `${pointer} [${checked}] ${label}`;
     }),
@@ -141,7 +141,7 @@ function buildChecklistLines(message, options, currentIndex, selectedIndexes, co
       const isCurrent = index === currentIndex;
       const isChecked = selectedIndexes.has(index);
       const pointer = isCurrent ? colorize(">", ansi.cyan, ansi.bold) : " ";
-      const checked = isChecked ? colorize("x", ansi.green, ansi.bold) : " ";
+      const checked = isChecked ? colorize("v", ansi.green, ansi.bold) : " ";
       const label = isCurrent ? colorize(option.label, ansi.cyan, ansi.bold) : option.label;
       return `${pointer} [${checked}] ${label}`;
     }),
@@ -199,7 +199,9 @@ async function runInteractiveSelector(renderLines, onKeypress) {
         return;
       }
 
-      render();
+      if (result?.changed) {
+        render();
+      }
     }
 
     if (canUseRawMode) {
@@ -222,12 +224,12 @@ async function promptSelect(message, options, fallbackValue) {
     (key) => {
       if (key.name === "up") {
         currentIndex = currentIndex === 0 ? options.length - 1 : currentIndex - 1;
-        return null;
+        return { changed: true };
       }
 
       if (key.name === "down") {
         currentIndex = currentIndex === options.length - 1 ? 0 : currentIndex + 1;
-        return null;
+        return { changed: true };
       }
 
       if (key.name === "return") {
@@ -253,12 +255,12 @@ async function promptMultiSelect(message, options, fallbackValues) {
     (key) => {
       if (key.name === "up") {
         currentIndex = currentIndex === 0 ? options.length - 1 : currentIndex - 1;
-        return null;
+        return { changed: true };
       }
 
       if (key.name === "down") {
         currentIndex = currentIndex === options.length - 1 ? 0 : currentIndex + 1;
-        return null;
+        return { changed: true };
       }
 
       if (key.name === "space") {
@@ -267,7 +269,7 @@ async function promptMultiSelect(message, options, fallbackValues) {
         } else {
           selectedIndexes.add(currentIndex);
         }
-        return null;
+        return { changed: true };
       }
 
       if (key.name === "return") {
@@ -302,12 +304,12 @@ async function promptChecklist(message, options, fallbackValues, continueLabel =
 
       if (key.name === "up") {
         currentIndex = currentIndex === 0 ? lastIndex : currentIndex - 1;
-        return null;
+        return { changed: true };
       }
 
       if (key.name === "down") {
         currentIndex = currentIndex === lastIndex ? 0 : currentIndex + 1;
-        return null;
+        return { changed: true };
       }
 
       if (key.name === "return") {
@@ -331,6 +333,7 @@ async function promptChecklist(message, options, fallbackValues, continueLabel =
         } else {
           selectedIndexes.add(currentIndex);
         }
+        return { changed: true };
       }
 
       return null;
