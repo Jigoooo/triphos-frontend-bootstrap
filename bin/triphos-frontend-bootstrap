@@ -8,10 +8,12 @@ import { fileURLToPath } from "node:url";
 import {
   ensureZshRegistration,
   getPackageVersion,
+  hasGlobalBinary,
   installGlobalPackage,
   installClaudePlugin,
   installCodexPlugin,
   isEphemeralExecution,
+  isNpmLauncherExecution,
   normalizeRuntime,
   normalizeScope,
   PACKAGE_NAME,
@@ -477,7 +479,13 @@ async function main() {
     throw new Error(`Unknown command: ${command}`);
   }
 
-  if (isEphemeralExecution(process.env) && command !== "help" && command !== "update") {
+  const shouldBootstrapGlobalCli =
+    command !== "help" &&
+    command !== "update" &&
+    isNpmLauncherExecution(process.env) &&
+    !hasGlobalBinary("tfb", process.env, process.cwd());
+
+  if (shouldBootstrapGlobalCli) {
     const currentVersion = getPackageVersion(packageRoot);
     const pinnedPackageSpec = `${PACKAGE_NAME}@${currentVersion}`;
 

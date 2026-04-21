@@ -15,6 +15,15 @@ export function isEphemeralExecution(env = process.env) {
   return env.npm_command === "exec" && env.npm_package_name === PACKAGE_NAME;
 }
 
+export function isNpmLauncherExecution(env = process.env) {
+  return Boolean(
+    env.npm_execpath ||
+      env.npm_command === "exec" ||
+      env.npm_lifecycle_event === "npx" ||
+      env.npm_config_user_agent,
+  );
+}
+
 export function getPackageVersion(packageRoot) {
   const packageJsonPath = resolve(packageRoot, "package.json");
   const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
@@ -273,6 +282,10 @@ export function resolveGlobalBinaryPath(command, env = process.env, cwd = proces
   return process.platform === "win32"
     ? resolve(prefix, `${command}.cmd`)
     : resolve(prefix, "bin", command);
+}
+
+export function hasGlobalBinary(command, env = process.env, cwd = process.cwd()) {
+  return existsSync(resolveGlobalBinaryPath(command, env, cwd));
 }
 
 export function updateGlobalPackage({
