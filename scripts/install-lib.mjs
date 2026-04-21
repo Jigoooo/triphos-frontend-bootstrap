@@ -10,6 +10,18 @@ export const PACKAGE_NAME = "@jigoooo/triphos-frontend-bootstrap";
 export const GITHUB_REPOSITORY = "Jigoooo/triphos-frontend-bootstrap";
 const ZSH_BLOCK_START = "# >>> triphos-frontend-bootstrap >>>";
 const ZSH_BLOCK_END = "# <<< triphos-frontend-bootstrap <<<";
+const PUBLIC_CODEX_SKILLS = [
+  "triphos-frontend-init",
+  "triphos-fsd-refactor",
+  "triphos-react-lint-rules",
+  "triphos-api-client-setup",
+  "triphos-fsd-skill-update",
+];
+const HIDDEN_CODEX_SKILLS = [
+  "triphos-frontend-bootstrap",
+  "triphos-frontend-doctor",
+  "triphos-theme-setup",
+];
 
 export function isEphemeralExecution(env = process.env) {
   return env.npm_command === "exec" && env.npm_package_name === PACKAGE_NAME;
@@ -109,6 +121,14 @@ export function resolvePluginSourceRoot(packageRoot) {
   return resolve(packageRoot, "plugins", PLUGIN_NAME);
 }
 
+export function resolveCodexSkillsRoot({ scope, cwd = process.cwd() }) {
+  if (scope === "global") {
+    return resolve(os.homedir(), ".codex", "skills");
+  }
+
+  return resolve(cwd, ".codex", "skills");
+}
+
 export function resolveCodexInstallRoot({ scope, cwd = process.cwd() }) {
   if (scope === "global") {
     return resolve(os.homedir(), ".triphos", "plugins", PLUGIN_NAME);
@@ -164,17 +184,80 @@ export function installCodexPlugin({ packageRoot, scope, cwd = process.cwd() }) 
   const sourceRoot = resolvePluginSourceRoot(packageRoot);
   const installRoot = resolveCodexInstallRoot({ scope, cwd });
   const marketplacePath = resolveCodexMarketplacePath({ scope, cwd });
+  const skillsRoot = resolveCodexSkillsRoot({ scope, cwd });
 
   syncCodexPluginBundle({ sourceRoot, installRoot });
   upsertCodexMarketplaceEntry({
     marketplacePath,
     pluginPath: installRoot,
   });
+  syncCodexSkills({
+    pluginInstallRoot: installRoot,
+    skillsRoot,
+  });
 
   return {
     installRoot,
     marketplacePath,
+    skillsRoot,
   };
+}
+
+function rewriteInstalledSkillMarkdown(rawContent, pluginInstallRoot) {
+  return rawContent
+    .replaceAll("../../../references/shared/", "references/shared/")
+    .replaceAll(
+      "node ../../../scripts/scaffold-app.mjs",
+      `node ${resolve(pluginInstallRoot, "scripts", "scaffold-app.mjs")}`,
+    )
+    .replaceAll(
+      "node ../../../scripts/validate-plugin-structure.mjs",
+      `node ${resolve(pluginInstallRoot, "scripts", "validate-plugin-structure.mjs")}`,
+    )
+    .replaceAll(
+      "node ../../../scripts/doctor.mjs",
+      `node ${resolve(pluginInstallRoot, "scripts", "doctor.mjs")}`,
+    );
+}
+
+export function syncCodexSkills({
+  pluginInstallRoot,
+  skillsRoot,
+}) {
+  const sourceSkillsRoot = resolve(pluginInstallRoot, "skills", "codex");
+  const sharedReferencesRoot = resolve(pluginInstallRoot, "references", "shared");
+
+  mkdirSync(skillsRoot, { recursive: true });
+
+  for (const hiddenSkill of HIDDEN_CODEX_SKILLS) {
+    rmSync(resolve(skillsRoot, hiddenSkill), { recursive: true, force: true });
+  }
+
+  for (const skillName of PUBLIC_CODEX_SKILLS) {
+    const sourceSkillRoot = resolve(sourceSkillsRoot, skillName);
+    const targetSkillRoot = resolve(skillsRoot, skillName);
+    const sourceSkillFile = resolve(sourceSkillRoot, "SKILL.md");
+    const targetSkillFile = resolve(targetSkillRoot, "SKILL.md");
+
+    rmSync(targetSkillRoot, { recursive: true, force: true });
+    mkdirSync(targetSkillRoot, { recursive: true });
+
+    if (existsSync(resolve(sourceSkillRoot, "agents"))) {
+      cpSync(resolve(sourceSkillRoot, "agents"), resolve(targetSkillRoot, "agents"), {
+        recursive: true,
+      });
+    }
+
+    if (existsSync(sharedReferencesRoot)) {
+      cpSync(sharedReferencesRoot, resolve(targetSkillRoot, "references", "shared"), {
+        recursive: true,
+      });
+    }
+
+    const skillContent = readFileSync(sourceSkillFile, "utf8");
+    const rewritten = rewriteInstalledSkillMarkdown(skillContent, pluginInstallRoot);
+    writeFileSync(targetSkillFile, rewritten);
+  }
 }
 
 function runCommand(command, args, options = {}) {
