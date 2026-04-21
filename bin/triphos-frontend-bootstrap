@@ -77,56 +77,82 @@ function parseBoolean(value, fallback = false) {
   return fallback;
 }
 
-function moveCursorUp(lines) {
-  if (lines > 0) {
-    output.write(`\u001B[${lines}A`);
+const supportsColor = Boolean(output.isTTY && !process.env.NO_COLOR);
+
+const ansi = {
+  reset: "\u001B[0m",
+  bold: "\u001B[1m",
+  dim: "\u001B[2m",
+  cyan: "\u001B[36m",
+  green: "\u001B[32m",
+  gray: "\u001B[90m",
+};
+
+function colorize(text, ...styles) {
+  if (!supportsColor || styles.length === 0) {
+    return text;
   }
+
+  return `${styles.join("")}${text}${ansi.reset}`;
 }
 
 function clearRenderedBlock(lines) {
-  for (let index = 0; index < lines; index += 1) {
-    output.write("\u001B[2K");
-    if (index < lines - 1) {
-      output.write("\u001B[1B");
-    }
+  if (lines <= 0) {
+    return;
   }
-  moveCursorUp(lines - 1);
-  output.write("\r");
+
+  readline.moveCursor(output, 0, -lines);
+  readline.cursorTo(output, 0);
+  readline.clearScreenDown(output);
 }
 
 function buildSingleSelectLines(message, options, currentIndex) {
   return [
-    `${message}`,
+    colorize(message, ansi.bold),
     ...options.map((option, index) => {
-      const pointer = index === currentIndex ? ">" : " ";
-      return `${pointer} ${option.label}`;
+      const isCurrent = index === currentIndex;
+      const pointer = isCurrent ? colorize(">", ansi.cyan, ansi.bold) : " ";
+      const label = isCurrent ? colorize(option.label, ansi.cyan, ansi.bold) : option.label;
+      return `${pointer} ${label}`;
     }),
-    "Use ↑/↓ to move, Enter to confirm.",
+    colorize("Use ↑/↓ to move, Enter to confirm.", ansi.dim, ansi.gray),
   ];
 }
 
 function buildMultiSelectLines(message, options, currentIndex, selectedIndexes) {
   return [
-    `${message}`,
+    colorize(message, ansi.bold),
     ...options.map((option, index) => {
-      const pointer = index === currentIndex ? ">" : " ";
-      const checked = selectedIndexes.has(index) ? "x" : " ";
-      return `${pointer} [${checked}] ${option.label}`;
+      const isCurrent = index === currentIndex;
+      const isChecked = selectedIndexes.has(index);
+      const pointer = isCurrent ? colorize(">", ansi.cyan, ansi.bold) : " ";
+      const checked = isChecked ? colorize("x", ansi.green, ansi.bold) : " ";
+      const label = isCurrent ? colorize(option.label, ansi.cyan, ansi.bold) : option.label;
+      return `${pointer} [${checked}] ${label}`;
     }),
-    "Use ↑/↓ to move, Space to toggle, Enter to confirm.",
+    colorize("Use ↑/↓ to move, Space to toggle, Enter to confirm.", ansi.dim, ansi.gray),
   ];
 }
 
 function buildChecklistLines(message, options, currentIndex, selectedIndexes, continueLabel) {
   return [
-    `${message}`,
+    colorize(message, ansi.bold),
     ...options.map((option, index) => {
-      const pointer = index === currentIndex ? ">" : " ";
-      const checked = selectedIndexes.has(index) ? "x" : " ";
-      return `${pointer} [${checked}] ${option.label}`;
+      const isCurrent = index === currentIndex;
+      const isChecked = selectedIndexes.has(index);
+      const pointer = isCurrent ? colorize(">", ansi.cyan, ansi.bold) : " ";
+      const checked = isChecked ? colorize("x", ansi.green, ansi.bold) : " ";
+      const label = isCurrent ? colorize(option.label, ansi.cyan, ansi.bold) : option.label;
+      return `${pointer} [${checked}] ${label}`;
     }),
-    `${currentIndex === options.length ? ">" : " "} ${continueLabel}`,
-    "Use ↑/↓ to move. Press Enter to toggle or continue.",
+    `${
+      currentIndex === options.length ? colorize(">", ansi.cyan, ansi.bold) : " "
+    } ${
+      currentIndex === options.length
+        ? colorize(continueLabel, ansi.cyan, ansi.bold)
+        : continueLabel
+    }`,
+    colorize("Use ↑/↓ to move. Press Enter to toggle or continue.", ansi.dim, ansi.gray),
   ];
 }
 

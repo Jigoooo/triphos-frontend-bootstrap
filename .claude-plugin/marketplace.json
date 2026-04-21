@@ -10,7 +10,7 @@
     {
       "name": "triphos-frontend-bootstrap",
       "description": "Bootstrap and maintain a Triphos-standard React frontend workspace with plugin-local skills, doctor checks, and init scaffolding.",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "author": {
         "name": "Jigoooo",
         "email": "opensource@triphos.dev"
@@ -27,5 +27,5 @@
       ]
     }
   ],
-  "version": "0.5.0"
+  "version": "0.5.1"
 }
