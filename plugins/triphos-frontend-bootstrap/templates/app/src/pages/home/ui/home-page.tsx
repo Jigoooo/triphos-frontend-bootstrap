@@ -23,6 +23,7 @@ export function homePage() {
   const increment = useUiStore((state) => state.increment);
   const colors = useColors();
   const prefersReducedMotion = usePreferReducedMotion();
+  const isWide = useMediaQuery('(min-width: 768px)');
 
   return (
     <main
@@ -30,7 +31,7 @@ export function homePage() {
         display: 'grid',
         placeItems: 'center',
         minHeight: '100dvh',
-        padding: '2rem',
+        padding: isWide ? '2rem' : '1.2rem',
         backgroundColor: colors.bg.base,
       }}
     >
@@ -45,16 +46,17 @@ export function homePage() {
         style={{
           width: 'min(72rem, 100%)',
           border: `1px solid ${colors.border.default}`,
-          borderRadius: '2.8rem',
+          borderRadius: isWide ? '2.8rem' : '2rem',
           background: colors.bg.elevated,
           boxShadow: '0 24px 80px rgba(15, 23, 42, 0.12)',
-          padding: '2rem',
+          padding: isWide ? '2rem' : '1.35rem',
         }}
       >
         <div
           style={{
             display: 'flex',
-            alignItems: 'center',
+            alignItems: isWide ? 'center' : 'flex-start',
+            flexDirection: isWide ? 'row' : 'column',
             gap: '0.5rem',
             color: colors.interactive.primary,
             fontSize: '1.5rem',
@@ -78,7 +80,7 @@ export function homePage() {
           style={{
             color: colors.text.secondary,
             lineHeight: 1.7,
-            fontSize: '1.6rem',
+            fontSize: isWide ? '1.6rem' : '1.45rem',
             marginBottom: '1.5rem',
           }}
         >
@@ -92,11 +94,12 @@ export function homePage() {
             gap: '1rem',
             marginBottom: '1.5rem',
             flexWrap: 'wrap',
+            flexDirection: isWide ? 'row' : 'column',
           }}
         >
           <div
             style={{
-              flex: '1 1 18rem',
+              flex: isWide ? '1 1 18rem' : '1 1 100%',
               border: `1px solid ${colors.border.default}`,
               borderRadius: '2rem',
               padding: '1rem',
@@ -124,7 +127,7 @@ export function homePage() {
           </div>
           <div
             style={{
-              flex: '1 1 18rem',
+              flex: isWide ? '1 1 18rem' : '1 1 100%',
               border: `1px solid ${colors.border.default}`,
               borderRadius: '2rem',
               padding: '1rem',
@@ -156,6 +159,7 @@ export function homePage() {
             display: 'flex',
             gap: '0.75rem',
             flexWrap: 'wrap',
+            flexDirection: isWide ? 'row' : 'column',
           }}
         >
           <button
@@ -169,6 +173,7 @@ export function homePage() {
               font: 'inherit',
               fontWeight: 700,
               padding: '0.85rem 1.25rem',
+              width: isWide ? 'auto' : '100%',
             }}
             onClick={() => {
               increment();
@@ -191,6 +196,8 @@ export function homePage() {
               alignItems: 'center',
               gap: '0.5rem',
               textDecoration: 'none',
+              justifyContent: 'center',
+              width: isWide ? 'auto' : '100%',
             }}
           >
             <Workflow size={16} />

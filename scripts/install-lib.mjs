@@ -1,0 +1,357 @@
+#!/usr/bin/env node
+
+import { spawnSync } from "node:child_process";
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import os from "node:os";
+import { dirname, resolve } from "node:path";
+
+export const PLUGIN_NAME = "triphos-frontend-bootstrap";
+export const PACKAGE_NAME = "@jigoooo/triphos-frontend-bootstrap";
+export const GITHUB_REPOSITORY = "Jigoooo/triphos-frontend-bootstrap";
+
+export function isEphemeralExecution(env = process.env) {
+  return env.npm_command === "exec" && env.npm_package_name === PACKAGE_NAME;
+}
+
+export function getPackageVersion(packageRoot) {
+  const packageJsonPath = resolve(packageRoot, "package.json");
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
+  return packageJson.version;
+}
+
+function normalizeCodexPayload(rawValue) {
+  if (!rawValue) {
+    return {
+      name: "local-plugins",
+      interface: {
+        displayName: "Local Plugins",
+      },
+      plugins: [],
+    };
+  }
+
+  const parsed = JSON.parse(rawValue);
+  parsed.plugins = Array.isArray(parsed.plugins) ? parsed.plugins : [];
+  parsed.interface = parsed.interface ?? { displayName: "Local Plugins" };
+  parsed.name = parsed.name ?? "local-plugins";
+  return parsed;
+}
+
+export function parseArgs(argv) {
+  const args = {};
+
+  for (let index = 0; index < argv.length; index += 1) {
+    const token = argv[index];
+    if (!token.startsWith("--")) {
+      continue;
+    }
+
+    const stripped = token.slice(2);
+    const equalsIndex = stripped.indexOf("=");
+
+    if (equalsIndex >= 0) {
+      const key = stripped.slice(0, equalsIndex);
+      args[key] = stripped.slice(equalsIndex + 1);
+      continue;
+    }
+
+    const next = argv[index + 1];
+    if (!next || next.startsWith("--")) {
+      args[stripped] = true;
+      continue;
+    }
+
+    args[stripped] = next;
+    index += 1;
+  }
+
+  return args;
+}
+
+export function normalizeRuntime(rawValue) {
+  if (!rawValue) {
+    return null;
+  }
+
+  const value = String(rawValue).trim().toLowerCase();
+  if (value === "claude" || value === "codex" || value === "both") {
+    return value;
+  }
+
+  throw new Error(`Unsupported runtime: ${rawValue}`);
+}
+
+export function normalizeScope(rawValue) {
+  if (!rawValue) {
+    return null;
+  }
+
+  const value = String(rawValue).trim().toLowerCase();
+  if (value === "global" || value === "local") {
+    return value;
+  }
+
+  throw new Error(`Unsupported scope: ${rawValue}`);
+}
+
+export function resolvePluginSourceRoot(packageRoot) {
+  return resolve(packageRoot, "plugins", PLUGIN_NAME);
+}
+
+export function resolveCodexInstallRoot({ scope, cwd = process.cwd() }) {
+  if (scope === "global") {
+    return resolve(os.homedir(), ".triphos", "plugins", PLUGIN_NAME);
+  }
+
+  return resolve(cwd, ".triphos", "plugins", PLUGIN_NAME);
+}
+
+export function resolveCodexMarketplacePath({ scope, cwd = process.cwd() }) {
+  if (scope === "global") {
+    return resolve(os.homedir(), ".agents", "plugins", "marketplace.json");
+  }
+
+  return resolve(cwd, ".agents", "plugins", "marketplace.json");
+}
+
+export function syncCodexPluginBundle({ sourceRoot, installRoot }) {
+  rmSync(installRoot, { recursive: true, force: true });
+  mkdirSync(dirname(installRoot), { recursive: true });
+  cpSync(sourceRoot, installRoot, { recursive: true });
+}
+
+export function upsertCodexMarketplaceEntry({ marketplacePath, pluginPath }) {
+  const payload = normalizeCodexPayload(
+    existsSync(marketplacePath) ? readFileSync(marketplacePath, "utf8") : null,
+  );
+
+  const entry = {
+    name: PLUGIN_NAME,
+    source: {
+      source: "local",
+      path: pluginPath,
+    },
+    policy: {
+      installation: "AVAILABLE",
+      authentication: "ON_INSTALL",
+    },
+    category: "Coding",
+  };
+
+  const existingIndex = payload.plugins.findIndex((item) => item?.name === entry.name);
+  if (existingIndex >= 0) {
+    payload.plugins[existingIndex] = entry;
+  } else {
+    payload.plugins.push(entry);
+  }
+
+  mkdirSync(dirname(marketplacePath), { recursive: true });
+  writeFileSync(marketplacePath, JSON.stringify(payload, null, 2) + "\n");
+}
+
+export function installCodexPlugin({ packageRoot, scope, cwd = process.cwd() }) {
+  const sourceRoot = resolvePluginSourceRoot(packageRoot);
+  const installRoot = resolveCodexInstallRoot({ scope, cwd });
+  const marketplacePath = resolveCodexMarketplacePath({ scope, cwd });
+
+  syncCodexPluginBundle({ sourceRoot, installRoot });
+  upsertCodexMarketplaceEntry({
+    marketplacePath,
+    pluginPath: installRoot,
+  });
+
+  return {
+    installRoot,
+    marketplacePath,
+  };
+}
+
+function runCommand(command, args, options = {}) {
+  const result = spawnSync(command, args, {
+    stdio: "pipe",
+    encoding: "utf8",
+    ...options,
+  });
+
+  return {
+    ...result,
+    stdout: result.stdout ?? "",
+    stderr: result.stderr ?? "",
+  };
+}
+
+export function runCommandOrThrow(command, args, options = {}) {
+  const result = runCommand(command, args, options);
+  if (result.status !== 0) {
+    throw new Error(result.stderr.trim() || result.stdout.trim() || `${command} failed.`);
+  }
+  return result;
+}
+
+function ensureCommand(command) {
+  const result = runCommand(command, ["--help"]);
+  if (result.status !== 0) {
+    throw new Error(`${command} CLI is not available in PATH.`);
+  }
+}
+
+function getClaudeMarketplaces(cwd) {
+  const result = runCommand("claude", ["plugin", "marketplace", "list", "--json"], { cwd });
+  if (result.status !== 0) {
+    throw new Error(result.stderr.trim() || "Failed to inspect Claude marketplaces.");
+  }
+
+  return JSON.parse(result.stdout);
+}
+
+function getClaudeInstalledPlugins(cwd) {
+  const result = runCommand("claude", ["plugin", "list", "--json"], { cwd });
+  if (result.status !== 0) {
+    throw new Error(result.stderr.trim() || "Failed to inspect Claude plugins.");
+  }
+
+  return JSON.parse(result.stdout);
+}
+
+function runClaudeStep(args, cwd) {
+  const result = spawnSync("claude", args, {
+    cwd,
+    stdio: "inherit",
+  });
+  if (result.status !== 0) {
+    throw new Error(`Claude command failed: claude ${args.join(" ")}`);
+  }
+}
+
+export function mapScopeToClaudeScope(scope) {
+  return scope === "global" ? "user" : "project";
+}
+
+export function installClaudePlugin({ scope, cwd = process.cwd() }) {
+  ensureCommand("claude");
+
+  const claudeScope = mapScopeToClaudeScope(scope);
+  const marketplaces = getClaudeMarketplaces(cwd);
+  const hasMarketplace = marketplaces.some((item) => item?.repo === GITHUB_REPOSITORY);
+
+  if (!hasMarketplace) {
+    runClaudeStep(
+      ["plugin", "marketplace", "add", GITHUB_REPOSITORY, "--scope", claudeScope],
+      cwd,
+    );
+  }
+
+  const installedPlugins = getClaudeInstalledPlugins(cwd);
+  const existing = installedPlugins.find(
+    (item) => item?.id?.startsWith(`${PLUGIN_NAME}@`) && item?.scope === claudeScope,
+  );
+
+  if (existing) {
+    runClaudeStep(["plugin", "update", PLUGIN_NAME, "--scope", claudeScope], cwd);
+  } else {
+    runClaudeStep(["plugin", "install", PLUGIN_NAME, "--scope", claudeScope], cwd);
+  }
+
+  return {
+    scope: claudeScope,
+    marketplace: GITHUB_REPOSITORY,
+  };
+}
+
+export function resolveGlobalNpmPrefix(env = process.env, cwd = process.cwd()) {
+  if (env.npm_config_prefix) {
+    return env.npm_config_prefix;
+  }
+
+  return runCommandOrThrow("npm", ["prefix", "-g"], { cwd, env }).stdout.trim();
+}
+
+export function resolveGlobalBinaryPath(command, env = process.env, cwd = process.cwd()) {
+  const prefix = resolveGlobalNpmPrefix(env, cwd);
+  return process.platform === "win32"
+    ? resolve(prefix, `${command}.cmd`)
+    : resolve(prefix, "bin", command);
+}
+
+export function updateGlobalPackage({
+  packageSpec = `${PACKAGE_NAME}@latest`,
+  env = process.env,
+  cwd = process.cwd(),
+}) {
+  const result = spawnSync("npm", ["install", "-g", packageSpec], {
+    cwd,
+    env,
+    stdio: "inherit",
+  });
+
+  if (result.status !== 0) {
+    throw new Error(`Failed to update global package: ${packageSpec}`);
+  }
+
+  return {
+    packageSpec,
+    binaryPath: resolveGlobalBinaryPath("tfb", env, cwd),
+  };
+}
+
+export function installGlobalPackage({
+  packageSpec,
+  env = process.env,
+  cwd = process.cwd(),
+}) {
+  const result = spawnSync("npm", ["install", "-g", packageSpec], {
+    cwd,
+    env,
+    stdio: "inherit",
+  });
+
+  if (result.status !== 0) {
+    throw new Error(`Failed to install global package: ${packageSpec}`);
+  }
+
+  return {
+    packageSpec,
+    binaryPath: resolveGlobalBinaryPath("tfb", env, cwd),
+  };
+}
+
+export function runUpdatedBinary({
+  binaryPath,
+  args,
+  env = process.env,
+  cwd = process.cwd(),
+}) {
+  const result = spawnSync(binaryPath, args, {
+    cwd,
+    env,
+    stdio: "inherit",
+  });
+
+  if (result.status !== 0) {
+    throw new Error(`Updated binary failed: ${binaryPath}`);
+  }
+}
+
+export function runTriphosInit({
+  packageRoot,
+  target,
+  name = "triphos-frontend-app",
+  installDeps = true,
+  cwd = process.cwd(),
+}) {
+  const scriptPath = resolve(resolvePluginSourceRoot(packageRoot), "scripts", "scaffold-app.mjs");
+  const args = ["node", scriptPath, "--target", target, "--name", name];
+
+  if (installDeps) {
+    args.push("--install");
+  }
+
+  const result = spawnSync(args[0], args.slice(1), {
+    cwd,
+    stdio: "inherit",
+  });
+
+  if (result.status !== 0) {
+    throw new Error("Triphos app scaffold failed.");
+  }
+}

@@ -2,52 +2,40 @@
 
 # triphos-frontend-bootstrap
 
-Git-first dual plugin marketplace for Triphos frontend bootstrapping.
+A Triphos frontend bootstrap tool for Claude Code and Codex.
 
 ## Install
 
-### Claude Code
-
-```text
-/plugin marketplace add https://github.com/Jigoooo/triphos-frontend-bootstrap
-/plugin install triphos-frontend-bootstrap
-```
-
-### Codex
-
-Use the local registration helper when testing from a checkout:
-
 ```bash
-pnpm run register:codex
+npx @jigoooo/triphos-frontend-bootstrap@latest
 ```
 
-## Main surfaces
+After install:
 
-- `triphos-frontend-bootstrap`: route bootstrap tasks
-- `triphos-frontend-doctor`: verify plugin structure and init prerequisites
-- `triphos-frontend-init`: scaffold a new Triphos frontend app
+- plugin setup
+- global `tfb` install
+- project bootstrap via `triphos-frontend-init`
+- updates via `tfb update`
 
-## Included policy skills
+Supports:
+
+- Claude Code
+- Codex
+
+## Main skill
+
+- `triphos-frontend-init`
+  Creates a new Triphos frontend project from the bundled template.
+
+## Policy skills
 
 - `triphos-fsd-refactor`
+  Used for FSD cleanup, boundary repair, and moving code into the right slice or layer.
 - `triphos-react-lint-rules`
+  Used to align code with React 19, React Compiler, hooks, and linting conventions.
 - `triphos-api-client-setup`
+  Used to wire `@jigoooo/api-client` and standardize API bootstrap patterns.
 - `triphos-fsd-skill-update`
+  Used when FSD-related skill rules or project application guidance need to be updated.
 
-Public aliases are preserved in descriptions:
-
-- `fsd-refactor`
-- `react-lint-rules`
-- `api-client-setup`
-- `fsd-update`
-- `fsd-skill-update`
-
-## Generated app baseline
-
-Apps scaffolded by `triphos-frontend-init` include:
-
-- `AGENTS.md` and `CLAUDE.md` guidance files
-- `shared/theme`, `shared/constants`, `shared/types`, and starter `shared/ui`
-- `/starter` showcase route for component and overlay validation
-- inline-style-first UI rules with `className` blocked except narrow utility cases
-
+Project generation happens inside Claude/Codex through the `triphos-frontend-init` skill.

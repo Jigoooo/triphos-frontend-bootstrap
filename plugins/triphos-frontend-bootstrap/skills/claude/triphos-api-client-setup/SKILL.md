@@ -21,5 +21,6 @@ argument-hint: "[init|add|migrate]"
 - treat `src/shared/lib/api/api-url.ts`, `src/shared/lib/dev/runtime-env.ts`, and `src/shared/lib/dev/mock-api-adapter.ts` as the default companions to `api-bootstrap.ts`
 - `src/shared/hooks/` exists by default, but it is not the primary dependency surface for `api-bootstrap`
 - show the intended edits before changing behavior
+- after the baseline bootstrap, ask the AI to align request and response shapes with the project's real API schema before considering the setup complete
 
 Use `triphos-fsd-refactor` for placement questions and `triphos-react-lint-rules` when hook patterns also change.

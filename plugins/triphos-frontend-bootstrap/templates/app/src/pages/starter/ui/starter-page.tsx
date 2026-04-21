@@ -31,6 +31,7 @@ export function starterPage() {
   const openModalDialog = useModalDialog();
   const containerRef = useRef<HTMLDivElement>(null);
   const isWide = useMediaQuery('(min-width: 900px)');
+  const isMedium = useMediaQuery('(min-width: 640px)');
   const { formatTime, startTimer, stopTimer, resetTimer } = useTimer(125, false);
   const [selected, setSelected] = useState(false);
   const [checked, setChecked] = useState(true);
@@ -66,7 +67,7 @@ export function starterPage() {
     border: `1px solid ${colors.border.default}`,
     borderRadius: '1.6rem',
     backgroundColor: colors.bg.elevated,
-    padding: '1.6rem',
+    padding: isMedium ? '1.6rem' : '1.2rem',
     display: 'flex',
     flexDirection: 'column',
     gap: '1.2rem',
@@ -77,7 +78,7 @@ export function starterPage() {
       style={{
         minHeight: '100dvh',
         backgroundColor: colors.bg.base,
-        padding: '2rem',
+        padding: isMedium ? '2rem' : '1.2rem',
       }}
     >
       <div
@@ -90,13 +91,14 @@ export function starterPage() {
         }}
       >
         <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: '1rem',
-            flexWrap: 'wrap',
-          }}
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: isMedium ? 'center' : 'flex-start',
+          flexDirection: isMedium ? 'row' : 'column',
+          gap: '1rem',
+          flexWrap: 'wrap',
+        }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
             <div
@@ -118,7 +120,15 @@ export function starterPage() {
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+              flexWrap: 'wrap',
+              width: isMedium ? 'auto' : '100%',
+            }}
+          >
             <ThemeToggle />
             <Link
               to='/'
@@ -129,6 +139,8 @@ export function starterPage() {
                 color: colors.text.primary,
                 textDecoration: 'none',
                 fontWeight: 600,
+                width: isMedium ? 'auto' : '100%',
+                textAlign: 'center',
               }}
             >
               Home

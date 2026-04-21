@@ -1,12 +1,57 @@
 {
-  "name": "triphos-frontend-bootstrap",
-  "private": true,
+  "name": "@jigoooo/triphos-frontend-bootstrap",
+  "version": "0.5.0",
+  "description": "npx installer and dual-plugin marketplace source for Triphos frontend bootstrapping.",
+  "author": "Jigoooo",
+  "license": "MIT",
+  "homepage": "https://github.com/Jigoooo/triphos-frontend-bootstrap",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jigoooo/triphos-frontend-bootstrap.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Jigoooo/triphos-frontend-bootstrap/issues"
+  },
+  "keywords": [
+    "triphos",
+    "frontend",
+    "bootstrap",
+    "codex",
+    "claude",
+    "plugin",
+    "installer"
+  ],
   "type": "module",
+  "bin": {
+    "triphos-frontend-bootstrap": "bin/triphos-frontend-bootstrap",
+    "tfb": "bin/triphos-frontend-bootstrap"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "bin/",
+    "scripts/",
+    "plugins/",
+    ".agents/plugins/marketplace.json",
+    ".claude-plugin/marketplace.json",
+    "README.md",
+    "README.ko.md",
+    "AGENTS.md",
+    "CLAUDE.md"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
+    "install:cli": "node ./bin/triphos-frontend-bootstrap",
     "doctor": "node plugins/triphos-frontend-bootstrap/scripts/doctor.mjs",
     "validate:structure": "node plugins/triphos-frontend-bootstrap/scripts/validate-plugin-structure.mjs",
     "check:template": "node plugins/triphos-frontend-bootstrap/scripts/check-app-constraints.mjs --target plugins/triphos-frontend-bootstrap/templates/app",
+    "register:claude": "node plugins/triphos-frontend-bootstrap/scripts/register-claude-local.mjs",
     "register:codex": "node plugins/triphos-frontend-bootstrap/scripts/register-codex-local.mjs",
-    "smoke:init": "node plugins/triphos-frontend-bootstrap/scripts/smoke-init.mjs"
+    "smoke:init": "node plugins/triphos-frontend-bootstrap/scripts/smoke-init.mjs",
+    "prepublishOnly": "pnpm run validate:structure && pnpm run check:template",
+    "publish:dry": "npm publish --dry-run"
   }
 }

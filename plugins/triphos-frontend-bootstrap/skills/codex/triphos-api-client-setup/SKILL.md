@@ -27,6 +27,7 @@ description: Triphos API client setup for `@jigoooo/api-client`. Use when the us
 - `src/shared/hooks/` exists by default, but it is not the primary dependency surface for `api-bootstrap`
 - plan the edits before changing code
 - when in doubt about response shape or auth flow, stop and inspect more
+- after the baseline bootstrap, ask the AI to align request and response shapes with the project's real API schema before considering the setup complete
 
 ## Companion skills
 

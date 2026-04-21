@@ -2,26 +2,16 @@
 
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-  parseArgs,
-  resolveCodexMarketplacePath,
-  upsertCodexMarketplaceEntry,
-} from "../../../scripts/install-lib.mjs";
+import { installClaudePlugin, parseArgs } from "../../../scripts/install-lib.mjs";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const pluginRoot = resolve(scriptDir, "..");
 const repoRoot = resolve(pluginRoot, "..", "..");
 const args = parseArgs(process.argv.slice(2));
 const scope = args.scope === "local" ? "local" : "global";
-const marketplacePath = resolveCodexMarketplacePath({
+const result = installClaudePlugin({
   scope,
   cwd: repoRoot,
 });
 
-upsertCodexMarketplaceEntry({
-  marketplacePath,
-  pluginPath: pluginRoot,
-});
-
-console.log(`Updated Codex marketplace (${scope}): ${marketplacePath}`);
-console.log(`Registered plugin path: ${pluginRoot}`);
+console.log(`Installed Claude plugin (${scope}): ${result.marketplace}`);

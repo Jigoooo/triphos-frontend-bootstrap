@@ -1,0 +1,533 @@
+#!/usr/bin/env node
+
+import { createInterface } from "node:readline/promises";
+import readline from "node:readline";
+import { stdin as input, stdout as output } from "node:process";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import {
+  getPackageVersion,
+  installGlobalPackage,
+  installClaudePlugin,
+  installCodexPlugin,
+  isEphemeralExecution,
+  normalizeRuntime,
+  normalizeScope,
+  PACKAGE_NAME,
+  parseArgs,
+  runUpdatedBinary,
+  updateGlobalPackage,
+} from "../scripts/install-lib.mjs";
+
+const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+
+function printUsage() {
+  console.log(`Usage:
+  triphos-frontend-bootstrap
+  update        Update the global tfb CLI, then resync plugins
+
+Install:
+  npx ${PACKAGE_NAME}@latest
+
+Update:
+  tfb update
+`);
+}
+
+function extractCommand(argv) {
+  if (argv.length === 0) {
+    return {
+      command: "setup",
+      rest: [],
+    };
+  }
+
+  const [first, ...rest] = argv;
+  if (first.startsWith("-")) {
+    return {
+      command: "setup",
+      rest: argv,
+    };
+  }
+
+  return {
+    command: first,
+    rest,
+  };
+}
+
+function parseBoolean(value, fallback = false) {
+  if (value === undefined) {
+    return fallback;
+  }
+
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  const normalized = String(value).trim().toLowerCase();
+  if (["true", "1", "yes", "y"].includes(normalized)) {
+    return true;
+  }
+
+  if (["false", "0", "no", "n"].includes(normalized)) {
+    return false;
+  }
+
+  return fallback;
+}
+
+function moveCursorUp(lines) {
+  if (lines > 0) {
+    output.write(`\u001B[${lines}A`);
+  }
+}
+
+function clearRenderedBlock(lines) {
+  for (let index = 0; index < lines; index += 1) {
+    output.write("\u001B[2K");
+    if (index < lines - 1) {
+      output.write("\u001B[1B");
+    }
+  }
+  moveCursorUp(lines - 1);
+  output.write("\r");
+}
+
+function buildSingleSelectLines(message, options, currentIndex) {
+  return [
+    `${message}`,
+    ...options.map((option, index) => {
+      const pointer = index === currentIndex ? ">" : " ";
+      return `${pointer} ${option.label}`;
+    }),
+    "Use ↑/↓ to move, Enter to confirm.",
+  ];
+}
+
+function buildMultiSelectLines(message, options, currentIndex, selectedIndexes) {
+  return [
+    `${message}`,
+    ...options.map((option, index) => {
+      const pointer = index === currentIndex ? ">" : " ";
+      const checked = selectedIndexes.has(index) ? "x" : " ";
+      return `${pointer} [${checked}] ${option.label}`;
+    }),
+    "Use ↑/↓ to move, Space to toggle, Enter to confirm.",
+  ];
+}
+
+function buildChecklistLines(message, options, currentIndex, selectedIndexes, continueLabel) {
+  return [
+    `${message}`,
+    ...options.map((option, index) => {
+      const pointer = index === currentIndex ? ">" : " ";
+      const checked = selectedIndexes.has(index) ? "x" : " ";
+      return `${pointer} [${checked}] ${option.label}`;
+    }),
+    `${currentIndex === options.length ? ">" : " "} ${continueLabel}`,
+    "Use ↑/↓ to move. Press Enter to toggle or continue.",
+  ];
+}
+
+async function runInteractiveSelector(renderLines, onKeypress) {
+  readline.emitKeypressEvents(input);
+
+  const canUseRawMode = Boolean(input.isTTY && typeof input.setRawMode === "function");
+  let renderedLines = 0;
+
+  return new Promise((resolvePromise, rejectPromise) => {
+    function cleanup() {
+      input.removeListener("keypress", handleKeypress);
+      if (canUseRawMode) {
+        input.setRawMode(false);
+      }
+      input.pause();
+      output.write("\u001B[?25h");
+      if (renderedLines > 0) {
+        clearRenderedBlock(renderedLines);
+      }
+    }
+
+    function render() {
+      const lines = renderLines();
+      if (renderedLines > 0) {
+        clearRenderedBlock(renderedLines);
+      }
+      output.write("\u001B[?25l");
+      output.write(lines.join("\n") + "\n");
+      renderedLines = lines.length;
+    }
+
+    function handleKeypress(_, key = {}) {
+      if (key.ctrl && key.name === "c") {
+        cleanup();
+        rejectPromise(new Error("Interrupted"));
+        return;
+      }
+
+      const result = onKeypress(key);
+      if (result?.done) {
+        cleanup();
+        resolvePromise(result.value);
+        return;
+      }
+
+      render();
+    }
+
+    if (canUseRawMode) {
+      input.setRawMode(true);
+    }
+    input.resume();
+    input.on("keypress", handleKeypress);
+    render();
+  });
+}
+
+async function promptSelect(message, options, fallbackValue) {
+  let currentIndex = Math.max(
+    0,
+    options.findIndex((option) => option.value === fallbackValue),
+  );
+
+  return runInteractiveSelector(
+    () => buildSingleSelectLines(message, options, currentIndex),
+    (key) => {
+      if (key.name === "up") {
+        currentIndex = currentIndex === 0 ? options.length - 1 : currentIndex - 1;
+        return null;
+      }
+
+      if (key.name === "down") {
+        currentIndex = currentIndex === options.length - 1 ? 0 : currentIndex + 1;
+        return null;
+      }
+
+      if (key.name === "return") {
+        return {
+          done: true,
+          value: options[currentIndex].value,
+        };
+      }
+
+      return null;
+    },
+  );
+}
+
+async function promptMultiSelect(message, options, fallbackValues) {
+  let currentIndex = 0;
+  const selectedIndexes = new Set(
+    options.flatMap((option, index) => (fallbackValues.includes(option.value) ? [index] : [])),
+  );
+
+  return runInteractiveSelector(
+    () => buildMultiSelectLines(message, options, currentIndex, selectedIndexes),
+    (key) => {
+      if (key.name === "up") {
+        currentIndex = currentIndex === 0 ? options.length - 1 : currentIndex - 1;
+        return null;
+      }
+
+      if (key.name === "down") {
+        currentIndex = currentIndex === options.length - 1 ? 0 : currentIndex + 1;
+        return null;
+      }
+
+      if (key.name === "space") {
+        if (selectedIndexes.has(currentIndex)) {
+          selectedIndexes.delete(currentIndex);
+        } else {
+          selectedIndexes.add(currentIndex);
+        }
+        return null;
+      }
+
+      if (key.name === "return") {
+        if (selectedIndexes.size === 0) {
+          selectedIndexes.add(currentIndex);
+        }
+
+        return {
+          done: true,
+          value: options
+            .filter((_, index) => selectedIndexes.has(index))
+            .map((option) => option.value),
+        };
+      }
+
+      return null;
+    },
+  );
+}
+
+async function promptChecklist(message, options, fallbackValues, continueLabel = "Continue") {
+  let currentIndex = 0;
+  const fallbackIndexes = options.flatMap((option, index) =>
+    fallbackValues.includes(option.value) ? [index] : [],
+  );
+  const selectedIndexes = new Set(fallbackIndexes);
+
+  return runInteractiveSelector(
+    () => buildChecklistLines(message, options, currentIndex, selectedIndexes, continueLabel),
+    (key) => {
+      const lastIndex = options.length;
+
+      if (key.name === "up") {
+        currentIndex = currentIndex === 0 ? lastIndex : currentIndex - 1;
+        return null;
+      }
+
+      if (key.name === "down") {
+        currentIndex = currentIndex === lastIndex ? 0 : currentIndex + 1;
+        return null;
+      }
+
+      if (key.name === "return") {
+        if (currentIndex === lastIndex) {
+          if (selectedIndexes.size === 0) {
+            for (const index of fallbackIndexes) {
+              selectedIndexes.add(index);
+            }
+          }
+
+          return {
+            done: true,
+            value: options
+              .filter((_, index) => selectedIndexes.has(index))
+              .map((option) => option.value),
+          };
+        }
+
+        if (selectedIndexes.has(currentIndex)) {
+          selectedIndexes.delete(currentIndex);
+        } else {
+          selectedIndexes.add(currentIndex);
+        }
+      }
+
+      return null;
+    },
+  );
+}
+
+function collapseRuntimeSelection(values) {
+  if (values.includes("claude") && values.includes("codex")) {
+    return "both";
+  }
+  if (values.includes("claude")) {
+    return "claude";
+  }
+  return "codex";
+}
+
+async function promptYesNo(message, fallbackValue) {
+  return promptSelect(
+    message,
+    [
+      { value: true, label: "Yes" },
+      { value: false, label: "No" },
+    ],
+    fallbackValue,
+  );
+}
+
+async function resolveInstallerOptions(command, argv) {
+  const args = parseArgs(argv);
+
+  if (args.help) {
+    printUsage();
+    process.exit(0);
+  }
+
+  if (command === "help") {
+    printUsage();
+    process.exit(0);
+  }
+
+  if (
+    args.init !== undefined ||
+    args["skip-init"] !== undefined ||
+    args.target !== undefined ||
+    args.name !== undefined ||
+    args["install-deps"] !== undefined
+  ) {
+    throw new Error(
+      "Project bootstrap moved to the triphos-frontend-init skill inside Claude/Codex.",
+    );
+  }
+
+  let runtime =
+    command === "claude-setup"
+      ? "claude"
+      : command === "codex-setup"
+        ? "codex"
+        : command === "both-setup"
+          ? "both"
+          : command === "update"
+            ? normalizeRuntime(args.runtime) ?? "both"
+          : normalizeRuntime(args.runtime);
+  let scope = command === "update" ? normalizeScope(args.scope) ?? "global" : normalizeScope(args.scope);
+  const init = false;
+  const packageSpec = args["package-spec"] ? String(args["package-spec"]) : `${PACKAGE_NAME}@latest`;
+
+  if (runtime && scope && init !== undefined) {
+    return { runtime, scope, init, packageSpec };
+  }
+
+  if (!process.stdin.isTTY || !process.stdout.isTTY) {
+    if (!runtime || !scope) {
+      throw new Error("Non-interactive mode requires --runtime and --scope.");
+    }
+
+    return {
+      runtime,
+      scope,
+      init: init ?? false,
+      packageSpec,
+    };
+  }
+
+  const rl = createInterface({ input, output });
+
+  try {
+    runtime =
+      runtime ??
+      collapseRuntimeSelection(
+        await promptChecklist(
+          "Select runtimes to install:",
+          [
+            { value: "claude", label: "Claude Code" },
+            { value: "codex", label: "Codex" },
+          ],
+          ["claude", "codex"],
+          "Continue",
+        ),
+      );
+
+    scope =
+      scope ??
+      (await promptSelect(
+        "Select install scope:",
+        [
+          { value: "global", label: "Global (user home)" },
+          { value: "local", label: "Local (current project)" },
+        ],
+        "global",
+      ));
+
+  } finally {
+    rl.close();
+  }
+
+  return {
+    runtime,
+    scope,
+    init: init ?? false,
+    packageSpec,
+  };
+}
+
+async function main() {
+  const { command, rest } = extractCommand(process.argv.slice(2));
+  const knownCommands = new Set(["setup", "claude-setup", "codex-setup", "both-setup", "update", "help"]);
+
+  if (!knownCommands.has(command)) {
+    throw new Error(`Unknown command: ${command}`);
+  }
+
+  if (isEphemeralExecution(process.env) && command !== "help" && command !== "update") {
+    const currentVersion = getPackageVersion(packageRoot);
+    const pinnedPackageSpec = `${PACKAGE_NAME}@${currentVersion}`;
+
+    try {
+      installGlobalPackage({
+        packageSpec: pinnedPackageSpec,
+        env: process.env,
+        cwd: process.cwd(),
+      });
+    } catch (error) {
+      throw new Error(
+        `${error.message}\nRun \`npm install -g ${pinnedPackageSpec}\` and retry.`,
+      );
+    }
+  }
+
+  const options = await resolveInstallerOptions(command, rest);
+  if (command === "update") {
+    const updateResult = updateGlobalPackage({
+      packageSpec: options.packageSpec,
+      env: process.env,
+      cwd: process.cwd(),
+    });
+
+    const syncCommand =
+      options.runtime === "claude"
+        ? "claude-setup"
+        : options.runtime === "codex"
+          ? "codex-setup"
+          : "both-setup";
+
+    runUpdatedBinary({
+      binaryPath: updateResult.binaryPath,
+      args: [syncCommand, "--scope", options.scope],
+      env: process.env,
+      cwd: process.cwd(),
+    });
+    return;
+  }
+
+  const selectedRuntimes =
+    options.runtime === "both" ? ["claude", "codex"] : [options.runtime];
+
+  const successes = [];
+  const failures = [];
+
+  if (selectedRuntimes.includes("claude")) {
+    try {
+      const result = installClaudePlugin({
+        scope: options.scope,
+        cwd: process.cwd(),
+      });
+      successes.push(`Claude (${result.scope})`);
+    } catch (error) {
+      failures.push(`Claude: ${error.message}`);
+    }
+  }
+
+  if (selectedRuntimes.includes("codex")) {
+    try {
+      const result = installCodexPlugin({
+        packageRoot,
+        scope: options.scope,
+        cwd: process.cwd(),
+      });
+      successes.push(`Codex (${result.marketplacePath})`);
+    } catch (error) {
+      failures.push(`Codex: ${error.message}`);
+    }
+  }
+
+  if (successes.length === 0) {
+    throw new Error(failures.join("\n"));
+  }
+
+  console.log("\nTriphos installer completed.");
+  for (const success of successes) {
+    console.log(`- OK: ${success}`);
+  }
+
+  if (failures.length > 0) {
+    console.error("\nPartial failures:");
+    for (const failure of failures) {
+      console.error(`- ${failure}`);
+    }
+    process.exit(1);
+  }
+}
+
+main().catch((error) => {
+  console.error(error.message);
+  process.exit(1);
+});

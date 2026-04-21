@@ -9,10 +9,14 @@ const pluginRoot = resolve(scriptDir, "..");
 const repoRoot = resolve(pluginRoot, "..", "..");
 
 const requiredPaths = [
+  resolve(repoRoot, "bin", "triphos-frontend-bootstrap"),
+  resolve(repoRoot, "scripts", "install-lib.mjs"),
   resolve(repoRoot, ".claude-plugin", "marketplace.json"),
   resolve(repoRoot, ".agents", "plugins", "marketplace.json"),
   resolve(pluginRoot, ".claude-plugin", "plugin.json"),
   resolve(pluginRoot, ".codex-plugin", "plugin.json"),
+  resolve(pluginRoot, "scripts", "register-claude-local.mjs"),
+  resolve(pluginRoot, "scripts", "register-codex-local.mjs"),
   resolve(pluginRoot, "skills", "codex", "triphos-frontend-bootstrap", "SKILL.md"),
   resolve(pluginRoot, "skills", "codex", "triphos-frontend-init", "SKILL.md"),
   resolve(pluginRoot, "skills", "codex", "triphos-frontend-doctor", "SKILL.md"),
