@@ -4,15 +4,25 @@ import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  hasCodexHooksEnabled,
+  readTextIfExists,
+  resolveRuntimeConfigPaths,
+} from "./runtime-config.mjs";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const pluginRoot = resolve(scriptDir, "..");
 const repoRoot = resolve(pluginRoot, "..", "..");
 
 const checks = [];
+const warnings = [];
 
 function pushCheck(label, ok, detail) {
   checks.push({ label, ok, detail });
+}
+
+function pushWarning(label, detail) {
+  warnings.push({ label, detail });
 }
 
 function hasCommand(command, args = ["--version"]) {
@@ -41,6 +51,55 @@ pushCheck(
   existsSync(resolve(pluginRoot, "templates", "app", "package.json")),
   resolve(pluginRoot, "templates", "app", "package.json"),
 );
+
+const repoRuntimePaths = resolveRuntimeConfigPaths(repoRoot);
+const templateRuntimePaths = resolveRuntimeConfigPaths(resolve(pluginRoot, "templates", "app"));
+
+const repoCodexConfig = readTextIfExists(repoRuntimePaths.codexConfigPath);
+const templateCodexConfig = readTextIfExists(templateRuntimePaths.codexConfigPath);
+
+pushCheck(
+  "repo codex hooks config",
+  existsSync(repoRuntimePaths.codexHooksPath) && hasCodexHooksEnabled(repoCodexConfig),
+  existsSync(repoRuntimePaths.codexHooksPath)
+    ? hasCodexHooksEnabled(repoCodexConfig)
+      ? "repo .codex/hooks.json + codex_hooks=true"
+      : "repo .codex/config.toml missing codex_hooks = true"
+    : "repo .codex/hooks.json missing",
+);
+pushCheck(
+  "template codex hooks config",
+  existsSync(templateRuntimePaths.codexHooksPath) && hasCodexHooksEnabled(templateCodexConfig),
+  existsSync(templateRuntimePaths.codexHooksPath)
+    ? hasCodexHooksEnabled(templateCodexConfig)
+      ? "template .codex/hooks.json + codex_hooks=true"
+      : "template .codex/config.toml missing codex_hooks = true"
+    : "template .codex/hooks.json missing",
+);
+pushCheck(
+  "repo claude project settings",
+  existsSync(repoRuntimePaths.claudeSettingsPath),
+  repoRuntimePaths.claudeSettingsPath,
+);
+pushCheck(
+  "template claude project settings",
+  existsSync(templateRuntimePaths.claudeSettingsPath),
+  templateRuntimePaths.claudeSettingsPath,
+);
+
+if (existsSync(repoRuntimePaths.claudeLocalSettingsPath)) {
+  pushWarning(
+    "repo claude local override",
+    `${repoRuntimePaths.claudeLocalSettingsPath} exists and overrides shared project settings`,
+  );
+}
+
+if (existsSync(templateRuntimePaths.claudeLocalSettingsPath)) {
+  pushWarning(
+    "template claude local override",
+    `${templateRuntimePaths.claudeLocalSettingsPath} exists and overrides shared project settings`,
+  );
+}
 
 const pnpmReady = hasCommand("pnpm");
 const corepackReady = hasCommand("corepack");
@@ -74,6 +133,10 @@ pushCheck(
 for (const check of checks) {
   const status = check.ok ? "OK" : "FAIL";
   console.log(`[${status}] ${check.label}: ${check.detail}`);
+}
+
+for (const warning of warnings) {
+  console.log(`[WARN] ${warning.label}: ${warning.detail}`);
 }
 
 if (checks.some((check) => !check.ok)) {

@@ -23,6 +23,23 @@ npx @jigoooo/triphos-frontend-bootstrap@latest
 - Claude Code
 - Codex
 
+## Runtime Activation
+
+- 생성되거나 adopt된 저장소는 tracked `.codex/config.toml`, `.codex/hooks.json`, `.claude/settings.json`을 함께 가진다.
+- Codex hooks는 `.codex/config.toml`의 `codex_hooks = true`에 의존한다.
+- Claude는 project-level `.claude/settings.json`을 사용하고, `.claude/settings.local.json`이 있으면 로컬에서 우선한다.
+- 정책 파일이 저장소에 존재하는 것과 런타임에서 실제 활성화되는 것은 별개이므로 doctor 경로로 둘 다 확인해야 한다.
+
+## Lifecycle 책임
+
+| Surface | 책임 |
+| --- | --- |
+| install scripts | plugin 등록, marketplace/skills 동기화, activation prerequisite 안내 |
+| doctor | Codex activation, Claude settings precedence, install 상태 진단 |
+| hooks | relevant 변경에서만 조건부 stop-time verification 실행 |
+| skills | scaffold/adopt baseline과 codebase 정렬 |
+| docs | 최신 공식 runtime 가정과 운영 복구 경로 기록 |
+
 ## 주요 스킬
 
 - `triphos-frontend-init`

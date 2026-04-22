@@ -74,6 +74,12 @@ Commands:
 `);
 }
 
+function printRuntimeActivationHints() {
+  console.log("- Runtime note: generated/adopted repos carry tracked `.codex/config.toml`, `.codex/hooks.json`, and `.claude/settings.json`.");
+  console.log("- Runtime note: Codex hooks require `codex_hooks = true` in the repo-local `.codex/config.toml`.");
+  console.log("- Runtime note: `.claude/settings.local.json` overrides shared project settings when present.");
+}
+
 function extractCommand(argv, defaultCommand) {
   if (argv.length === 0) {
     return {
@@ -710,6 +716,7 @@ async function main() {
   for (const success of successes) {
     console.log(`- OK: ${success}`);
   }
+  printRuntimeActivationHints();
 
   if (failures.length > 0) {
     console.error("\nPartial failures:");

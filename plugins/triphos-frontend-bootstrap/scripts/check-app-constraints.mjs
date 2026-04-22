@@ -74,6 +74,7 @@ const requiredFiles = [
   'CLAUDE.md',
   'CLAUDE.en.md',
   '.codex/hooks.json',
+  '.codex/config.toml',
   '.claude/settings.json',
   '.env',
   '.gitignore',
@@ -141,6 +142,9 @@ const gitignore = readFileSync(resolve(target, '.gitignore'), 'utf8');
 for (const entry of ['.env.local', '.env.development.local', '.env.production.local']) {
   expectTextIncludes(gitignore, entry, `Expected .gitignore to include ${entry}`);
 }
+
+const codexConfig = readFileSync(resolve(target, '.codex/config.toml'), 'utf8');
+expectTextIncludes(codexConfig, 'codex_hooks = true', 'Expected .codex/config.toml to enable codex_hooks');
 
 const packageJson = JSON.parse(readFileSync(resolve(target, 'package.json'), 'utf8'));
 expect(packageJson.scripts?.dev === 'vite dev', 'Expected package.json scripts.dev to stay "vite dev"');

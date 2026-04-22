@@ -7,8 +7,4 @@ tmp
 
 .omc
 .omx
-.claude
-!.claude/
-.claude/*
-!.claude/settings.json
 .triphos

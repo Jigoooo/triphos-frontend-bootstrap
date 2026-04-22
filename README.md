@@ -23,6 +23,23 @@ Supports:
 - Claude Code
 - Codex
 
+## Runtime Activation
+
+- Generated or adopted repositories carry tracked `.codex/config.toml`, `.codex/hooks.json`, and `.claude/settings.json`.
+- Codex hooks depend on `codex_hooks = true` in `.codex/config.toml`.
+- Claude uses project-level `.claude/settings.json`; `.claude/settings.local.json` overrides it locally when present.
+- Policy files existing in a repo and runtime activation being effective are separate concerns. Use the doctor flow to verify both.
+
+## Lifecycle Responsibilities
+
+| Surface | Responsibility |
+| --- | --- |
+| install scripts | register plugin, sync marketplace/skills, report activation prerequisites |
+| doctor | diagnose Codex activation, Claude settings precedence, and install health |
+| hooks | run conditional stop-time verification only when relevant files changed |
+| skills | scaffold/adopt baseline and align codebases |
+| docs | record official runtime assumptions and operational recovery paths |
+
 ## Main skill
 
 - `triphos-frontend-init`
