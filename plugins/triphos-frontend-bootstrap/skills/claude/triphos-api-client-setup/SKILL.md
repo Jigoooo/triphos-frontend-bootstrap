@@ -9,6 +9,11 @@ allowed-tools: Read Edit Write Grep Glob Bash(pnpm add *) Bash(pnpm list *) Bash
 
 `@jigoooo/api-client` + `apiWithAdapter` 패턴으로 API 레이어를 셋업/확장하는 스킬.
 
+## Read first
+
+- [../../../references/internal/frontend-bootstrap-router.md](../../../references/internal/frontend-bootstrap-router.md)
+- [../../../references/internal/frontend-doctor.md](../../../references/internal/frontend-doctor.md)
+
 ## 언제 쓰는가
 
 ### 수동 호출

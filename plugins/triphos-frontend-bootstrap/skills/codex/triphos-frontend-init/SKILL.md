@@ -18,10 +18,11 @@ description: 새 디렉터리에 React 19, React Compiler, TanStack Router/Query
 - [../../../references/shared/stack.md](../../../references/shared/stack.md)
 - [../../../references/shared/init-contract.md](../../../references/shared/init-contract.md)
 - [../../../references/shared/latest-stack.md](../../../references/shared/latest-stack.md)
+- [../../../references/internal/frontend-doctor.md](../../../references/internal/frontend-doctor.md)
 
 ## 워크플로우
 
-1. 레포 또는 머신 상태가 불명확하면 `triphos-frontend-doctor`로 환경을 먼저 확인한다.
+1. 레포 또는 머신 상태가 불명확하면 내부 doctor 가이드를 따라 `validate-plugin-structure.mjs`와 `doctor.mjs`를 먼저 실행한다.
 2. 대상 디렉터리가 새 디렉터리이거나 비어 있는지 확인한다.
 3. 다음 스캐폴드 스크립트를 실행한다.
 

@@ -11,10 +11,11 @@ argument-hint: "[target-directory]"
 - [../../../references/shared/stack.md](../../../references/shared/stack.md)
 - [../../../references/shared/init-contract.md](../../../references/shared/init-contract.md)
 - [../../../references/shared/latest-stack.md](../../../references/shared/latest-stack.md)
+- [../../../references/internal/frontend-doctor.md](../../../references/internal/frontend-doctor.md)
 
 ## Workflow
 
-1. Run `triphos-frontend-doctor` if the environment is unclear.
+1. If the environment is unclear, follow the internal doctor guide and run `validate-plugin-structure.mjs` plus `doctor.mjs` first.
 2. Ensure the target directory is new or empty.
 3. Run:
 
