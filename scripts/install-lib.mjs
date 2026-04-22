@@ -8,8 +8,8 @@ import { dirname, resolve } from "node:path";
 export const PLUGIN_NAME = "triphos-frontend-bootstrap";
 export const PACKAGE_NAME = "@jigoooo/triphos-frontend-bootstrap";
 export const GITHUB_REPOSITORY = "Jigoooo/triphos-frontend-bootstrap";
-const ZSH_BLOCK_START = "# >>> triphos-frontend-bootstrap >>>";
-const ZSH_BLOCK_END = "# <<< triphos-frontend-bootstrap <<<";
+const MANAGED_BLOCK_START = "# >>> triphos-frontend-bootstrap >>>";
+const MANAGED_BLOCK_END = "# <<< triphos-frontend-bootstrap <<<";
 const PUBLIC_CODEX_SKILLS = [
   "triphos-frontend-init",
   "triphos-fsd-refactor",
@@ -417,21 +417,34 @@ export function installGlobalPackage({
   };
 }
 
-export function ensureZshRegistration({
-  env = process.env,
-  homeDir = os.homedir(),
-}) {
-  const shell = env.SHELL ?? "";
-  const zshrcPath = resolve(homeDir, ".zshrc");
-  const shouldManageZsh = shell.includes("zsh") || existsSync(zshrcPath);
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
-  if (!shouldManageZsh) {
-    return null;
+function upsertManagedBlock(filePath, existingContent, managedBlock) {
+  const blockPattern = new RegExp(
+    `${escapeRegExp(MANAGED_BLOCK_START)}[\\s\\S]*?${escapeRegExp(MANAGED_BLOCK_END)}`,
+    "m",
+  );
+
+  const nextContent = blockPattern.test(existingContent)
+    ? existingContent.replace(blockPattern, managedBlock)
+    : `${existingContent.replace(/\s*$/, "")}${existingContent.trim().length > 0 ? "\n\n" : ""}${managedBlock}\n`;
+
+  if (nextContent !== existingContent) {
+    mkdirSync(dirname(filePath), { recursive: true });
+    writeFileSync(filePath, nextContent);
   }
 
-  const existing = existsSync(zshrcPath) ? readFileSync(zshrcPath, "utf8") : "";
-  const managedBlock = [
-    ZSH_BLOCK_START,
+  return {
+    path: filePath,
+    changed: nextContent !== existingContent,
+  };
+}
+
+function buildPosixManagedBlock() {
+  return [
+    MANAGED_BLOCK_START,
     'if [ -z "$NVM_DIR" ] && [ -d "$HOME/.nvm" ]; then',
     '  export NVM_DIR="$HOME/.nvm"',
     "fi",
@@ -446,26 +459,198 @@ export function ensureZshRegistration({
     "  esac",
     "  unset _tfb_npm_bin",
     "fi",
-    ZSH_BLOCK_END,
+    MANAGED_BLOCK_END,
   ].join("\n");
+}
 
-  const blockPattern = new RegExp(
-    `${ZSH_BLOCK_START.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}[\\s\\S]*?${ZSH_BLOCK_END.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`,
-    "m",
-  );
+function buildFishManagedBlock() {
+  return [
+    MANAGED_BLOCK_START,
+    "if command -sq npm",
+    "  set -l _tfb_npm_bin (npm prefix -g ^/dev/null)",
+    "  if test -n \"$_tfb_npm_bin\"",
+    "    if not contains -- $_tfb_npm_bin $PATH",
+    "      set -gx PATH $_tfb_npm_bin $PATH",
+    "    end",
+    "  end",
+    "end",
+    MANAGED_BLOCK_END,
+  ].join("\n");
+}
 
-  const nextContent = blockPattern.test(existing)
-    ? existing.replace(blockPattern, managedBlock)
-    : `${existing.replace(/\s*$/, "")}${existing.trim().length > 0 ? "\n\n" : ""}${managedBlock}\n`;
+function resolveShellProfileTarget({
+  shell,
+  homeDir,
+  platform,
+}) {
+  const normalizedShell = shell.toLowerCase();
+  const zshrcPath = resolve(homeDir, ".zshrc");
+  const bashrcPath = resolve(homeDir, ".bashrc");
+  const bashProfilePath = resolve(homeDir, ".bash_profile");
+  const profilePath = resolve(homeDir, ".profile");
+  const fishConfigPath = resolve(homeDir, ".config", "fish", "config.fish");
 
-  if (nextContent !== existing) {
-    writeFileSync(zshrcPath, nextContent);
+  if (normalizedShell.includes("zsh")) {
+    return {
+      path: zshrcPath,
+      shellName: "zsh",
+      refreshHint: "Run `source ~/.zshrc` or open a new terminal to use `tfb` immediately.",
+      managedBlock: buildPosixManagedBlock(),
+    };
+  }
+
+  if (normalizedShell.includes("bash")) {
+    const targetPath =
+      existsSync(bashProfilePath)
+        ? bashProfilePath
+        : existsSync(bashrcPath)
+          ? bashrcPath
+          : platform === "darwin"
+            ? bashProfilePath
+            : bashrcPath;
+
+    return {
+      path: targetPath,
+      shellName: "bash",
+      refreshHint:
+        targetPath.endsWith(".bash_profile")
+          ? "Run `source ~/.bash_profile` or open a new terminal to use `tfb` immediately."
+          : "Run `source ~/.bashrc` or open a new terminal to use `tfb` immediately.",
+      managedBlock: buildPosixManagedBlock(),
+    };
+  }
+
+  if (normalizedShell.includes("fish")) {
+    return {
+      path: fishConfigPath,
+      shellName: "fish",
+      refreshHint:
+        "Run `source ~/.config/fish/config.fish` or open a new terminal to use `tfb` immediately.",
+      managedBlock: buildFishManagedBlock(),
+    };
+  }
+
+  if (existsSync(profilePath)) {
+    return {
+      path: profilePath,
+      shellName: "sh",
+      refreshHint: "Run `source ~/.profile` or open a new terminal to use `tfb` immediately.",
+      managedBlock: buildPosixManagedBlock(),
+    };
+  }
+
+  if (existsSync(bashProfilePath)) {
+    return {
+      path: bashProfilePath,
+      shellName: "bash",
+      refreshHint: "Run `source ~/.bash_profile` or open a new terminal to use `tfb` immediately.",
+      managedBlock: buildPosixManagedBlock(),
+    };
+  }
+
+  if (existsSync(bashrcPath)) {
+    return {
+      path: bashrcPath,
+      shellName: "bash",
+      refreshHint: "Run `source ~/.bashrc` or open a new terminal to use `tfb` immediately.",
+      managedBlock: buildPosixManagedBlock(),
+    };
+  }
+
+  if (existsSync(fishConfigPath)) {
+    return {
+      path: fishConfigPath,
+      shellName: "fish",
+      refreshHint:
+        "Run `source ~/.config/fish/config.fish` or open a new terminal to use `tfb` immediately.",
+      managedBlock: buildFishManagedBlock(),
+    };
   }
 
   return {
-    zshrcPath,
-    changed: nextContent !== existing,
+    path: profilePath,
+    shellName: "sh",
+    refreshHint:
+      "Run `source ~/.profile` or open a new terminal to use `tfb` immediately.",
+    managedBlock: buildPosixManagedBlock(),
   };
+}
+
+function ensureWindowsPathRegistration({
+  env,
+  cwd,
+}) {
+  const npmPrefix = resolveGlobalNpmPrefix(env, cwd);
+  const escapedPrefix = npmPrefix.replace(/'/g, "''");
+  const command = [
+    `$current = [Environment]::GetEnvironmentVariable('Path', 'User')`,
+    "$segments = @()",
+    "if ($current) { $segments = $current -split ';' | Where-Object { $_ } }",
+    `$target = '${escapedPrefix}'`,
+    "$normalizedTarget = $target.TrimEnd('\\')",
+    "$alreadyPresent = $segments | Where-Object { $_.TrimEnd('\\') -ieq $normalizedTarget }",
+    "if (-not $alreadyPresent) {",
+    "  $next = if ($segments.Count -gt 0) { $target + ';' + ($segments -join ';') } else { $target }",
+    "  [Environment]::SetEnvironmentVariable('Path', $next, 'User')",
+    "  [Console]::WriteLine('updated')",
+    "} else {",
+    "  [Console]::WriteLine('unchanged')",
+    "}",
+  ].join("; ");
+
+  for (const shellCommand of ["powershell", "pwsh"]) {
+    const result = runCommand(shellCommand, ["-NoProfile", "-Command", command], { cwd, env });
+
+    if (result.status === 0) {
+      const changed = result.stdout.trim() === "updated";
+
+      return {
+        changed,
+        targets: ["Windows user PATH"],
+        refreshHint:
+          "Open a new PowerShell or Command Prompt window to use `tfb` immediately.",
+      };
+    }
+
+    if (result.error?.code !== "ENOENT") {
+      throw new Error(result.stderr.trim() || `Failed to update the Windows user PATH with ${shellCommand}.`);
+    }
+  }
+
+  throw new Error("Neither PowerShell nor pwsh is available to update the Windows user PATH.");
+}
+
+export function ensureEnvironmentRegistration({
+  env = process.env,
+  homeDir = os.homedir(),
+  platform = process.platform,
+  cwd = process.cwd(),
+}) {
+  if (platform === "win32") {
+    return ensureWindowsPathRegistration({
+      env,
+      cwd,
+    });
+  }
+
+  const shell = env.SHELL ?? "";
+  const target = resolveShellProfileTarget({
+    shell,
+    homeDir,
+    platform,
+  });
+  const existing = existsSync(target.path) ? readFileSync(target.path, "utf8") : "";
+  const registration = upsertManagedBlock(target.path, existing, target.managedBlock);
+
+  return {
+    changed: registration.changed,
+    targets: [registration.path],
+    refreshHint: target.refreshHint,
+  };
+}
+
+export function ensureZshRegistration(args = {}) {
+  return ensureEnvironmentRegistration(args);
 }
 
 export function runUpdatedBinary({

@@ -6,7 +6,7 @@ import { stdin as input, stdout as output } from "node:process";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-  ensureZshRegistration,
+  ensureEnvironmentRegistration,
   getPackageVersion,
   getGlobalInstalledPackageVersion,
   hasGlobalBinary,
@@ -25,13 +25,16 @@ import {
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 function printShellRefreshHint(registrationResult) {
-  if (!registrationResult?.zshrcPath) {
+  if (!registrationResult?.targets?.length) {
     return;
   }
 
   console.log("");
-  console.log(`zsh configuration updated: ${registrationResult.zshrcPath}`);
-  console.log("Run `source ~/.zshrc` or open a new terminal to use `tfb` immediately.");
+  console.log(`Environment registration updated: ${registrationResult.targets.join(", ")}`);
+  console.log(
+    registrationResult.refreshHint ??
+      "Open a new terminal to use `tfb` immediately.",
+  );
 }
 
 function printVersion() {
@@ -528,14 +531,14 @@ async function main() {
     const pinnedPackageSpec = `${PACKAGE_NAME}@${currentVersion}`;
 
     try {
-      let zshRegistrationResult = null;
+      let registrationResult = null;
       installGlobalPackage({
         packageSpec: pinnedPackageSpec,
         env: process.env,
         cwd: process.cwd(),
       });
-      zshRegistrationResult = ensureZshRegistration({ env: process.env });
-      printShellRefreshHint(zshRegistrationResult);
+      registrationResult = ensureEnvironmentRegistration({ env: process.env });
+      printShellRefreshHint(registrationResult);
     } catch (error) {
       throw new Error(
         `${error.message}\nRun \`npm install -g ${pinnedPackageSpec}\` and retry.`,
@@ -550,8 +553,8 @@ async function main() {
       env: process.env,
       cwd: process.cwd(),
     });
-    const zshRegistrationResult = ensureZshRegistration({ env: process.env });
-    printShellRefreshHint(zshRegistrationResult);
+    const registrationResult = ensureEnvironmentRegistration({ env: process.env });
+    printShellRefreshHint(registrationResult);
 
     const syncCommand =
       options.runtime === "claude"
