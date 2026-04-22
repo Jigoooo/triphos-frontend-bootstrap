@@ -10,6 +10,7 @@ const repoRoot = resolve(pluginRoot, "..", "..");
 const repoPackageJson = JSON.parse(readFileSync(resolve(repoRoot, "package.json"), "utf8"));
 const claudePluginJsonPath = resolve(pluginRoot, ".claude-plugin", "plugin.json");
 const codexPluginJsonPath = resolve(pluginRoot, ".codex-plugin", "plugin.json");
+const claudeMarketplaceJsonPath = resolve(repoRoot, ".claude-plugin", "marketplace.json");
 
 const requiredPaths = [
   resolve(repoRoot, "bin", "triphos-frontend-bootstrap"),
@@ -85,6 +86,7 @@ if (missing.length > 0) {
 
 const claudePluginJson = JSON.parse(readFileSync(claudePluginJsonPath, "utf8"));
 const codexPluginJson = JSON.parse(readFileSync(codexPluginJsonPath, "utf8"));
+const claudeMarketplaceJson = JSON.parse(readFileSync(claudeMarketplaceJsonPath, "utf8"));
 
 if (claudePluginJson.version !== repoPackageJson.version) {
   console.error("Triphos plugin structure check failed.");
@@ -98,6 +100,32 @@ if (codexPluginJson.version !== repoPackageJson.version) {
   console.error("Triphos plugin structure check failed.");
   console.error(
     `- codex plugin version mismatch: ${codexPluginJson.version} !== ${repoPackageJson.version}`,
+  );
+  process.exit(1);
+}
+
+if (claudeMarketplaceJson.version !== repoPackageJson.version) {
+  console.error("Triphos plugin structure check failed.");
+  console.error(
+    `- claude marketplace version mismatch: ${claudeMarketplaceJson.version} !== ${repoPackageJson.version}`,
+  );
+  process.exit(1);
+}
+
+const marketplacePluginEntry = Array.isArray(claudeMarketplaceJson.plugins)
+  ? claudeMarketplaceJson.plugins.find((item) => item?.name === claudePluginJson.name)
+  : null;
+
+if (!marketplacePluginEntry) {
+  console.error("Triphos plugin structure check failed.");
+  console.error(`- claude marketplace is missing plugin entry for ${claudePluginJson.name}`);
+  process.exit(1);
+}
+
+if (marketplacePluginEntry.version !== repoPackageJson.version) {
+  console.error("Triphos plugin structure check failed.");
+  console.error(
+    `- claude marketplace plugin version mismatch: ${marketplacePluginEntry.version} !== ${repoPackageJson.version}`,
   );
   process.exit(1);
 }

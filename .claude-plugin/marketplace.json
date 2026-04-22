@@ -1,17 +1,16 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "triphos-frontend-bootstrap",
+  "description": "Triphos frontend bootstrap marketplace for Claude Code and Codex with init/adopt flows, project-local runtime hooks, and policy-driven verification.",
   "owner": {
     "name": "Jigoooo",
     "email": "opensource@triphos.dev"
   },
-  "metadata": {
-    "description": "Triphos frontend bootstrap marketplace with plugin-local frontend init, doctor, and rules skills for Claude Code and Codex."
-  },
   "plugins": [
     {
       "name": "triphos-frontend-bootstrap",
-      "description": "Bootstrap and maintain a Triphos-standard React frontend workspace with plugin-local skills, doctor checks, and init scaffolding.",
-      "version": "0.6.2",
+      "description": "Bootstrap and maintain a Triphos-standard React frontend workspace with init/adopt flows, repo-local runtime enforcement, shared/api baseline, and verification-first tooling.",
+      "version": "0.6.15",
       "author": {
         "name": "Jigoooo",
         "email": "opensource@triphos.dev"
@@ -27,5 +26,6 @@
         "triphos"
       ]
     }
-  ]
+  ],
+  "version": "0.6.15"
 }
