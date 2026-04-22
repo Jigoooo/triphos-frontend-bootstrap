@@ -27,6 +27,8 @@ Supports:
 
 - `triphos-frontend-init`
   Creates a new Triphos frontend project from the bundled template.
+- `triphos-frontend-adopt`
+  Aligns an existing frontend project to the same Triphos runtime, tooling, API, and verification baseline used by the template.
 
 ## Policy skills
 
@@ -35,7 +37,7 @@ Supports:
 - `triphos-react-lint-rules`
   Used to align code with React 19, React Compiler, hooks, and linting conventions.
 - `triphos-api-client-setup`
-  Used to wire `@jigoooo/api-client` and standardize API bootstrap patterns.
+  Used after the baseline is in place when a project needs additional entity APIs, raw API migration, or deeper `@jigoooo/api-client` customization.
 - `triphos-fsd-skill-update`
   Used when FSD-related skill rules or project application guidance need to be updated.
 

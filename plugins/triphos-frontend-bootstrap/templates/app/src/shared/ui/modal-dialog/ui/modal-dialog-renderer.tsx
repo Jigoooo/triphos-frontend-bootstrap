@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { type ReactNode, useCallback, useEffect, useRef } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
 import { modalDialogActions, useModalDialogStore } from '../model/modal-dialog-store';
@@ -29,14 +29,14 @@ export function ModalDialogRenderer(): ReactNode {
     }
   }, [isOpen]);
 
-  const handleClose = useCallback((value = false) => {
+  const handleClose = (value = false) => {
     const id = historyIdRef.current;
     historyIdRef.current = null;
     modalDialogActions.close(value);
     if (id) {
       overlayStackActions.closeWithBack(id);
     }
-  }, []);
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -50,7 +50,7 @@ export function ModalDialogRenderer(): ReactNode {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [closeOnBackdropClick, handleClose, isOpen]);
+  }, [closeOnBackdropClick, isOpen]);
 
   return createPortal(
     <AnimatePresence>
@@ -101,4 +101,3 @@ export function ModalDialogRenderer(): ReactNode {
     document.body,
   );
 }
-

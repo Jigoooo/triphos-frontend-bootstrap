@@ -18,7 +18,17 @@ export function useTimer(initialSeconds: number, start = false) {
   };
 
   useEffect(() => {
-    setTimerValue(initialSeconds);
+    let active = true;
+
+    queueMicrotask(() => {
+      if (active) {
+        setTimerValue(initialSeconds);
+      }
+    });
+
+    return () => {
+      active = false;
+    };
   }, [initialSeconds]);
 
   useEffect(() => {
@@ -44,4 +54,3 @@ export function useTimer(initialSeconds: number, start = false) {
     startTimer,
   };
 }
-

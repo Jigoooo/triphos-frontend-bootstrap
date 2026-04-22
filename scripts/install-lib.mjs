@@ -12,6 +12,7 @@ const MANAGED_BLOCK_START = "# >>> triphos-frontend-bootstrap >>>";
 const MANAGED_BLOCK_END = "# <<< triphos-frontend-bootstrap <<<";
 const PUBLIC_CODEX_SKILLS = [
   "triphos-frontend-init",
+  "triphos-frontend-adopt",
   "triphos-fsd-refactor",
   "triphos-react-lint-rules",
   "triphos-api-client-setup",

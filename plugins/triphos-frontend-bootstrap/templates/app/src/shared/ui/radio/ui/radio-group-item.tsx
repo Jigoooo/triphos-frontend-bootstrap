@@ -1,7 +1,7 @@
 import { useId, useState } from 'react';
 
-import { RadioItemContextProvider } from '../model/radio-item-context';
 import { useRadioGroupContext } from '../model/radio-group-context';
+import { RadioItemContextProvider } from '../model/radio-item-context';
 import type { ExtendedValue, RadioGroupItemProps } from '../model/types';
 import { useColors } from '@/shared/theme';
 

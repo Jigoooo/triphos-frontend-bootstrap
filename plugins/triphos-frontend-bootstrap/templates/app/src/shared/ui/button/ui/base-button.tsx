@@ -1,5 +1,5 @@
-import { forwardRef } from 'react';
 import { motion } from 'framer-motion';
+import { forwardRef } from 'react';
 
 import type { BaseButtonProps } from '../model/types';
 

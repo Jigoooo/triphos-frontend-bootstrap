@@ -1,4 +1,4 @@
-import { type ChangeEvent, type KeyboardEvent, useCallback, useLayoutEffect, useRef } from 'react';
+import { type ChangeEvent, type KeyboardEvent, useLayoutEffect, useRef } from 'react';
 
 import { BaseTextarea } from './base-textarea';
 import type { TextareaProps } from '../model/types';
@@ -42,35 +42,29 @@ export function Textarea({
   const internalTextareaRef = useRef<HTMLTextAreaElement>(null);
   const textareaRef = externalTextareaRef ?? internalTextareaRef;
 
-  const handleChange = useCallback(
-    (event: ChangeEvent<HTMLTextAreaElement>) => {
-      onChange?.(event);
+  const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    onChange?.(event);
 
-      if (autoResize) {
-        const element = event.target;
-        withScrollPreserved(scrollContainerRef?.current ?? null, () => {
-          element.style.height = 'auto';
-          const maxHeight = LINE_HEIGHT * maxRows + PADDING;
-          element.style.height = `${Math.min(element.scrollHeight, maxHeight)}px`;
-        });
-      }
-    },
-    [autoResize, maxRows, onChange, scrollContainerRef],
-  );
+    if (autoResize) {
+      const element = event.target;
+      withScrollPreserved(scrollContainerRef?.current ?? null, () => {
+        element.style.height = 'auto';
+        const maxHeight = LINE_HEIGHT * maxRows + PADDING;
+        element.style.height = `${Math.min(element.scrollHeight, maxHeight)}px`;
+      });
+    }
+  };
 
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLTextAreaElement>) => {
-      if (event.nativeEvent.isComposing) return;
+  const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.nativeEvent.isComposing) return;
 
-      if (event.key === 'Enter' && !event.shiftKey && onEnter && textareaRef.current) {
-        event.preventDefault();
-        onEnter(textareaRef.current.value);
-      }
+    if (event.key === 'Enter' && !event.shiftKey && onEnter && textareaRef.current) {
+      event.preventDefault();
+      onEnter(textareaRef.current.value);
+    }
 
-      onKeyDown?.(event);
-    },
-    [onEnter, onKeyDown, textareaRef],
-  );
+    onKeyDown?.(event);
+  };
 
   useLayoutEffect(() => {
     if (!autoResize || !textareaRef.current) return;
@@ -97,7 +91,7 @@ export function Textarea({
         border: `1px solid ${hasError ? colors.feedback.error : colors.border.default}`,
         borderRadius: '0.8rem',
         padding: '1.2rem',
-        fontSize: SIZE_FONT[size] || SIZE_FONT.md,
+        fontSize: SIZE_FONT[size] || SIZE_FONT['md'],
         outline: 'none',
         resize: 'none',
         lineHeight: `${LINE_HEIGHT}px`,

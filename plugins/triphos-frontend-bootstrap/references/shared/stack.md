@@ -8,6 +8,7 @@
 - Zustand
 - Vitest
 - `@jigoooo/api-client`
+- `@lukemorales/query-key-factory`
 - `@floating-ui/react`
 - `date-fns`
 - `framer-motion`

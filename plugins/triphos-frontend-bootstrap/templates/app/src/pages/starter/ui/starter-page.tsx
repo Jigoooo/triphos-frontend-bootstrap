@@ -2,6 +2,10 @@ import { Link } from '@tanstack/react-router';
 import { CalendarDays, ChevronDown, LoaderCircle, MessageSquare, MousePointer2, Palette, Plus, Sparkles } from 'lucide-react';
 import { useRef, useState } from 'react';
 
+import { useFormState, useMediaQuery, useTimer } from '@/shared/hooks';
+import { formatPhoneNumber, thousandSeparator } from '@/shared/lib/formatter/formatter-lib';
+import { useColors } from '@/shared/theme';
+import { alertDialog } from '@/shared/ui/alert-dialog';
 import { useBottomSheet } from '@/shared/ui/bottom-sheet';
 import { Button } from '@/shared/ui/button';
 import { Checkbox } from '@/shared/ui/checkbox';
@@ -10,6 +14,7 @@ import { FormField } from '@/shared/ui/form-field';
 import { Input } from '@/shared/ui/input';
 import { BouncingDotsLoader, DelayedFallback, Skeleton, Spinner } from '@/shared/ui/loader';
 import { useModalDialog } from '@/shared/ui/modal-dialog';
+import { OverlayScrollbar as OverlayScrollbarComponent } from '@/shared/ui/overlay-scrollbar';
 import { RadioGroup } from '@/shared/ui/radio';
 import { MultiSelect, Select } from '@/shared/ui/select';
 import { SpeedDial } from '@/shared/ui/speed-dial';
@@ -18,15 +23,10 @@ import { Textarea } from '@/shared/ui/textarea';
 import { ThemeToggle } from '@/shared/ui/theme-toggle';
 import { toast } from '@/shared/ui/toast';
 import { ToggleButton } from '@/shared/ui/toggle-button';
-import { Typography } from '@/shared/ui/typography';
 import { Tooltip } from '@/shared/ui/tooltip';
-import { alertDialog } from '@/shared/ui/alert-dialog';
-import { useColors } from '@/shared/theme';
-import { useFormState, useMediaQuery, useTimer } from '@/shared/hooks';
-import { formatPhoneNumber, thousandSeparator } from '@/shared/lib/formatter/formatter-lib';
-import { OverlayScrollbar as OverlayScrollbarComponent } from '@/shared/ui/overlay-scrollbar';
+import { Typography } from '@/shared/ui/typography';
 
-export function starterPage() {
+export function StarterPage() {
   const colors = useColors();
   const openBottomSheet = useBottomSheet();
   const openModalDialog = useModalDialog();
@@ -75,14 +75,14 @@ export function starterPage() {
         }}
       >
         <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: isMedium ? 'center' : 'flex-start',
-          flexDirection: isMedium ? 'row' : 'column',
-          gap: '1rem',
-          flexWrap: 'wrap',
-        }}
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: isMedium ? 'center' : 'flex-start',
+            flexDirection: isMedium ? 'row' : 'column',
+            gap: '1rem',
+            flexWrap: 'wrap',
+          }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
             <div

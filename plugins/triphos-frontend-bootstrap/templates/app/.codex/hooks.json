@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/scripts/hooks/codex-session-start.mjs\"",
+            "statusMessage": "Loading Triphos frontend policy"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/scripts/hooks/codex-stop-verify.mjs\"",
+            "timeout": 120,
+            "statusMessage": "Verifying Triphos frontend policy"
+          }
+        ]
+      }
+    ]
+  }
+}

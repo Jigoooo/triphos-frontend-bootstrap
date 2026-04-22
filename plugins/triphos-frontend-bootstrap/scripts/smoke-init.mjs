@@ -35,6 +35,11 @@ if (constraints.status !== 0) {
   process.exit(constraints.status ?? 1);
 }
 
+const verifyFrontend = spawnSync("pnpm", ["verify:frontend"], { cwd: appDir, stdio: "inherit" });
+if (verifyFrontend.status !== 0) {
+  process.exit(verifyFrontend.status ?? 1);
+}
+
 const typecheck = spawnSync("pnpm", ["typecheck"], { cwd: appDir, stdio: "inherit" });
 if (typecheck.status !== 0) {
   process.exit(typecheck.status ?? 1);

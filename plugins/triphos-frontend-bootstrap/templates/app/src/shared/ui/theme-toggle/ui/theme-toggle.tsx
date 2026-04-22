@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
 import { Moon, Sun } from 'lucide-react';
 
-import { RawButton } from '@/shared/ui/button';
 import { ResolvedThemeMode, ThemeMode, useColors, useThemeStore } from '@/shared/theme';
+import { RawButton } from '@/shared/ui/button';
 
 export function ThemeToggle() {
   const colors = useColors();

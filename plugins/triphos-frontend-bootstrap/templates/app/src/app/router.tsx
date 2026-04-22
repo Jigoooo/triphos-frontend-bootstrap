@@ -1,8 +1,8 @@
 import { createRootRoute, createRoute, createRouter, Outlet } from '@tanstack/react-router';
 
 import { getQueryClient } from '@/app/providers/query-client';
-import { homePage } from '@/pages/home';
-import { starterPage } from '@/pages/starter';
+import { HomePage } from '@/pages/home';
+import { StarterPage } from '@/pages/starter';
 import { AlertDialogRenderer } from '@/shared/ui/alert-dialog';
 import { BottomSheetRenderer } from '@/shared/ui/bottom-sheet';
 import { ModalDialogRenderer } from '@/shared/ui/modal-dialog';
@@ -31,13 +31,13 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: homePage,
+  component: HomePage,
 });
 
 const starterRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/starter',
-  component: starterPage,
+  component: StarterPage,
 });
 
 const routeTree = rootRoute.addChildren([indexRoute, starterRoute]);

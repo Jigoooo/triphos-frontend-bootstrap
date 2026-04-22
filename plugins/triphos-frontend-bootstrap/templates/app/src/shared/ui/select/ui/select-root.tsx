@@ -96,8 +96,6 @@ function SelectRootBase<ValueType extends ExtendedValue>({
     setItems((currentItems) => currentItems.filter((item) => item.id !== id));
   };
 
-  const getEnabledItems = () => items.filter((item) => !item.disabled);
-
   const getLabelForValue = (value: ValueType) =>
     items.find((item) => item.value === value)?.labelText ?? String(value);
 
@@ -111,7 +109,7 @@ function SelectRootBase<ValueType extends ExtendedValue>({
   };
 
   const moveHighlight = (direction: 1 | -1) => {
-    const enabledItems = getEnabledItems();
+    const enabledItems = items.filter((item) => !item.disabled);
     if (enabledItems.length === 0) return;
 
     const currentIndex = enabledItems.findIndex((item) => item.id === highlightedItemId);
@@ -133,7 +131,7 @@ function SelectRootBase<ValueType extends ExtendedValue>({
   };
 
   const handleHighlightedSelection = () => {
-    const enabledItems = getEnabledItems();
+    const enabledItems = items.filter((item) => !item.disabled);
     const highlightedItem = enabledItems.find((item) => item.id === highlightedItemId) ?? enabledItems[0];
 
     if (!highlightedItem) return;
@@ -186,9 +184,14 @@ function SelectRootBase<ValueType extends ExtendedValue>({
   useEffect(() => {
     if (!isOpen) return;
 
-    const enabledItems = getEnabledItems();
+    let active = true;
+    const enabledItems = items.filter((item) => !item.disabled);
     if (enabledItems.length === 0) {
-      setHighlightedItemId(null);
+      queueMicrotask(() => {
+        if (active) {
+          setHighlightedItemId(null);
+        }
+      });
       return;
     }
 
@@ -197,8 +200,20 @@ function SelectRootBase<ValueType extends ExtendedValue>({
       : enabledItems.find((item) => item.value === selectedValue);
 
     const nextId = selectedItem?.id ?? enabledItems[0]?.id ?? null;
-    setHighlightedItemId(nextId);
-    focusHighlightedItem(nextId);
+    queueMicrotask(() => {
+      if (!active) return;
+      setHighlightedItemId(nextId);
+      if (!nextId) return;
+
+      const nextItem = items.find((item) => item.id === nextId);
+      nextItem?.ref?.scrollIntoView({
+        block: 'nearest',
+      });
+    });
+
+    return () => {
+      active = false;
+    };
   }, [isOpen, items, multiple, selectedValue, selectedValues]);
 
   const contextValue: SelectContextValue<ValueType> = {

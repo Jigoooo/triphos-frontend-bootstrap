@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import { clampDate, formatPickerDate, parsePickerDate } from '../lib/date-picker-values';
 import type { DatePickerProps, UseDatePickerReturn } from './types';
+import { clampDate, formatPickerDate, parsePickerDate } from '../lib/date-picker-values';
 
 export function useDatePicker({
   mode = 'day',
@@ -20,13 +20,33 @@ export function useDatePicker({
   const [displayMode, setDisplayMode] = useState(mode);
 
   useEffect(() => {
-    setSelectedDate(parsedValue);
+    let active = true;
+
+    queueMicrotask(() => {
+      if (active) {
+        setSelectedDate(parsedValue);
+      }
+    });
+
+    return () => {
+      active = false;
+    };
   }, [parsedValue, value]);
 
   useEffect(() => {
     if (isOpen) return;
-    setCurrentDate(clampDate(parsedValue ?? new Date(), minDate, maxDate));
-    setDisplayMode(mode);
+
+    let active = true;
+
+    queueMicrotask(() => {
+      if (!active) return;
+      setCurrentDate(clampDate(parsedValue ?? new Date(), minDate, maxDate));
+      setDisplayMode(mode);
+    });
+
+    return () => {
+      active = false;
+    };
   }, [isOpen, maxDate, minDate, mode, parsedValue]);
 
   const commitSelection = (date: Date) => {

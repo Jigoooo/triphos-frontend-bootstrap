@@ -27,6 +27,8 @@ npx @jigoooo/triphos-frontend-bootstrap@latest
 
 - `triphos-frontend-init`
   새 Triphos 프론트엔드 프로젝트를 템플릿 기준으로 생성합니다.
+- `triphos-frontend-adopt`
+  기존 프론트엔드 프로젝트를 템플릿과 동일한 Triphos runtime, tooling, API, verification 기준으로 정렬합니다.
 
 ## 정책 스킬
 
@@ -35,7 +37,7 @@ npx @jigoooo/triphos-frontend-bootstrap@latest
 - `triphos-react-lint-rules`
   React 19, React Compiler, hooks/lint 규칙에 맞게 코드와 패턴을 정리할 때 사용합니다.
 - `triphos-api-client-setup`
-  `@jigoooo/api-client` 기준으로 API bootstrap과 클라이언트 연결 규칙을 맞출 때 사용합니다.
+  baseline이 준비된 뒤 새 entity API 추가, raw API migration, 고급 `@jigoooo/api-client` customization이 필요할 때 사용합니다.
 - `triphos-fsd-skill-update`
   FSD 관련 스킬 규칙이나 프로젝트 적용 기준을 업데이트할 때 사용합니다.
 

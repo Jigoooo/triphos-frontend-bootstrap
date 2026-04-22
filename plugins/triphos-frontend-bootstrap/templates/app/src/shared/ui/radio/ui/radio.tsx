@@ -1,5 +1,5 @@
-import { RadioGroupItem } from './radio-group-item';
 import { RadioGroupIndicator } from './radio-group-indicator';
+import { RadioGroupItem } from './radio-group-item';
 import { RadioGroupLabel } from './radio-group-label';
 import type { ExtendedValue, RadioProps } from '../model/types';
 

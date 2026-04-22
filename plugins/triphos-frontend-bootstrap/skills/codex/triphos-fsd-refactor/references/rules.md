@@ -204,13 +204,13 @@ export const AddMedicineForm = () => {
 ```ts
 // entities/medicine/api/medicine-api.ts
 import { api } from '@jigoooo/api-client';
-import { apiWithAdapter } from '@/shared/adapter';
+import { apiWithAdapter } from '@/shared/api';
 
 export const addMedicineApi = (data: AddMedicineRequest) =>
   apiWithAdapter<Medicine>(api.post('/medicines', data));
 ```
 
-`shared/adapter/`의 셋업(bootstrap, adapter 3+1 파일) 및 새 entity의 api 파일 추가는 **`api-client-setup` 스킬**이 담당한다. `fsd-refactor`는 entities/api 파일이 이 패턴을 따르는지 **검증만** 하고, 위반을 발견하면 **직접 수정하지 말고** 사용자에게 `/api-client-setup migrate <path>` 실행을 제안한다.
+`shared/api/` baseline의 셋업과 새 entity의 api 파일 추가는 **`api-client-setup` 스킬**이 담당한다. `fsd-refactor`는 entities/api 파일이 이 패턴을 따르는지 **검증만** 하고, 위반을 발견하면 **직접 수정하지 말고** 사용자에게 `/api-client-setup migrate <path>` 실행을 제안한다.
 
 검증 체크리스트 (fsd-refactor가 확인할 것):
 - `entities/*/api/*.ts` 파일이 `import { api } from '@jigoooo/api-client'`를 사용하는가?
@@ -219,6 +219,28 @@ export const addMedicineApi = (data: AddMedicineRequest) =>
 - 함수 이름이 `<verb><Entity>Api` 네이밍 규칙을 따르는가?
 
 위반을 발견하면 리포트에 포함하되 수정은 `api-client-setup`에 위임.
+
+### 3.5 Query Key / Query Options / Mutation Options
+
+이 프로젝트는 entity `model/`에서 TanStack Query wrapper를 관리한다.
+
+- query key는 `@lukemorales/query-key-factory`로 정의한다.
+- `queryOptions` wrapper는 entity `model/query-options.ts`에 둔다.
+- `mutationOptions` wrapper는 entity `model/mutation-options.ts`에 둔다.
+- feature는 entity wrapper를 `useQuery`, `useMutation`에 직접 넣어 사용한다.
+
+예:
+
+```ts
+const query = useQuery(memberQueryOptions.me());
+const mutation = useMutation(memberMutationOptions.updateMe(queryClient));
+```
+
+검증 체크리스트:
+- entity `model/query-keys.ts`가 `createQueryKeys`를 사용하는가?
+- entity `model/query-options.ts`가 `queryOptions`를 사용하는가?
+- entity `model/mutation-options.ts`가 `mutationOptions`를 사용하는가?
+- feature에서 query key나 mutationFn을 다시 inline 정의하지 않는가?
 
 ---
 

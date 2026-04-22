@@ -1,5 +1,5 @@
-import type { DatePickerContentProps } from '../model/types';
 import { useDatePickerContext } from '../model/date-picker-context';
+import type { DatePickerContentProps } from '../model/types';
 import { useColors } from '@/shared/theme';
 
 export function DatePickerContent({ children, style }: DatePickerContentProps) {

@@ -4,10 +4,10 @@ export { RadioGroupItem } from './ui/radio-group-item';
 export { RadioGroupLabel } from './ui/radio-group-label';
 export { RadioGroupRoot } from './ui/radio-group-root';
 
-import { RadioGroupRoot } from './ui/radio-group-root';
-import { RadioGroupItem } from './ui/radio-group-item';
 import { RadioGroupIndicator } from './ui/radio-group-indicator';
+import { RadioGroupItem } from './ui/radio-group-item';
 import { RadioGroupLabel } from './ui/radio-group-label';
+import { RadioGroupRoot } from './ui/radio-group-root';
 
 export const RadioGroup = Object.assign(RadioGroupRoot, {
   Root: RadioGroupRoot,

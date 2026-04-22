@@ -1,5 +1,5 @@
-import type { SelectValueProps } from '../model/types';
 import { useSelectContext } from '../model/select-context';
+import type { SelectValueProps } from '../model/types';
 import { useColors } from '@/shared/theme';
 
 export function SelectValue({ placeholder, style }: SelectValueProps) {

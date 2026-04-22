@@ -1,2 +1,1 @@
-export { starterPage } from './ui/starter-page';
-
+export { StarterPage } from './ui/starter-page';

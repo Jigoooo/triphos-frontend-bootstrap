@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/scripts/hooks/repo-codex-session-start.mjs\"",
+            "statusMessage": "Loading Triphos plugin policy"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/scripts/hooks/repo-codex-stop-verify.mjs\"",
+            "timeout": 240,
+            "statusMessage": "Verifying Triphos plugin repository"
+          }
+        ]
+      }
+    ]
+  }
+}

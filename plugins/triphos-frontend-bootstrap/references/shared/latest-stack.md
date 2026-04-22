@@ -10,6 +10,7 @@ This file captures the approved official reference set for the bootstrap.
 - Zustand
 - Vitest 4
 - `@jigoooo/api-client`
+- `@lukemorales/query-key-factory`
 - `framer-motion`
 - `@floating-ui/react`
 - TypeScript 6.0

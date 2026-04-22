@@ -8,12 +8,17 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "verify:fsd": "node ./scripts/verify-fsd.mjs",
+    "verify:react-rules": "node ./scripts/verify-react-rules.mjs",
+    "verify:api": "node ./scripts/verify-api-baseline.mjs",
+    "verify:frontend": "pnpm verify:fsd && pnpm verify:react-rules && pnpm verify:api && pnpm lint && pnpm typecheck",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
     "format": "prettier --check ."
   },
   "dependencies": {
     "@jigoooo/api-client": "^0.2.4",
+    "@lukemorales/query-key-factory": "^1.3.4",
     "@floating-ui/react": "^0.27.19",
     "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-router": "^1.167.2",

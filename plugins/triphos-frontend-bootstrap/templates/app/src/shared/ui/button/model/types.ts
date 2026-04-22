@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
 import type { HTMLMotionProps } from 'framer-motion';
+import type { ReactNode } from 'react';
 
 export interface BaseButtonProps extends HTMLMotionProps<'button'> {
   size?: 'xs' | 'sm' | 'md' | 'lg';

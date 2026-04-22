@@ -1,6 +1,6 @@
 {
   "name": "triphos-frontend-bootstrap",
-  "version": "0.6.13",
+  "version": "0.6.14",
   "description": "Triphos frontend bootstrap plugin with init flow, plugin-local rules skills, and internal validation helpers.",
   "author": {
     "name": "Jigoooo",
@@ -33,6 +33,7 @@
     "termsOfServiceURL": "https://github.com/Jigoooo/triphos-frontend-bootstrap",
     "defaultPrompt": [
       "Use triphos-frontend-init to scaffold a new Triphos frontend app.",
+      "Use triphos-frontend-adopt to align an existing frontend project to the Triphos baseline.",
       "Use the bundled policy skills for FSD, React lint rules, theme, and API client setup.",
       "Use the validation scripts in this plugin when the environment or template health is unclear."
     ],

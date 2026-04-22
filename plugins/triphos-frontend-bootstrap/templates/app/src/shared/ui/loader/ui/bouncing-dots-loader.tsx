@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+
 import { useColors } from '@/shared/theme';
 
 export function BouncingDotsLoader() {

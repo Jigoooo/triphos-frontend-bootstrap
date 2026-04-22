@@ -7,13 +7,16 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_');
-  const apiOrigin = env.VITE_API_ORIGIN || 'http://localhost:3001';
-  const apiPrefix = env.VITE_API_PREFIX || '/api';
+  const apiUrl = env['VITE_API_URL'] || 'http://localhost';
+  const apiPort = env['VITE_API_PORT'] || '3001';
+  const apiSuffix = (env['VITE_SUFFIX_API_ENDPOINT'] || 'api').replace(/^\/+|\/+$/g, '');
+  const apiPrefix = `/${apiSuffix}`;
+  const apiOrigin = `${apiUrl}:${apiPort}`;
 
   return {
     server: {
       host: '0.0.0.0',
-      port: Number(env.VITE_PORT || 3000),
+      port: Number(env['VITE_PORT'] || 3000),
       open: true,
       proxy: {
         [apiPrefix]: {

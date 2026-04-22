@@ -7,9 +7,10 @@
 - Preserve `.gitkeep` files for empty FSD slices.
 - Copy `public/fonts/PretendardVariable.woff2` into the generated app.
 - Copy the reference `index.css` reset and font setup.
-- Create `src/shared/adapter/`, `src/shared/lib/api/`, `src/shared/lib/dev/`, `src/shared/hooks/`, and `src/shared/theme/` by default.
+- Create `src/shared/api/`, `src/shared/hooks/`, `src/shared/theme/`, `src/entities/auth/`, and `src/entities/member/` by default.
 - Copy `src/app/declare/global.d.ts` and `src/app/declare/svg.d.ts` into the template baseline.
 - Copy `public/robots.txt` into the template baseline.
+- Copy `.codex/hooks.json`, `.claude/settings.json`, and the `scripts/verify-*.mjs` verification scripts into the generated app.
 - Default new UI code to inline `style` props unless the style is truly global.
 - Treat `className` as banned by default. Only allow it for hard-to-express global utility hooks such as scrollbar handling.
-- After generation, prefer `pnpm install` then `pnpm build` or `pnpm typecheck`.
+- After generation, prefer `pnpm install` then `pnpm verify:frontend` and `pnpm build`.

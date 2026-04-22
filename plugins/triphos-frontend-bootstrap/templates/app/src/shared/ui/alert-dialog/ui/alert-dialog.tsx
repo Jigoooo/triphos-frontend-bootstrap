@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { type ReactNode, useCallback, useEffect, useRef } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
 import { alertDialogActions, useAlertDialogStore } from '../model/alert-dialog-store';
@@ -33,14 +33,14 @@ export function AlertDialogRenderer(): ReactNode {
     }
   }, [isOpen]);
 
-  const handleClose = useCallback((value: boolean) => {
+  const handleClose = (value: boolean) => {
     const id = historyIdRef.current;
     historyIdRef.current = null;
     alertDialogActions.close(value);
     if (id) {
       overlayStackActions.closeWithBack(id);
     }
-  }, []);
+  };
 
   useEffect(() => {
     if (!isOpen || !config) return;
@@ -57,7 +57,7 @@ export function AlertDialogRenderer(): ReactNode {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [config, handleClose, isOpen]);
+  }, [config, isOpen]);
 
   const accentColor = config ? colors.feedback[config.type as keyof typeof colors.feedback] : colors.interactive.primary;
   const isDestructive = config ? DESTRUCTIVE_TYPES.has(config.type) : false;

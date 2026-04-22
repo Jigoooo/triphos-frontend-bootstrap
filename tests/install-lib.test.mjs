@@ -82,6 +82,7 @@ test("uninstallCodexPlugin falls back to the known managed skills when the marke
   try {
     const skillsRoot = resolve(cwd, ".codex", "skills");
     const managedSkills = [
+      "triphos-frontend-adopt",
       "triphos-frontend-init",
       "triphos-api-client-setup",
       "triphos-frontend-bootstrap",

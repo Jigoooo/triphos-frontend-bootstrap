@@ -11,8 +11,8 @@ import {
 } from '@floating-ui/react';
 
 import { DatePickerContextProvider } from '../model/date-picker-context';
-import { useDatePicker } from '../model/use-date-picker';
 import type { DatePickerRootProps } from '../model/types';
+import { useDatePicker } from '../model/use-date-picker';
 
 export function DatePickerRoot({
   children,

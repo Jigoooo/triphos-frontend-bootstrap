@@ -1,6 +1,6 @@
 {
   "name": "@jigoooo/triphos-frontend-bootstrap",
-  "version": "0.6.13",
+  "version": "0.6.14",
   "description": "npx installer and dual-plugin marketplace source for Triphos frontend bootstrapping.",
   "author": "Jigoooo",
   "license": "MIT",
@@ -49,10 +49,12 @@
     "doctor": "node plugins/triphos-frontend-bootstrap/scripts/doctor.mjs",
     "validate:structure": "node plugins/triphos-frontend-bootstrap/scripts/validate-plugin-structure.mjs",
     "check:template": "node plugins/triphos-frontend-bootstrap/scripts/check-app-constraints.mjs --target plugins/triphos-frontend-bootstrap/templates/app",
+    "check:parity": "node plugins/triphos-frontend-bootstrap/scripts/check-skill-parity.mjs",
     "register:claude": "node plugins/triphos-frontend-bootstrap/scripts/register-claude-local.mjs",
     "register:codex": "node plugins/triphos-frontend-bootstrap/scripts/register-codex-local.mjs",
     "smoke:init": "node plugins/triphos-frontend-bootstrap/scripts/smoke-init.mjs",
-    "prepublishOnly": "pnpm run validate:structure && pnpm run check:template",
+    "verify:repo": "pnpm run validate:structure && pnpm run check:template && pnpm run check:parity && pnpm test && pnpm run smoke:init",
+    "prepublishOnly": "pnpm run verify:repo",
     "publish:dry": "npm publish --dry-run"
   }
 }

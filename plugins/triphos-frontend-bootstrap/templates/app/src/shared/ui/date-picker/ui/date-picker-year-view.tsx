@@ -1,7 +1,7 @@
 import { addYears, getYear, isSameYear, setYear, subYears } from 'date-fns';
 
-import { useDatePickerContext } from '../model/date-picker-context';
 import { DatePickerNavigationButton } from './date-picker-navigation-button';
+import { useDatePickerContext } from '../model/date-picker-context';
 import { useColors } from '@/shared/theme';
 
 export function DatePickerYearView() {

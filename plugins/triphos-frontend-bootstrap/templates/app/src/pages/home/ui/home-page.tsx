@@ -1,7 +1,7 @@
+import { Link } from '@tanstack/react-router';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import { Sparkles, Workflow } from 'lucide-react';
-import { Link } from '@tanstack/react-router';
 import { create } from 'zustand';
 
 import { useMediaQuery, usePreferReducedMotion } from '@/shared/hooks';
@@ -18,7 +18,7 @@ const useUiStore = create<UiState>((set) => ({
   increment: () => set((state) => ({ launches: state.launches + 1 })),
 }));
 
-export function homePage() {
+export function HomePage() {
   const launches = useUiStore((state) => state.launches);
   const increment = useUiStore((state) => state.increment);
   const colors = useColors();
