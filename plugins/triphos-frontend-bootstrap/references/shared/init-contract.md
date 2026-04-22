@@ -1,6 +1,6 @@
 # Init Contract
 
-- Create a new directory only.
+- Create in a new directory, or in a directory that contains only allowed runtime/workspace state entries: `.omx`, `.omc`, `.codex`, `.claude`, `.agents`, `.cursor`, `.vscode`, `.idea`, `.zed`, `.git`, `.DS_Store`, `Thumbs.db`.
 - Ensure `pnpm` is available. If missing, try `corepack enable` and `corepack prepare pnpm@10.8.1 --activate`.
 - Scaffold the standard Triphos stack from `templates/app/`.
 - Replace the package name placeholder.

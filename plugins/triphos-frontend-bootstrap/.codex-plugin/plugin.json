@@ -1,6 +1,6 @@
 {
   "name": "triphos-frontend-bootstrap",
-  "version": "0.6.11",
+  "version": "0.6.12",
   "description": "Triphos frontend bootstrap plugin with init flow, plugin-local rules skills, and internal validation helpers.",
   "author": {
     "name": "Jigoooo",

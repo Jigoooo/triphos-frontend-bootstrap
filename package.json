@@ -1,6 +1,6 @@
 {
   "name": "@jigoooo/triphos-frontend-bootstrap",
-  "version": "0.6.11",
+  "version": "0.6.12",
   "description": "npx installer and dual-plugin marketplace source for Triphos frontend bootstrapping.",
   "author": "Jigoooo",
   "license": "MIT",
@@ -45,6 +45,7 @@
   },
   "scripts": {
     "install:cli": "node ./bin/triphos-frontend-bootstrap",
+    "test": "node --test",
     "doctor": "node plugins/triphos-frontend-bootstrap/scripts/doctor.mjs",
     "validate:structure": "node plugins/triphos-frontend-bootstrap/scripts/validate-plugin-structure.mjs",
     "check:template": "node plugins/triphos-frontend-bootstrap/scripts/check-app-constraints.mjs --target plugins/triphos-frontend-bootstrap/templates/app",

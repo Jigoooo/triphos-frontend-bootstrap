@@ -6,6 +6,7 @@ import { stdin as input, stdout as output } from "node:process";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  cleanupClaudePluginArtifacts,
   ensureEnvironmentRegistration,
   getPackageVersion,
   getGlobalInstalledPackageVersion,
@@ -14,11 +15,14 @@ import {
   installClaudePlugin,
   installCodexPlugin,
   isNpmLauncherExecution,
+  normalizeDeleteScope,
   normalizeRuntime,
   normalizeScope,
   PACKAGE_NAME,
   parseArgs,
   runUpdatedBinary,
+  uninstallClaudePlugin,
+  uninstallCodexPlugin,
   updateGlobalPackage,
 } from "../scripts/install-lib.mjs";
 
@@ -45,6 +49,7 @@ function printUsage() {
   console.log(`Usage:
   triphos-frontend-bootstrap
   update        Update the global tfb CLI, then resync plugins
+  delete        Remove installed Triphos plugins and synced skills
   version       Show the installed CLI version
 
 Install:
@@ -52,6 +57,9 @@ Install:
 
 Update:
   tfb update
+
+Delete:
+  tfb delete
 `);
 }
 
@@ -61,6 +69,7 @@ Triphos frontend bootstrap CLI
 
 Commands:
   update        Update the global tfb CLI, then resync plugins
+  delete        Remove installed Triphos plugins and synced skills
   version       Show the installed CLI version
 `);
 }
@@ -425,10 +434,17 @@ async function resolveInstallerOptions(command, argv) {
         ? "codex"
         : command === "both-setup"
           ? "both"
+          : command === "delete"
+            ? normalizeRuntime(args.runtime) ?? "both"
           : command === "update"
             ? normalizeRuntime(args.runtime) ?? "both"
-          : normalizeRuntime(args.runtime);
-  let scope = command === "update" ? normalizeScope(args.scope) ?? "global" : normalizeScope(args.scope);
+            : normalizeRuntime(args.runtime);
+  let scope =
+    command === "delete"
+      ? normalizeDeleteScope(args.scope) ?? "all"
+      : command === "update"
+        ? normalizeScope(args.scope) ?? "global"
+        : normalizeScope(args.scope);
   const init = false;
   const packageSpec = args["package-spec"] ? String(args["package-spec"]) : `${PACKAGE_NAME}@latest`;
 
@@ -503,7 +519,16 @@ async function main() {
 
   const defaultCommand = isNpmLauncherExecution(process.env) ? "setup" : "help";
   const { command, rest } = extractCommand(rawArgs, defaultCommand);
-  const knownCommands = new Set(["setup", "claude-setup", "codex-setup", "both-setup", "update", "help", "version"]);
+  const knownCommands = new Set([
+    "setup",
+    "claude-setup",
+    "codex-setup",
+    "both-setup",
+    "update",
+    "delete",
+    "help",
+    "version",
+  ]);
 
   if (!knownCommands.has(command)) {
     throw new Error(`Unknown command: ${command}`);
@@ -523,6 +548,7 @@ async function main() {
   const shouldBootstrapGlobalCli =
     command !== "help" &&
     command !== "update" &&
+    command !== "delete" &&
     isNpmLauncherExecution(process.env) &&
     (!hasGlobalBinary("tfb", process.env, process.cwd()) ||
       globalInstalledVersion !== currentVersion);
@@ -569,6 +595,79 @@ async function main() {
       env: process.env,
       cwd: process.cwd(),
     });
+    return;
+  }
+
+  if (command === "delete") {
+    const selectedRuntimes =
+      options.runtime === "both" ? ["claude", "codex"] : [options.runtime];
+    const selectedScopes =
+      options.scope === "all" ? ["global", "local"] : [options.scope];
+    const successes = [];
+    const failures = [];
+
+    if (selectedRuntimes.includes("claude")) {
+      try {
+        const removedScopes = [];
+
+        for (const scope of selectedScopes) {
+          const result = uninstallClaudePlugin({
+            scope,
+            cwd: process.cwd(),
+          });
+          removedScopes.push(`${result.scope}:${result.removedPluginIds.length}`);
+        }
+
+        const cleanupResult = cleanupClaudePluginArtifacts({
+          cwd: process.cwd(),
+        });
+        const cleanupSummary =
+          cleanupResult.remainingPluginIds.length > 0
+            ? `remaining ${cleanupResult.remainingPluginIds.length} install(s)`
+            : "artifacts removed";
+
+        successes.push(`Claude (${removedScopes.join(", ")}; ${cleanupSummary})`);
+      } catch (error) {
+        failures.push(`Claude: ${error.message}`);
+      }
+    }
+
+    if (selectedRuntimes.includes("codex")) {
+      try {
+        const removedScopes = [];
+
+        for (const scope of selectedScopes) {
+          const result = uninstallCodexPlugin({
+            scope,
+            cwd: process.cwd(),
+          });
+          removedScopes.push(`${scope}:${result.hadInstallRoot ? "install removed" : "no install"}`);
+        }
+
+        successes.push(`Codex (${removedScopes.join(", ")})`);
+      } catch (error) {
+        failures.push(`Codex: ${error.message}`);
+      }
+    }
+
+    if (successes.length === 0) {
+      throw new Error(failures.join("\n"));
+    }
+
+    console.log("\nTriphos delete completed.");
+    for (const success of successes) {
+      console.log(`- OK: ${success}`);
+    }
+    console.log(`- Note: the global \`tfb\` CLI is kept installed; remove ${PACKAGE_NAME} separately if needed.`);
+
+    if (failures.length > 0) {
+      console.error("\nPartial failures:");
+      for (const failure of failures) {
+        console.error(`- ${failure}`);
+      }
+      process.exit(1);
+    }
+
     return;
   }
 

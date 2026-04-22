@@ -16,6 +16,7 @@ After install:
 - global `tfb` install
 - project bootstrap via `triphos-frontend-init`
 - updates via `tfb update`
+- cleanup via `tfb delete`
 
 Supports:
 
@@ -39,3 +40,12 @@ Supports:
   Used when FSD-related skill rules or project application guidance need to be updated.
 
 Project generation happens inside Claude/Codex through the `triphos-frontend-init` skill.
+
+## Cleanup
+
+```bash
+tfb delete
+```
+
+This removes the installed Triphos plugin from Claude and Codex, deletes synced Codex skills, and cleans the Claude plugin cache and marketplace clone when no Triphos install remains.
+It keeps the global `tfb` CLI installed.

@@ -6,6 +6,8 @@ argument-hint: "[target-directory]"
 
 # triphos-frontend-init
 
+Use this skill only for a new directory, or for a directory that contains only allowed runtime state entries.
+
 ## Read first
 
 - [../../../references/shared/stack.md](../../../references/shared/stack.md)
@@ -16,14 +18,16 @@ argument-hint: "[target-directory]"
 ## Workflow
 
 1. If the environment is unclear, follow the internal doctor guide and run `validate-plugin-structure.mjs` plus `doctor.mjs` first.
-2. Ensure the target directory is new or empty.
-3. Run:
+2. If the checked-out plugin repository is more trustworthy than any installed cache, use the current repository as the source of truth for `scripts/` and `plugins/triphos-frontend-bootstrap/`.
+3. Ensure the target directory is new, or contains only allowed runtime/workspace state entries: `.omx`, `.omc`, `.codex`, `.claude`, `.agents`, `.cursor`, `.vscode`, `.idea`, `.zed`, `.git`, `.DS_Store`, `Thumbs.db`.
+4. If other entries exist, stop and name the blocking entries directly instead of working around them.
+5. Run:
 
 ```bash
 node ../../../scripts/scaffold-app.mjs --target <directory> --name <package-name> --install
 ```
 
-4. Verify with `pnpm typecheck` or `pnpm build`.
+6. Verify with `pnpm typecheck` or `pnpm build`.
 
 ## Template rules
 

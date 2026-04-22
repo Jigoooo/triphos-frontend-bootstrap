@@ -5,12 +5,13 @@ description: 새 디렉터리에 React 19, React Compiler, TanStack Router/Query
 
 # triphos-frontend-init
 
-새 디렉터리를 스캐폴딩할 때만 이 스킬을 사용한다.
+새 디렉터리 또는 허용된 런타임 상태물만 남아 있는 디렉터리를 스캐폴딩할 때만 이 스킬을 사용한다.
 
 ## 언어 규칙
 
 - 사용자에게 보여주는 설명, 진행 보고, 계획, 검증 요약은 기본적으로 한국어로 작성한다.
 - 코드, 명령어, 패키지명, 파일 경로는 원문을 유지한다.
+- 한국어 문장에는 한글과 필요한 영문 코드 토큰만 사용한다. 다른 문자 체계나 깨진 인코딩처럼 보이는 문자를 섞지 않는다.
 - 사용자가 다른 언어를 명시하면 그 요청을 따른다.
 
 ## 먼저 읽기
@@ -23,14 +24,17 @@ description: 새 디렉터리에 React 19, React Compiler, TanStack Router/Query
 ## 워크플로우
 
 1. 레포 또는 머신 상태가 불명확하면 내부 doctor 가이드를 따라 `validate-plugin-structure.mjs`와 `doctor.mjs`를 먼저 실행한다.
-2. 대상 디렉터리가 새 디렉터리이거나 비어 있는지 확인한다.
-3. 다음 스캐폴드 스크립트를 실행한다.
+2. 설치 캐시보다 현재 체크아웃된 플러그인 원본 저장소가 더 신뢰할 수 있으면, 현재 저장소의 `scripts/`와 `plugins/triphos-frontend-bootstrap/`를 source of truth로 삼아 설명한다.
+3. 대상 디렉터리가 새 디렉터리이거나, `.omx`, `.omc`, `.codex`, `.claude`, `.agents`, `.cursor`, `.vscode`, `.idea`, `.zed`, `.git`, `.DS_Store`, `Thumbs.db` 같은 허용된 런타임/워크스페이스 상태물만 포함하는지 확인한다.
+4. 허용되지 않은 엔트리가 있으면 우회하지 말고, 어떤 엔트리가 스캐폴드를 막는지 한국어로 짧게 설명한다.
+5. doctor나 캐시 fallback을 설명할 때는 경로를 그대로 인용하고, 설명 문장은 짧은 한국어 평서문으로 유지한다.
+6. 다음 스캐폴드 스크립트를 실행한다.
 
 ```bash
 node ../../../scripts/scaffold-app.mjs --target <directory> --name <package-name> --install
 ```
 
-4. 1차 검증은 `pnpm typecheck` 또는 `pnpm build`를 우선 사용한다.
+7. 1차 검증은 `pnpm typecheck` 또는 `pnpm build`를 우선 사용한다.
 
 ## 템플릿 규칙
 

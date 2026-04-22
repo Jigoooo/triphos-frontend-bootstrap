@@ -22,6 +22,9 @@ const HIDDEN_CODEX_SKILLS = [
   "triphos-frontend-bootstrap",
   "triphos-frontend-doctor",
 ];
+const MANAGED_CODEX_SKILLS = Array.from(
+  new Set([...PUBLIC_CODEX_SKILLS, ...HIDDEN_CODEX_SKILLS]),
+);
 const CODEX_SKILL_MARKER_FILE = `.managed-${PLUGIN_NAME}-skills.json`;
 
 export function isEphemeralExecution(env = process.env) {
@@ -118,6 +121,19 @@ export function normalizeScope(rawValue) {
   throw new Error(`Unsupported scope: ${rawValue}`);
 }
 
+export function normalizeDeleteScope(rawValue) {
+  if (!rawValue) {
+    return null;
+  }
+
+  const value = String(rawValue).trim().toLowerCase();
+  if (value === "global" || value === "local" || value === "all") {
+    return value;
+  }
+
+  throw new Error(`Unsupported delete scope: ${rawValue}`);
+}
+
 export function resolvePluginSourceRoot(packageRoot) {
   return resolve(packageRoot, "plugins", PLUGIN_NAME);
 }
@@ -181,6 +197,26 @@ export function upsertCodexMarketplaceEntry({ marketplacePath, pluginPath }) {
   writeFileSync(marketplacePath, JSON.stringify(payload, null, 2) + "\n");
 }
 
+export function removeCodexMarketplaceEntry({ marketplacePath }) {
+  if (!existsSync(marketplacePath)) {
+    return {
+      changed: false,
+      marketplacePath,
+    };
+  }
+
+  const payload = normalizeCodexPayload(readFileSync(marketplacePath, "utf8"));
+  const nextPlugins = payload.plugins.filter((item) => item?.name !== PLUGIN_NAME);
+  const changed = nextPlugins.length !== payload.plugins.length;
+  payload.plugins = nextPlugins;
+  writeFileSync(marketplacePath, JSON.stringify(payload, null, 2) + "\n");
+
+  return {
+    changed,
+    marketplacePath,
+  };
+}
+
 export function installCodexPlugin({ packageRoot, scope, cwd = process.cwd() }) {
   const sourceRoot = resolvePluginSourceRoot(packageRoot);
   const installRoot = resolveCodexInstallRoot({ scope, cwd });
@@ -201,6 +237,68 @@ export function installCodexPlugin({ packageRoot, scope, cwd = process.cwd() }) 
     installRoot,
     marketplacePath,
     skillsRoot,
+  };
+}
+
+function readManagedCodexSkillNames(skillsRoot) {
+  const markerPath = resolve(skillsRoot, CODEX_SKILL_MARKER_FILE);
+  if (!existsSync(markerPath)) {
+    return {
+      markerPath,
+      skillNames: MANAGED_CODEX_SKILLS,
+    };
+  }
+
+  try {
+    const parsed = JSON.parse(readFileSync(markerPath, "utf8"));
+    if (Array.isArray(parsed) && parsed.every((item) => typeof item === "string")) {
+      return {
+        markerPath,
+        skillNames: parsed,
+      };
+    }
+  } catch {
+    // Fall back to the current managed skill set if the marker file is corrupt.
+  }
+
+  return {
+    markerPath,
+    skillNames: MANAGED_CODEX_SKILLS,
+  };
+}
+
+function removeManagedCodexSkills(skillsRoot) {
+  const { markerPath, skillNames } = readManagedCodexSkillNames(skillsRoot);
+
+  for (const skillName of skillNames) {
+    rmSync(resolve(skillsRoot, skillName), { recursive: true, force: true });
+  }
+
+  rmSync(markerPath, { force: true });
+
+  return {
+    markerPath,
+    removedSkillNames: skillNames,
+  };
+}
+
+export function uninstallCodexPlugin({ scope, cwd = process.cwd() }) {
+  const installRoot = resolveCodexInstallRoot({ scope, cwd });
+  const marketplacePath = resolveCodexMarketplacePath({ scope, cwd });
+  const skillsRoot = resolveCodexSkillsRoot({ scope, cwd });
+  const hadInstallRoot = existsSync(installRoot);
+  const { removedSkillNames } = removeManagedCodexSkills(skillsRoot);
+  const marketplaceResult = removeCodexMarketplaceEntry({ marketplacePath });
+
+  rmSync(installRoot, { recursive: true, force: true });
+
+  return {
+    installRoot,
+    marketplacePath,
+    skillsRoot,
+    hadInstallRoot,
+    removedSkillNames,
+    marketplaceChanged: marketplaceResult.changed,
   };
 }
 
@@ -227,9 +325,7 @@ export function syncCodexSkills({
 }) {
   const sourceSkillsRoot = resolve(pluginInstallRoot, "skills", "codex");
   const markerPath = resolve(skillsRoot, CODEX_SKILL_MARKER_FILE);
-  const nextManagedSkillNames = Array.from(
-    new Set([...PUBLIC_CODEX_SKILLS, ...HIDDEN_CODEX_SKILLS]),
-  );
+  const nextManagedSkillNames = MANAGED_CODEX_SKILLS;
 
   mkdirSync(skillsRoot, { recursive: true });
 
@@ -350,6 +446,85 @@ export function installClaudePlugin({ scope, cwd = process.cwd() }) {
   return {
     scope: claudeScope,
     marketplace: GITHUB_REPOSITORY,
+  };
+}
+
+function resolveClaudePluginsRoot() {
+  return resolve(os.homedir(), ".claude", "plugins");
+}
+
+function resolveClaudeCacheRoot() {
+  return resolve(resolveClaudePluginsRoot(), "cache", PLUGIN_NAME);
+}
+
+function resolveClaudeMarketplaceRoot() {
+  return resolve(resolveClaudePluginsRoot(), "marketplaces", PLUGIN_NAME);
+}
+
+export function uninstallClaudePlugin({ scope, cwd = process.cwd() }) {
+  ensureCommand("claude");
+
+  const claudeScope = mapScopeToClaudeScope(scope);
+  const installedPlugins = getClaudeInstalledPlugins(cwd);
+  const pluginIds = Array.from(
+    new Set(
+      installedPlugins
+        .filter((item) => item?.id?.startsWith(`${PLUGIN_NAME}@`) && item?.scope === claudeScope)
+        .map((item) => item.id),
+    ),
+  );
+
+  for (const pluginId of pluginIds) {
+    runClaudeStep(["plugin", "uninstall", pluginId, "--scope", claudeScope], cwd);
+  }
+
+  return {
+    scope: claudeScope,
+    removedPluginIds: pluginIds,
+  };
+}
+
+export function cleanupClaudePluginArtifacts({ cwd = process.cwd() }) {
+  ensureCommand("claude");
+
+  const remainingPlugins = getClaudeInstalledPlugins(cwd).filter((item) =>
+    item?.id?.startsWith(`${PLUGIN_NAME}@`),
+  );
+  if (remainingPlugins.length > 0) {
+    return {
+      removedMarketplaceNames: [],
+      removedCacheRoot: false,
+      removedMarketplaceRoot: false,
+      remainingPluginIds: remainingPlugins.map((item) => item.id),
+    };
+  }
+
+  const marketplaces = getClaudeMarketplaces(cwd);
+  const marketplaceNames = Array.from(
+    new Set(
+      marketplaces
+        .filter((item) => item?.repo === GITHUB_REPOSITORY || item?.name === PLUGIN_NAME)
+        .map((item) => item?.name)
+        .filter(Boolean),
+    ),
+  );
+
+  for (const marketplaceName of marketplaceNames) {
+    runClaudeStep(["plugin", "marketplace", "remove", marketplaceName], cwd);
+  }
+
+  const cacheRoot = resolveClaudeCacheRoot();
+  const marketplaceRoot = resolveClaudeMarketplaceRoot();
+  const hadCacheRoot = existsSync(cacheRoot);
+  const hadMarketplaceRoot = existsSync(marketplaceRoot);
+  rmSync(cacheRoot, { recursive: true, force: true });
+  rmSync(marketplaceRoot, { recursive: true, force: true });
+
+  return {
+    removedMarketplaceNames: marketplaceNames,
+    removedCacheRoot: hadCacheRoot,
+    removedMarketplaceRoot: hadMarketplaceRoot,
+    remainingPluginIds: [],
   };
 }
 

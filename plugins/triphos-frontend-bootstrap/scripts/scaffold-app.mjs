@@ -8,6 +8,20 @@ import { fileURLToPath } from "node:url";
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const pluginRoot = resolve(scriptDir, "..");
 const templateRoot = resolve(pluginRoot, "templates", "app");
+const IGNORED_TARGET_ENTRIES = new Set([
+  ".omx",
+  ".omc",
+  ".codex",
+  ".claude",
+  ".agents",
+  ".cursor",
+  ".vscode",
+  ".idea",
+  ".zed",
+  ".git",
+  ".DS_Store",
+  "Thumbs.db",
+]);
 
 function parseArgs(argv) {
   const args = {};
@@ -46,15 +60,19 @@ function ensurePnpm() {
   }
 }
 
-function ensureEmptyDirectory(targetDir) {
+function ensureScaffoldReadyDirectory(targetDir) {
   if (!existsSync(targetDir)) {
     mkdirSync(targetDir, { recursive: true });
     return;
   }
 
   const entries = readdirSync(targetDir);
-  if (entries.length > 0) {
-    throw new Error(`Target directory is not empty: ${targetDir}`);
+  const blockingEntries = entries.filter((entry) => !IGNORED_TARGET_ENTRIES.has(entry));
+  if (blockingEntries.length > 0) {
+    throw new Error(
+      `Target directory contains blocking entries: ${blockingEntries.join(", ")}. ` +
+        `Only runtime state entries may remain: ${Array.from(IGNORED_TARGET_ENTRIES).join(", ")}.`,
+    );
   }
 }
 
@@ -76,7 +94,7 @@ if (!target) {
 }
 
 ensurePnpm();
-ensureEmptyDirectory(target);
+ensureScaffoldReadyDirectory(target);
 cpSync(templateRoot, target, { recursive: true });
 replacePackageName(target, name);
 
@@ -91,4 +109,3 @@ if (install) {
 }
 
 console.log(`Scaffolded Triphos app at ${target}`);
-

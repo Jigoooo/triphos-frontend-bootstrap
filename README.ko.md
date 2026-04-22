@@ -16,6 +16,7 @@ npx @jigoooo/triphos-frontend-bootstrap@latest
 - 전역 `tfb` 설치
 - `triphos-frontend-init` 기반 프로젝트 생성
 - `tfb update` 기반 업데이트
+- `tfb delete` 기반 정리
 
 지원 환경:
 
@@ -39,3 +40,12 @@ npx @jigoooo/triphos-frontend-bootstrap@latest
   FSD 관련 스킬 규칙이나 프로젝트 적용 기준을 업데이트할 때 사용합니다.
 
 프로젝트 생성은 Claude/Codex 안에서 `triphos-frontend-init` 스킬로 수행합니다.
+
+## 정리
+
+```bash
+tfb delete
+```
+
+이 명령은 Claude/Codex 에 설치된 Triphos 플러그인을 제거하고, 동기화된 Codex 스킬과 Claude 플러그인 캐시 및 marketplace clone 을 정리합니다.
+전역 `tfb` CLI 자체는 유지됩니다.
