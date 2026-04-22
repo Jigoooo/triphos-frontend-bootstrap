@@ -1,0 +1,2 @@
+# Publish scope is controlled primarily by package.json#files.
+# Keep this file so npm does not fall back to .gitignore.

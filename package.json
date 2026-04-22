@@ -1,13 +1,13 @@
 {
   "name": "@jigoooo/triphos-frontend-bootstrap",
-  "version": "0.6.9",
+  "version": "0.6.10",
   "description": "npx installer and dual-plugin marketplace source for Triphos frontend bootstrapping.",
   "author": "Jigoooo",
   "license": "MIT",
   "homepage": "https://github.com/Jigoooo/triphos-frontend-bootstrap",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Jigoooo/triphos-frontend-bootstrap.git"
+    "url": "git+https://github.com/Jigoooo/triphos-frontend-bootstrap.git"
   },
   "bugs": {
     "url": "https://github.com/Jigoooo/triphos-frontend-bootstrap/issues"
