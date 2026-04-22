@@ -1,7 +1,7 @@
 {
   "name": "triphos-frontend-bootstrap",
-  "version": "0.6.2",
-  "description": "Triphos frontend bootstrap plugin with doctor, init, and plugin-local rules skills.",
+  "version": "0.6.9",
+  "description": "Triphos frontend bootstrap plugin with init flow, plugin-local rules skills, and internal validation helpers.",
   "author": {
     "name": "Jigoooo",
     "email": "opensource@triphos.dev",
@@ -32,9 +32,9 @@
     "privacyPolicyURL": "https://github.com/Jigoooo/triphos-frontend-bootstrap",
     "termsOfServiceURL": "https://github.com/Jigoooo/triphos-frontend-bootstrap",
     "defaultPrompt": [
-      "Use triphos-frontend-bootstrap to decide whether I should run doctor or init.",
-      "Use triphos-frontend-doctor to validate this Triphos plugin checkout.",
-      "Use triphos-frontend-init to scaffold a new Triphos frontend app."
+      "Use triphos-frontend-init to scaffold a new Triphos frontend app.",
+      "Use the bundled policy skills for FSD, React lint rules, theme, and API client setup.",
+      "Use the validation scripts in this plugin when the environment or template health is unclear."
     ],
     "brandColor": "#0F766E",
     "composerIcon": "./assets/icon.svg",

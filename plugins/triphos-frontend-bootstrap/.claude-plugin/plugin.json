@@ -1,7 +1,7 @@
 {
   "name": "triphos-frontend-bootstrap",
-  "version": "0.6.2",
-  "description": "Triphos frontend bootstrap plugin with doctor, init, and bundled frontend policy skills.",
+  "version": "0.6.9",
+  "description": "Triphos frontend bootstrap plugin with init flow, bundled frontend policy skills, and internal validation helpers.",
   "author": {
     "name": "Jigoooo",
     "email": "opensource@triphos.dev",

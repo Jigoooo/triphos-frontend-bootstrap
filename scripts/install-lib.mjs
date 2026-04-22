@@ -22,6 +22,7 @@ const HIDDEN_CODEX_SKILLS = [
   "triphos-frontend-bootstrap",
   "triphos-frontend-doctor",
 ];
+const CODEX_SKILL_MARKER_FILE = `.managed-${PLUGIN_NAME}-skills.json`;
 
 export function isEphemeralExecution(env = process.env) {
   return env.npm_command === "exec" && env.npm_package_name === PACKAGE_NAME;
@@ -225,11 +226,19 @@ export function syncCodexSkills({
   skillsRoot,
 }) {
   const sourceSkillsRoot = resolve(pluginInstallRoot, "skills", "codex");
+  const markerPath = resolve(skillsRoot, CODEX_SKILL_MARKER_FILE);
+  const nextManagedSkillNames = Array.from(
+    new Set([...PUBLIC_CODEX_SKILLS, ...HIDDEN_CODEX_SKILLS]),
+  );
 
   mkdirSync(skillsRoot, { recursive: true });
 
-  for (const hiddenSkill of HIDDEN_CODEX_SKILLS) {
-    rmSync(resolve(skillsRoot, hiddenSkill), { recursive: true, force: true });
+  const previousManagedSkillNames = existsSync(markerPath)
+    ? JSON.parse(readFileSync(markerPath, "utf8"))
+    : HIDDEN_CODEX_SKILLS;
+
+  for (const staleSkill of previousManagedSkillNames) {
+    rmSync(resolve(skillsRoot, staleSkill), { recursive: true, force: true });
   }
 
   for (const skillName of PUBLIC_CODEX_SKILLS) {
@@ -245,6 +254,8 @@ export function syncCodexSkills({
     const rewritten = rewriteInstalledSkillMarkdown(skillContent, pluginInstallRoot);
     writeFileSync(targetSkillFile, rewritten);
   }
+
+  writeFileSync(markerPath, JSON.stringify(nextManagedSkillNames, null, 2) + "\n");
 }
 
 function runCommand(command, args, options = {}) {

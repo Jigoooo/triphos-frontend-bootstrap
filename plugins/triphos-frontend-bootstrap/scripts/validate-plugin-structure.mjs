@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const pluginRoot = resolve(scriptDir, "..");
 const repoRoot = resolve(pluginRoot, "..", "..");
+const repoPackageJson = JSON.parse(readFileSync(resolve(repoRoot, "package.json"), "utf8"));
+const claudePluginJsonPath = resolve(pluginRoot, ".claude-plugin", "plugin.json");
+const codexPluginJsonPath = resolve(pluginRoot, ".codex-plugin", "plugin.json");
 
 const requiredPaths = [
   resolve(repoRoot, "bin", "triphos-frontend-bootstrap"),
@@ -49,6 +52,25 @@ if (missing.length > 0) {
   for (const path of missing) {
     console.error(`- missing: ${path}`);
   }
+  process.exit(1);
+}
+
+const claudePluginJson = JSON.parse(readFileSync(claudePluginJsonPath, "utf8"));
+const codexPluginJson = JSON.parse(readFileSync(codexPluginJsonPath, "utf8"));
+
+if (claudePluginJson.version !== repoPackageJson.version) {
+  console.error("Triphos plugin structure check failed.");
+  console.error(
+    `- claude plugin version mismatch: ${claudePluginJson.version} !== ${repoPackageJson.version}`,
+  );
+  process.exit(1);
+}
+
+if (codexPluginJson.version !== repoPackageJson.version) {
+  console.error("Triphos plugin structure check failed.");
+  console.error(
+    `- codex plugin version mismatch: ${codexPluginJson.version} !== ${repoPackageJson.version}`,
+  );
   process.exit(1);
 }
 
