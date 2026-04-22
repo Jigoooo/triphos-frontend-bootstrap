@@ -319,7 +319,7 @@ async function promptMultiSelect(message, options, fallbackValues) {
 }
 
 async function promptChecklist(message, options, fallbackValues, continueLabel = "Continue") {
-  let currentIndex = 0;
+  let currentIndex = options.length;
   const fallbackIndexes = options.flatMap((option, index) =>
     fallbackValues.includes(option.value) ? [index] : [],
   );
