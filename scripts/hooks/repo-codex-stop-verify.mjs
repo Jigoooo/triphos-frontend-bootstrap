@@ -13,21 +13,25 @@ import {
 
 const payload = parseStopHookInput(readFileSync(0, 'utf8'));
 const changedFiles = listChangedFiles(process.cwd());
-const relevantMatchers = makePathMatchers([
-  'plugins/triphos-frontend-bootstrap',
-  'scripts',
-  'tests',
-  '.codex',
-  '.claude',
-  '.claude-plugin',
-  '.agents/plugins',
-  'README.md',
-  'README.ko.md',
-  'AGENTS.md',
-  'CLAUDE.md',
-  'package.json',
-  'bin/triphos-frontend-bootstrap',
-]);
+const relevantMatchers = makePathMatchers({
+  directories: [
+    'plugins/triphos-frontend-bootstrap',
+    'scripts',
+    'tests',
+    '.codex',
+    '.claude',
+    '.claude-plugin',
+    '.agents/plugins',
+  ],
+  exact: [
+    'README.md',
+    'README.ko.md',
+    'AGENTS.md',
+    'CLAUDE.md',
+    'package.json',
+    'bin/triphos-frontend-bootstrap',
+  ],
+});
 
 if (payload?.stop_hook_active) {
   process.stdout.write(

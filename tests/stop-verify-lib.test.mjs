@@ -16,7 +16,10 @@ test("parseStopHookInput reads valid JSON and returns null on invalid input", ()
 });
 
 test("hasRelevantChanges matches configured repo paths", () => {
-  const matchers = makePathMatchers(["src", "package.json", ".codex"]);
+  const matchers = makePathMatchers({
+    directories: ["src", ".codex"],
+    exact: ["package.json"],
+  });
 
   assert.equal(hasRelevantChanges(["src/app.tsx"], matchers), true);
   assert.equal(hasRelevantChanges(["package.json"], matchers), true);

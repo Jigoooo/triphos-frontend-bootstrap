@@ -139,25 +139,25 @@ export function resolvePluginSourceRoot(packageRoot) {
   return resolve(packageRoot, "plugins", PLUGIN_NAME);
 }
 
-export function resolveCodexSkillsRoot({ scope, cwd = process.cwd() }) {
+export function resolveCodexSkillsRoot({ scope, cwd = process.cwd(), homeDir = os.homedir() }) {
   if (scope === "global") {
-    return resolve(os.homedir(), ".codex", "skills");
+    return resolve(homeDir, ".codex", "skills");
   }
 
   return resolve(cwd, ".codex", "skills");
 }
 
-export function resolveCodexInstallRoot({ scope, cwd = process.cwd() }) {
+export function resolveCodexInstallRoot({ scope, cwd = process.cwd(), homeDir = os.homedir() }) {
   if (scope === "global") {
-    return resolve(os.homedir(), ".triphos", "plugins", PLUGIN_NAME);
+    return resolve(homeDir, ".triphos", "plugins", PLUGIN_NAME);
   }
 
   return resolve(cwd, ".triphos", "plugins", PLUGIN_NAME);
 }
 
-export function resolveCodexMarketplacePath({ scope, cwd = process.cwd() }) {
+export function resolveCodexMarketplacePath({ scope, cwd = process.cwd(), homeDir = os.homedir() }) {
   if (scope === "global") {
-    return resolve(os.homedir(), ".agents", "plugins", "marketplace.json");
+    return resolve(homeDir, ".agents", "plugins", "marketplace.json");
   }
 
   return resolve(cwd, ".agents", "plugins", "marketplace.json");
@@ -218,11 +218,11 @@ export function removeCodexMarketplaceEntry({ marketplacePath }) {
   };
 }
 
-export function installCodexPlugin({ packageRoot, scope, cwd = process.cwd() }) {
+export function installCodexPlugin({ packageRoot, scope, cwd = process.cwd(), homeDir = os.homedir() }) {
   const sourceRoot = resolvePluginSourceRoot(packageRoot);
-  const installRoot = resolveCodexInstallRoot({ scope, cwd });
-  const marketplacePath = resolveCodexMarketplacePath({ scope, cwd });
-  const skillsRoot = resolveCodexSkillsRoot({ scope, cwd });
+  const installRoot = resolveCodexInstallRoot({ scope, cwd, homeDir });
+  const marketplacePath = resolveCodexMarketplacePath({ scope, cwd, homeDir });
+  const skillsRoot = resolveCodexSkillsRoot({ scope, cwd, homeDir });
 
   syncCodexPluginBundle({ sourceRoot, installRoot });
   upsertCodexMarketplaceEntry({
@@ -283,10 +283,10 @@ function removeManagedCodexSkills(skillsRoot) {
   };
 }
 
-export function uninstallCodexPlugin({ scope, cwd = process.cwd() }) {
-  const installRoot = resolveCodexInstallRoot({ scope, cwd });
-  const marketplacePath = resolveCodexMarketplacePath({ scope, cwd });
-  const skillsRoot = resolveCodexSkillsRoot({ scope, cwd });
+export function uninstallCodexPlugin({ scope, cwd = process.cwd(), homeDir = os.homedir() }) {
+  const installRoot = resolveCodexInstallRoot({ scope, cwd, homeDir });
+  const marketplacePath = resolveCodexMarketplacePath({ scope, cwd, homeDir });
+  const skillsRoot = resolveCodexSkillsRoot({ scope, cwd, homeDir });
   const hadInstallRoot = existsSync(installRoot);
   const { removedSkillNames } = removeManagedCodexSkills(skillsRoot);
   const marketplaceResult = removeCodexMarketplaceEntry({ marketplacePath });

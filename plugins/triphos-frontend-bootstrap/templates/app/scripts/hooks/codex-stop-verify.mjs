@@ -13,26 +13,25 @@ import {
 
 const payload = parseStopHookInput(readFileSync(0, 'utf8'));
 const changedFiles = listChangedFiles(process.cwd());
-const relevantMatchers = makePathMatchers([
-  'src',
-  'scripts/verify-api-baseline.mjs',
-  'scripts/verify-fsd.mjs',
-  'scripts/verify-react-rules.mjs',
-  'scripts/hooks',
-  '.codex',
-  '.claude',
-  'package.json',
-  'tsconfig.json',
-  'vite.config.ts',
-  '.env',
-  '.env.local',
-  '.env.development.local',
-  '.env.production.local',
-  'AGENTS.md',
-  'AGENTS.en.md',
-  'CLAUDE.md',
-  'CLAUDE.en.md',
-]);
+const relevantMatchers = makePathMatchers({
+  directories: ['src', 'scripts/hooks', '.codex', '.claude'],
+  exact: [
+    'scripts/verify-api-baseline.mjs',
+    'scripts/verify-fsd.mjs',
+    'scripts/verify-react-rules.mjs',
+    'package.json',
+    'tsconfig.json',
+    'vite.config.ts',
+    '.env',
+    '.env.local',
+    '.env.development.local',
+    '.env.production.local',
+    'AGENTS.md',
+    'AGENTS.en.md',
+    'CLAUDE.md',
+    'CLAUDE.en.md',
+  ],
+});
 
 if (payload?.stop_hook_active) {
   process.stdout.write(

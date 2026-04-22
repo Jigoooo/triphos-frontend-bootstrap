@@ -46,10 +46,14 @@ export function hasRelevantChanges(changedFiles, matchers) {
   );
 }
 
-export function makePathMatchers(prefixes) {
-  return prefixes.map((prefix) => (filePath) => {
-    return filePath === prefix || filePath.startsWith(`${prefix}/`);
-  });
+export function makePathMatchers({ exact = [], directories = [], prefixes = [] }) {
+  return [
+    ...exact.map((value) => (filePath) => filePath === value),
+    ...directories.map((directory) => (filePath) => {
+      return filePath === directory || filePath.startsWith(`${directory}/`);
+    }),
+    ...prefixes.map((prefix) => (filePath) => filePath.startsWith(prefix)),
+  ];
 }
 
 export function runVerification(cwd, command, args) {

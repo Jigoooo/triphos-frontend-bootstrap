@@ -25,6 +25,10 @@ function pushWarning(label, detail) {
   warnings.push({ label, detail });
 }
 
+function toActivationLabel(ok) {
+  return ok ? "effective" : "ineffective";
+}
+
 function hasCommand(command, args = ["--version"]) {
   const result = spawnSync(command, args, { stdio: "pipe", encoding: "utf8" });
   return result.status === 0;
@@ -59,32 +63,36 @@ const repoCodexConfig = readTextIfExists(repoRuntimePaths.codexConfigPath);
 const templateCodexConfig = readTextIfExists(templateRuntimePaths.codexConfigPath);
 
 pushCheck(
-  "repo codex hooks config",
+  "repo codex runtime activation",
   existsSync(repoRuntimePaths.codexHooksPath) && hasCodexHooksEnabled(repoCodexConfig),
   existsSync(repoRuntimePaths.codexHooksPath)
     ? hasCodexHooksEnabled(repoCodexConfig)
-      ? "repo .codex/hooks.json + codex_hooks=true"
-      : "repo .codex/config.toml missing codex_hooks = true"
-    : "repo .codex/hooks.json missing",
+      ? `${toActivationLabel(true)}: repo .codex/hooks.json + codex_hooks=true`
+      : `${toActivationLabel(false)}: repo .codex/config.toml missing codex_hooks = true`
+    : `${toActivationLabel(false)}: repo .codex/hooks.json missing`,
 );
 pushCheck(
-  "template codex hooks config",
+  "template codex runtime activation",
   existsSync(templateRuntimePaths.codexHooksPath) && hasCodexHooksEnabled(templateCodexConfig),
   existsSync(templateRuntimePaths.codexHooksPath)
     ? hasCodexHooksEnabled(templateCodexConfig)
-      ? "template .codex/hooks.json + codex_hooks=true"
-      : "template .codex/config.toml missing codex_hooks = true"
-    : "template .codex/hooks.json missing",
+      ? `${toActivationLabel(true)}: template .codex/hooks.json + codex_hooks=true`
+      : `${toActivationLabel(false)}: template .codex/config.toml missing codex_hooks = true`
+    : `${toActivationLabel(false)}: template .codex/hooks.json missing`,
 );
 pushCheck(
-  "repo claude project settings",
+  "repo claude runtime activation",
   existsSync(repoRuntimePaths.claudeSettingsPath),
-  repoRuntimePaths.claudeSettingsPath,
+  existsSync(repoRuntimePaths.claudeSettingsPath)
+    ? `${toActivationLabel(true)}: ${repoRuntimePaths.claudeSettingsPath}`
+    : `${toActivationLabel(false)}: ${repoRuntimePaths.claudeSettingsPath}`,
 );
 pushCheck(
-  "template claude project settings",
+  "template claude runtime activation",
   existsSync(templateRuntimePaths.claudeSettingsPath),
-  templateRuntimePaths.claudeSettingsPath,
+  existsSync(templateRuntimePaths.claudeSettingsPath)
+    ? `${toActivationLabel(true)}: ${templateRuntimePaths.claudeSettingsPath}`
+    : `${toActivationLabel(false)}: ${templateRuntimePaths.claudeSettingsPath}`,
 );
 
 if (existsSync(repoRuntimePaths.claudeLocalSettingsPath)) {
