@@ -14,7 +14,7 @@ import {
 const payload = parseStopHookInput(readFileSync(0, 'utf8'));
 const changedFiles = listChangedFiles(process.cwd());
 const relevantMatchers = makePathMatchers({
-  directories: ['src', 'scripts/hooks', '.codex', '.claude'],
+  directories: ['src', 'scripts', 'docs', '.codex', '.claude'],
   exact: [
     'scripts/verify-api-baseline.mjs',
     'scripts/verify-fsd.mjs',

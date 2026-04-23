@@ -21,6 +21,7 @@ test("scaffold-app allows known runtime state directories in the target", () => 
     const allowedEntries = [
       ".omx",
       ".omc",
+      ".triphos",
       ".codex",
       ".claude",
       ".agents",
@@ -71,6 +72,26 @@ test("scaffold-app still rejects user-managed files in the target", () => {
       result.stderr || result.stdout,
       /Target directory contains blocking entries: notes\.txt/,
     );
+  } finally {
+    rmSync(target, { recursive: true, force: true });
+  }
+});
+
+test("scaffold-app omits template runtime artifacts", () => {
+  const target = mkdtempSync(resolve(tmpdir(), "tfb-scaffold-clean-"));
+
+  try {
+    const result = spawnSync("node", [scriptPath, "--target", target, "--name", "tfb-clean"], {
+      cwd: repoRoot,
+      encoding: "utf8",
+      stdio: "pipe",
+    });
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    assert.equal(existsSync(resolve(target, "node_modules")), false);
+    assert.equal(existsSync(resolve(target, "dist")), false);
+    assert.equal(existsSync(resolve(target, ".triphos")), false);
+    assert.equal(existsSync(resolve(target, ".triphos-template-source")), false);
   } finally {
     rmSync(target, { recursive: true, force: true });
   }

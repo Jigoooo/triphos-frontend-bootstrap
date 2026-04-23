@@ -58,6 +58,7 @@ export const useOverlayStackStore = create<OverlayStackStore>()((setState, getSt
       const { stack } = getState();
       if (stack.length === 0) return undefined;
       const top = stack[stack.length - 1];
+      if (!top) return undefined;
       setState({ stack: stack.slice(0, -1) });
       return top;
     },
@@ -107,4 +108,3 @@ export const useOverlayStackStore = create<OverlayStackStore>()((setState, getSt
 }));
 
 export const overlayStackActions = useOverlayStackStore.getState().actions;
-

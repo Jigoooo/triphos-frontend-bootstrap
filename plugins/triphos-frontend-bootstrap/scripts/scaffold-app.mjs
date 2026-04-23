@@ -8,9 +8,11 @@ import { fileURLToPath } from "node:url";
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const pluginRoot = resolve(scriptDir, "..");
 const templateRoot = resolve(pluginRoot, "templates", "app");
+const IGNORED_TEMPLATE_ENTRIES = new Set(["node_modules", "dist", ".triphos", ".triphos-template-source"]);
 const IGNORED_TARGET_ENTRIES = new Set([
   ".omx",
   ".omc",
+  ".triphos",
   ".codex",
   ".claude",
   ".agents",
@@ -95,7 +97,20 @@ if (!target) {
 
 ensurePnpm();
 ensureScaffoldReadyDirectory(target);
-cpSync(templateRoot, target, { recursive: true });
+cpSync(templateRoot, target, {
+  recursive: true,
+  filter: (source) => {
+    const normalized = source.replaceAll("\\", "/");
+    const normalizedTemplateRoot = templateRoot.replaceAll("\\", "/");
+    if (normalized === normalizedTemplateRoot) {
+      return true;
+    }
+
+    const relativePath = normalized.slice(normalizedTemplateRoot.length + 1);
+    const rootEntry = relativePath.split("/")[0];
+    return !IGNORED_TEMPLATE_ENTRIES.has(rootEntry);
+  },
+});
 replacePackageName(target, name);
 
 if (install) {

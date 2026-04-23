@@ -43,9 +43,9 @@ Supports:
 ## Main skill
 
 - `triphos-frontend-init`
-  Creates a new Triphos frontend project from the bundled template.
+  Creates a new Triphos frontend project from the bundled template. This is the default target for the strong Triphos harness.
 - `triphos-frontend-adopt`
-  Aligns an existing frontend project to the same Triphos runtime, tooling, API, and verification baseline used by the template.
+  Explicitly opts an existing frontend project into the same Triphos runtime, tooling, API, documentation, and verification baseline used by the template.
 
 ## Policy skills
 
@@ -59,6 +59,7 @@ Supports:
   Used when FSD-related skill rules or project application guidance need to be updated.
 
 Project generation happens inside Claude/Codex through the `triphos-frontend-init` skill.
+The strong harness is meant for generated repositories by default. Existing projects only get the same contract through an explicit `triphos-frontend-adopt` migration.
 
 ## Cleanup
 

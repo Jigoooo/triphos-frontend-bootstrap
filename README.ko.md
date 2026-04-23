@@ -43,9 +43,9 @@ npx @jigoooo/triphos-frontend-bootstrap@latest
 ## 주요 스킬
 
 - `triphos-frontend-init`
-  새 Triphos 프론트엔드 프로젝트를 템플릿 기준으로 생성합니다.
+  새 Triphos 프론트엔드 프로젝트를 템플릿 기준으로 생성합니다. 강한 Triphos 하네스의 기본 대상은 이 경로로 생성된 저장소입니다.
 - `triphos-frontend-adopt`
-  기존 프론트엔드 프로젝트를 템플릿과 동일한 Triphos runtime, tooling, API, verification 기준으로 정렬합니다.
+  기존 프론트엔드 프로젝트를 템플릿과 동일한 Triphos runtime, tooling, API, docs, verification 기준으로 명시적으로 opt-in 정렬합니다.
 
 ## 정책 스킬
 
@@ -59,6 +59,7 @@ npx @jigoooo/triphos-frontend-bootstrap@latest
   FSD 관련 스킬 규칙이나 프로젝트 적용 기준을 업데이트할 때 사용합니다.
 
 프로젝트 생성은 Claude/Codex 안에서 `triphos-frontend-init` 스킬로 수행합니다.
+강한 하네스는 기본적으로 init으로 생성된 저장소를 대상으로 하며, 기존 프로젝트는 `triphos-frontend-adopt`를 명시적으로 호출한 경우에만 같은 계약을 적용합니다.
 
 ## 정리
 

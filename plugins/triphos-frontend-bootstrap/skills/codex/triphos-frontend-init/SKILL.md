@@ -23,6 +23,8 @@ argument-hint: "[target-directory]"
 
 ## 템플릿 계약
 
+- 이 스킬로 생성된 저장소가 강한 Triphos 하네스의 기본 대상이다.
+- 생성 결과에는 `docs/` system-of-record, repo-local hooks, verifier scripts, browser harness scripts가 기본 포함된다.
 - `src/shared/api/`와 `apiWithAdapter`가 기본 포함된다.
 - `entities/auth`, token store, 최소 member store, auth-aware `api-bootstrap`이 기본 포함된다.
 - query key는 `@lukemorales/query-key-factory`로 관리하고, entity `model/`에 `query-keys.ts`, `query-options.ts`, `mutation-options.ts`가 기본 포함된다.

@@ -1,6 +1,8 @@
 # Default Template — 시작점으로 쓰는 기본 골격
 
 > **이 템플릿은 "이렇게 하면 된다"가 아니라 "이렇게 시작하면 편하다"의 의미다.** 각 프로젝트의 백엔드 응답 shape, 인증 흐름, 에러 처리 규칙이 다르므로 반드시 사용자와 검토 후 조정한다.
+> `http://localhost:3001/api` 계열 URL과 `success/data/message/timestamp/error/statusCode` 같은 필드명은 템플릿 예시다. 저장소/문서/사용자 지시로 실제 계약이 확인되지 않으면 이 값을 유지할지 교체할지 먼저 묻고 진행한다.
+> API 관련 작업은 최소 `response-adapter`, `api-with-adapter`, `api-bootstrap` 섹션을 먼저 읽고 기존 baseline을 확장하는 방식으로 진행한다.
 > 스킬 호출 시 먼저 `@jigoooo/api-client` 최신 docs를 조회해 이 템플릿이 여전히 유효한지 확인한다. 유효하지 않으면 이 파일을 먼저 업데이트한 뒤 사용자 작업을 진행한다.
 
 ## 목차
@@ -314,6 +316,7 @@ export const logoutApi = () =>
 6. **retry 정책** — 재시도 횟수, 어떤 status/endpoint에서 재시도
 7. **환경 변수** — `VITE_API_PREFIX`, `API_BASE_URL` 등의 이름/위치
 8. **기존 `shared/adapter/` 존재 여부** — 있으면 덮어쓸지 병합할지 확인
+9. **템플릿 placeholder 유지 여부** — `http://localhost:3001/api`, `success/data/message/timestamp/error/statusCode`를 실제 계약으로 교체할지 확인
 
 ---
 

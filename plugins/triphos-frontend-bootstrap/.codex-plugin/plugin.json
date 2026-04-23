@@ -1,7 +1,7 @@
 {
   "name": "triphos-frontend-bootstrap",
-  "version": "0.6.16",
-  "description": "Triphos frontend bootstrap plugin with init flow, plugin-local rules skills, and internal validation helpers.",
+  "version": "0.6.17",
+  "description": "Triphos frontend bootstrap plugin with init-generated frontend harness defaults, explicit adopt migrations, plugin-local rules skills, and internal validation helpers.",
   "author": {
     "name": "Jigoooo",
     "email": "opensource@triphos.dev",
@@ -20,8 +20,8 @@
   "skills": "./skills/codex/",
   "interface": {
     "displayName": "Triphos Frontend Bootstrap",
-    "shortDescription": "Bootstrap and verify Triphos-standard frontend projects.",
-    "longDescription": "Install a Triphos-standard frontend bootstrap plugin with doctor, init, namespaced rules skills, template scaffolding, and validation helpers.",
+    "shortDescription": "Bootstrap and verify Triphos-standard generated frontend projects.",
+    "longDescription": "Install a Triphos-standard frontend bootstrap plugin with doctor, init-generated harness defaults, explicit adopt migrations for existing projects, namespaced rules skills, template scaffolding, and validation helpers.",
     "developerName": "Jigoooo",
     "category": "Coding",
     "capabilities": [
@@ -32,8 +32,8 @@
     "privacyPolicyURL": "https://github.com/Jigoooo/triphos-frontend-bootstrap",
     "termsOfServiceURL": "https://github.com/Jigoooo/triphos-frontend-bootstrap",
     "defaultPrompt": [
-      "Use triphos-frontend-init to scaffold a new Triphos frontend app.",
-      "Use triphos-frontend-adopt to align an existing frontend project to the Triphos baseline.",
+      "Use triphos-frontend-init to scaffold a new Triphos frontend app. Generated apps are the default target for the strong harness.",
+      "Use triphos-frontend-adopt only when you explicitly want to migrate an existing frontend project into the Triphos harness.",
       "Use the bundled policy skills for FSD, React lint rules, theme, and API client setup.",
       "Use the validation scripts in this plugin when the environment or template health is unclear."
     ],

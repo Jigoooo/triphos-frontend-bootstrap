@@ -73,15 +73,35 @@ const requiredFiles = [
   'AGENTS.en.md',
   'CLAUDE.md',
   'CLAUDE.en.md',
+  'docs/README.md',
+  'docs/architecture/README.md',
+  'docs/product/README.md',
+  'docs/plans/README.md',
+  'docs/plans/active/.gitkeep',
+  'docs/plans/completed/.gitkeep',
+  'docs/decisions/README.md',
+  'docs/quality/README.md',
+  'docs/quality/verification-matrix.md',
+  'docs/quality/visual-baseline/README.md',
+  'docs/quality/visual-baseline/starter-desktop.png',
+  'docs/quality/visual-baseline/starter-mobile.png',
   '.codex/hooks.json',
   '.codex/config.toml',
   '.claude/settings.json',
   '.env',
   '.gitignore',
   'package.json',
+  'scripts/dev-harness.mjs',
+  'scripts/capture-dom.mjs',
+  'scripts/capture-screenshot.mjs',
   'scripts/verify-fsd.mjs',
   'scripts/verify-react-rules.mjs',
   'scripts/verify-api-baseline.mjs',
+  'scripts/verify-plans.mjs',
+  'scripts/verify-e2e.mjs',
+  'scripts/verify-visual.mjs',
+  'scripts/verify-uat.mjs',
+  'scripts/harness/harness-lib.mjs',
   'vite.config.ts',
   'src/app/providers/api-bootstrap.ts',
   'src/shared/api/index.ts',
@@ -139,23 +159,52 @@ expect(envValues.VITE_API_PORT === '3001', 'Expected .env VITE_API_PORT=3001');
 expect(envValues.VITE_SUFFIX_API_ENDPOINT === 'api', 'Expected .env VITE_SUFFIX_API_ENDPOINT=api');
 
 const gitignore = readFileSync(resolve(target, '.gitignore'), 'utf8');
-for (const entry of ['.env.local', '.env.development.local', '.env.production.local']) {
+for (const entry of ['.triphos', '.env.local', '.env.development.local', '.env.production.local']) {
   expectTextIncludes(gitignore, entry, `Expected .gitignore to include ${entry}`);
 }
 
 const codexConfig = readFileSync(resolve(target, '.codex/config.toml'), 'utf8');
 expectTextIncludes(codexConfig, 'codex_hooks = true', 'Expected .codex/config.toml to enable codex_hooks');
 
+const agents = readFileSync(resolve(target, 'AGENTS.md'), 'utf8');
+expectTextIncludes(agents, 'docs/README.md', 'Expected AGENTS.md to route to docs/README.md');
+expectTextIncludes(
+  agents,
+  'docs/plans/active/<date>-<slug>/PLAN.md',
+  'Expected AGENTS.md to describe the plan record layout',
+);
+
+const claudeGuidance = readFileSync(resolve(target, 'CLAUDE.md'), 'utf8');
+expectTextIncludes(claudeGuidance, 'docs/README.md', 'Expected CLAUDE.md to route to docs/README.md');
+
+const codexSessionStart = readFileSync(resolve(target, 'scripts/hooks/codex-session-start.mjs'), 'utf8');
+expectTextIncludes(codexSessionStart, 'docs/README.md', 'Expected codex session-start hook to mention docs/README.md');
+
+const codexStopVerify = readFileSync(resolve(target, 'scripts/hooks/codex-stop-verify.mjs'), 'utf8');
+expectTextIncludes(codexStopVerify, "'docs'", 'Expected codex stop hook to treat docs changes as relevant');
+expectTextIncludes(codexStopVerify, "'scripts'", 'Expected codex stop hook to treat script changes as relevant');
+
 const packageJson = JSON.parse(readFileSync(resolve(target, 'package.json'), 'utf8'));
 expect(packageJson.scripts?.dev === 'vite dev', 'Expected package.json scripts.dev to stay "vite dev"');
+expect(packageJson.scripts?.['dev:harness'] === 'node ./scripts/dev-harness.mjs', 'Expected package.json scripts.dev:harness');
 expect(packageJson.scripts?.build === 'vite build', 'Expected package.json scripts.build to stay "vite build"');
 expect(packageJson.scripts?.preview === 'vite preview', 'Expected package.json scripts.preview to stay "vite preview"');
 expect(packageJson.scripts?.prd === 'vite build', 'Expected package.json scripts.prd to be "vite build"');
 expect(packageJson.dependencies?.['@lukemorales/query-key-factory'], 'Expected package.json to include @lukemorales/query-key-factory');
+expect(packageJson.scripts?.['capture:dom'] === 'node ./scripts/capture-dom.mjs', 'Expected package.json scripts.capture:dom');
+expect(packageJson.scripts?.['capture:screenshot'] === 'node ./scripts/capture-screenshot.mjs', 'Expected package.json scripts.capture:screenshot');
 expect(packageJson.scripts?.['verify:fsd'] === 'node ./scripts/verify-fsd.mjs', 'Expected package.json scripts.verify:fsd');
 expect(packageJson.scripts?.['verify:react-rules'] === 'node ./scripts/verify-react-rules.mjs', 'Expected package.json scripts.verify:react-rules');
 expect(packageJson.scripts?.['verify:api'] === 'node ./scripts/verify-api-baseline.mjs', 'Expected package.json scripts.verify:api');
+expect(packageJson.scripts?.['verify:plans'] === 'node ./scripts/verify-plans.mjs', 'Expected package.json scripts.verify:plans');
+expect(packageJson.scripts?.['verify:e2e'] === 'node ./scripts/verify-e2e.mjs', 'Expected package.json scripts.verify:e2e');
+expect(packageJson.scripts?.['verify:visual'] === 'node ./scripts/verify-visual.mjs', 'Expected package.json scripts.verify:visual');
+expect(packageJson.scripts?.['verify:uat'] === 'node ./scripts/verify-uat.mjs', 'Expected package.json scripts.verify:uat');
 expect(packageJson.scripts?.['verify:frontend']?.includes('pnpm verify:fsd'), 'Expected package.json scripts.verify:frontend');
+expect(packageJson.scripts?.['verify:frontend']?.includes('pnpm verify:plans'), 'Expected package.json scripts.verify:frontend to include verify:plans');
+expect(packageJson.scripts?.['verify:frontend']?.includes('pnpm verify:e2e'), 'Expected package.json scripts.verify:frontend to include verify:e2e');
+expect(packageJson.scripts?.['verify:frontend']?.includes('pnpm verify:visual'), 'Expected package.json scripts.verify:frontend to include verify:visual');
+expect(packageJson.scripts?.['verify:frontend']?.includes('pnpm verify:uat'), 'Expected package.json scripts.verify:frontend to include verify:uat');
 expect(!packageJson.scripts?.prd?.includes('--mode'), 'Expected package.json scripts.prd to avoid custom Vite modes');
 
 const viteConfig = readFileSync(resolve(target, 'vite.config.ts'), 'utf8');

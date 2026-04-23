@@ -1,11 +1,11 @@
-import { forwardRef } from 'react';
-
 import type { BaseInputProps } from '../model/types';
 
-export const BaseInput = forwardRef<HTMLInputElement, BaseInputProps>(function BaseInput(
-  props,
-  ref,
+export function BaseInput(
+  {
+    hasError: _hasError,
+    ref,
+    ...props
+  }: BaseInputProps,
 ) {
   return <input ref={ref} {...props} />;
-});
-
+}

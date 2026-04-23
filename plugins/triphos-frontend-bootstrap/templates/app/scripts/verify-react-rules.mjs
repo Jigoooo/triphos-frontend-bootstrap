@@ -31,6 +31,9 @@ function walk(currentPath) {
   if (content.includes('useCallback(')) {
     failures.push(`${currentPath} contains forbidden useCallback usage`);
   }
+  if (content.includes('forwardRef')) {
+    failures.push(`${currentPath} contains forbidden forwardRef usage`);
+  }
 }
 
 walk(srcRoot);

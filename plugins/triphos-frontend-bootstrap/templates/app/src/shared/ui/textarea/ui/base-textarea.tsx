@@ -1,11 +1,11 @@
-import { forwardRef } from 'react';
-
 import type { BaseTextareaProps } from '../model/types';
 
-export const BaseTextarea = forwardRef<HTMLTextAreaElement, BaseTextareaProps>(function BaseTextarea(
-  props,
-  ref,
+export function BaseTextarea(
+  {
+    hasError: _hasError,
+    ref,
+    ...props
+  }: BaseTextareaProps,
 ) {
   return <textarea ref={ref} {...props} />;
-});
-
+}
