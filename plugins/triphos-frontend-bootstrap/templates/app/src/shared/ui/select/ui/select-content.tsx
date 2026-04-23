@@ -20,9 +20,10 @@ export function SelectContent({ children, style }: SelectContentProps) {
         padding: '0.6rem',
         borderRadius: '1.4rem',
         border: `1px solid ${colors.border.default}`,
-        background: `linear-gradient(180deg, ${colors.bg.elevated}, ${colors.bg.subtle})`,
+        backgroundColor: colors.bg.elevated,
         boxShadow: `0 24px 60px ${colors.shadow.modal}`,
         overflowY: 'auto',
+        backdropFilter: 'blur(14px)',
         zIndex: 40,
         ...style,
       }}

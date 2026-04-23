@@ -50,4 +50,33 @@ if (build.status !== 0) {
   process.exit(build.status ?? 1);
 }
 
+const finalizeGit = spawnSync(
+  "node",
+  [resolve(scriptDir, "finalize-init.mjs"), "--target", appDir],
+  { stdio: "inherit" },
+);
+if (finalizeGit.status !== 0) {
+  process.exit(finalizeGit.status ?? 1);
+}
+
+const gitLog = spawnSync("git", ["log", "--oneline", "-1"], {
+  cwd: appDir,
+  encoding: "utf8",
+  stdio: "pipe",
+});
+if (gitLog.status !== 0 || !gitLog.stdout.includes("chore: initialize Triphos frontend app")) {
+  console.error(gitLog.stderr || gitLog.stdout || "Missing initial commit after finalize-init.");
+  process.exit(gitLog.status ?? 1);
+}
+
+const gitStatus = spawnSync("git", ["status", "--short"], {
+  cwd: appDir,
+  encoding: "utf8",
+  stdio: "pipe",
+});
+if (gitStatus.status !== 0 || gitStatus.stdout.trim().length > 0) {
+  console.error(gitStatus.stderr || gitStatus.stdout || "Git worktree is not clean after finalize-init.");
+  process.exit(gitStatus.status ?? 1);
+}
+
 console.log(`Smoke init passed: ${appDir}`);

@@ -1,8 +1,16 @@
 node_modules
 dist
 .tanstack
+.omx
+.omc
 .triphos
 .env.local
 .env.development.local
 .env.production.local
 .claude/settings.local.json
+.idea
+.vscode
+.zed
+.cursor
+.DS_Store
+Thumbs.db

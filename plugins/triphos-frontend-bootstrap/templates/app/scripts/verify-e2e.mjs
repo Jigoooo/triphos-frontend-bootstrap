@@ -23,7 +23,7 @@ const routes = [
   {
     route: '/starter',
     label: 'starter',
-    requiredText: ['Triphos UI starter', 'Form controls', 'Buttons and feedback'],
+    requiredText: ['Triphos UI starter', 'Form controls', 'Feedback & Overlays', 'Loading & Progress'],
   },
 ];
 

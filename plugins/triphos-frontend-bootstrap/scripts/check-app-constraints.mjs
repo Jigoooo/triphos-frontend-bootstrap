@@ -159,7 +159,20 @@ expect(envValues.VITE_API_PORT === '3001', 'Expected .env VITE_API_PORT=3001');
 expect(envValues.VITE_SUFFIX_API_ENDPOINT === 'api', 'Expected .env VITE_SUFFIX_API_ENDPOINT=api');
 
 const gitignore = readFileSync(resolve(target, '.gitignore'), 'utf8');
-for (const entry of ['.triphos', '.env.local', '.env.development.local', '.env.production.local']) {
+for (const entry of [
+  '.omx',
+  '.omc',
+  '.triphos',
+  '.idea',
+  '.vscode',
+  '.zed',
+  '.cursor',
+  '.DS_Store',
+  'Thumbs.db',
+  '.env.local',
+  '.env.development.local',
+  '.env.production.local',
+]) {
   expectTextIncludes(gitignore, entry, `Expected .gitignore to include ${entry}`);
 }
 

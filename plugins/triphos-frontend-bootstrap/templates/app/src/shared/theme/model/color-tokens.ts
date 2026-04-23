@@ -96,10 +96,12 @@ export const darkColors: SemanticColors = {
   ...lightColors,
   bg: {
     ...lightColors.bg,
-    base: '#0f172a',
-    elevated: '#111827',
-    subtle: '#1f2937',
-    input: '#111827',
+    base: '#0a0a0a',
+    elevated: '#111111',
+    subtle: '#1a1a1a',
+    input: '#111111',
+    overlay: p.whiteAlpha[5],
+    overlayHover: p.whiteAlpha[10],
     inverse: '#f8fafc',
   },
   text: {
@@ -116,12 +118,16 @@ export const darkColors: SemanticColors = {
     input: 'rgba(255,255,255,0.16)',
     inverse: 'rgba(15,23,42,0.12)',
   },
+  interactive: {
+    ...lightColors.interactive,
+    primarySurface: 'rgba(5, 150, 105, 0.22)',
+  },
   overlay: {
-    modalBackdrop: 'rgba(2, 6, 23, 0.62)',
-    sheetBackdrop: 'rgba(2, 6, 23, 0.44)',
+    modalBackdrop: 'rgba(0, 0, 0, 0.62)',
+    sheetBackdrop: 'rgba(0, 0, 0, 0.44)',
   },
   shadow: {
-    floating: 'rgba(2, 6, 23, 0.42)',
-    modal: 'rgba(2, 6, 23, 0.42)',
+    floating: 'rgba(0, 0, 0, 0.42)',
+    modal: 'rgba(0, 0, 0, 0.42)',
   },
 };

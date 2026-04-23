@@ -1,46 +1,168 @@
-import { useEffect, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { useState } from 'react';
 
 import type { OverlayScrollbarProps } from '../model/overlay-scrollbar-types';
-import { Z_INDEX } from '@/shared/constants';
-import { useColors } from '@/shared/theme';
+import { useScrollState } from '../model/use-scroll-state';
+import { useScrollbarInteraction } from '../model/use-scrollbar-interaction';
 
-export function OverlayScrollbar({ containerRef, offset }: OverlayScrollbarProps) {
-  const colors = useColors();
-  const [metrics, setMetrics] = useState({
-    scrollTop: 0,
-    scrollHeight: 0,
-    clientHeight: 0,
-  });
+const MIN_THUMB_SIZE = 20;
+const AUTO_HIDE_DELAY = 1500;
+const SCROLLBAR_Z_INDEX = 200;
 
-  useEffect(() => {
-    const element = containerRef.current;
-    if (!element) return;
+export function OverlayScrollbar({
+  containerRef,
+  orientation = 'vertical',
+  autoHideDelay = AUTO_HIDE_DELAY,
+  minThumbSize = MIN_THUMB_SIZE,
+  offset,
+}: OverlayScrollbarProps) {
+  const shouldReduceMotion = useReducedMotion();
+  const { scrollTop, scrollHeight, clientHeight, scrollLeft, scrollWidth, clientWidth } =
+    useScrollState(containerRef);
 
-    const update = () => {
-      setMetrics({
-        scrollTop: element.scrollTop,
-        scrollHeight: element.scrollHeight,
-        clientHeight: element.clientHeight,
-      });
-    };
+  const isHorizontal = orientation === 'horizontal';
 
-    update();
-    element.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
-
-    return () => {
-      element.removeEventListener('scroll', update);
-      window.removeEventListener('resize', update);
-    };
-  }, [containerRef]);
-
-  const { scrollTop, scrollHeight, clientHeight } = metrics;
-  if (scrollHeight <= clientHeight || clientHeight === 0) return null;
-
-  const thumbHeight = Math.max(20, (clientHeight / scrollHeight) * clientHeight);
+  const hasVerticalScroll = scrollHeight > clientHeight;
+  const thumbHeight = hasVerticalScroll
+    ? Math.max(minThumbSize, (clientHeight / scrollHeight) * clientHeight)
+    : 0;
   const maxScrollTop = scrollHeight - clientHeight;
   const maxThumbTop = clientHeight - thumbHeight;
   const thumbTop = maxScrollTop > 0 ? (scrollTop / maxScrollTop) * maxThumbTop : 0;
+
+  const hasHorizontalScroll = scrollWidth > clientWidth;
+  const thumbWidth = hasHorizontalScroll
+    ? Math.max(minThumbSize, (clientWidth / scrollWidth) * clientWidth)
+    : 0;
+  const maxScrollLeft = scrollWidth - clientWidth;
+  const maxThumbLeft = clientWidth - thumbWidth;
+  const thumbLeft = maxScrollLeft > 0 ? (scrollLeft / maxScrollLeft) * maxThumbLeft : 0;
+
+  const hasScroll = isHorizontal ? hasHorizontalScroll : hasVerticalScroll;
+  const scrollPos = isHorizontal ? scrollLeft : scrollTop;
+  const [isHovered, setIsHovered] = useState(false);
+
+  const { isDragging, isVisible, handleThumbPointerDown, handleTrackPointerDown } =
+    useScrollbarInteraction(
+      containerRef,
+      isHorizontal ? thumbWidth : thumbHeight,
+      scrollPos,
+      autoHideDelay,
+      orientation,
+      isHovered,
+    );
+
+  if (!hasScroll) return null;
+
+  const isPointerOver = isVisible ? isHovered : false;
+
+  const thumbColor = isDragging
+    ? 'rgba(5, 150, 105, 0.95)'
+    : isPointerOver
+      ? 'rgba(148, 163, 184, 0.92)'
+      : 'rgba(148, 163, 184, 0.72)';
+  const trackBg = isDragging
+    ? 'rgba(148, 163, 184, 0.16)'
+    : isPointerOver
+      ? 'rgba(148, 163, 184, 0.1)'
+      : 'transparent';
+
+  if (isHorizontal) {
+    const thumbHeightStr = isDragging ? '0.7rem' : isPointerOver ? '0.55rem' : '0.4rem';
+
+    const motionProps = shouldReduceMotion
+      ? {
+          initial: { opacity: 0 },
+          animate: { opacity: 1 },
+          exit: { opacity: 0 },
+          transition: { duration: 0 },
+        }
+      : {
+          initial: { opacity: 0, scaleY: 0.5 },
+          animate: { opacity: 1, scaleY: 1 },
+          exit: { opacity: 0, scaleY: 0.5 },
+          transition: { duration: 0.2 },
+        };
+
+    return (
+      <div
+        style={{
+          position: 'sticky',
+          bottom: offset?.bottom ?? 0,
+          left: 0,
+          width: 0,
+          overflow: 'visible',
+          zIndex: SCROLLBAR_Z_INDEX,
+          pointerEvents: 'none',
+        }}
+      >
+        <AnimatePresence>
+          {isVisible ? (
+            <motion.div
+              key='overlay-scrollbar-track-h'
+              {...motionProps}
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                left: offset?.left ?? 0,
+                height: '0.6rem',
+                width: clientWidth,
+                backgroundColor: trackBg,
+                borderRadius: '0.4rem',
+                transformOrigin: 'bottom',
+                transition: shouldReduceMotion ? undefined : 'background-color 160ms ease',
+                touchAction: 'none',
+                pointerEvents: 'auto',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+              onPointerEnter={() => setIsHovered(true)}
+              onPointerLeave={() => setIsHovered(false)}
+              onPointerDown={handleTrackPointerDown}
+            >
+              <motion.div
+                animate={{
+                  height: thumbHeightStr,
+                  backgroundColor: thumbColor,
+                  opacity: isDragging ? 1 : isPointerOver ? 0.96 : 0.84,
+                }}
+                transition={
+                  shouldReduceMotion
+                    ? { duration: 0 }
+                    : { type: 'spring', stiffness: 300, damping: 25 }
+                }
+                style={{
+                  position: 'absolute',
+                  left: thumbLeft,
+                  width: thumbWidth,
+                  borderRadius: '0.4rem',
+                  cursor: 'pointer',
+                  touchAction: 'none',
+                }}
+                onPointerDown={handleThumbPointerDown}
+              />
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </div>
+    );
+  }
+
+  const thumbWidthStr = isDragging ? '0.7rem' : isPointerOver ? '0.55rem' : '0.4rem';
+
+  const motionProps = shouldReduceMotion
+    ? {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        exit: { opacity: 0 },
+        transition: { duration: 0 },
+      }
+    : {
+        initial: { opacity: 0, scaleX: 0.5 },
+        animate: { opacity: 1, scaleX: 1 },
+        exit: { opacity: 0, scaleX: 0.5 },
+        transition: { duration: 0.2 },
+      };
 
   return (
     <div
@@ -50,34 +172,58 @@ export function OverlayScrollbar({ containerRef, offset }: OverlayScrollbarProps
         float: 'right',
         height: 0,
         overflow: 'visible',
-        zIndex: Z_INDEX.SCROLLBAR,
+        zIndex: SCROLLBAR_Z_INDEX,
         pointerEvents: 'none',
       }}
     >
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          right: offset?.right ?? 0,
-          width: '0.6rem',
-          height: clientHeight,
-          borderRadius: '0.4rem',
-          backgroundColor: 'transparent',
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            top: thumbTop + 4,
-            right: 0,
-            width: '0.4rem',
-            height: thumbHeight - 8,
-            borderRadius: '0.4rem',
-            backgroundColor: colors.text.disabled,
-          }}
-        />
-      </div>
+      <AnimatePresence>
+        {isVisible ? (
+          <motion.div
+            key='overlay-scrollbar-track'
+            {...motionProps}
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: offset?.right ?? 0,
+              width: '0.6rem',
+              height: clientHeight,
+              backgroundColor: trackBg,
+              borderRadius: '0.4rem',
+              transformOrigin: 'right',
+              transition: shouldReduceMotion ? undefined : 'background-color 160ms ease',
+              touchAction: 'none',
+              pointerEvents: 'auto',
+              display: 'flex',
+              justifyContent: 'center',
+            }}
+            onPointerEnter={() => setIsHovered(true)}
+            onPointerLeave={() => setIsHovered(false)}
+            onPointerDown={handleTrackPointerDown}
+          >
+            <motion.div
+              animate={{
+                width: thumbWidthStr,
+                backgroundColor: thumbColor,
+                opacity: isDragging ? 1 : isPointerOver ? 0.96 : 0.84,
+              }}
+              transition={
+                shouldReduceMotion
+                  ? { duration: 0 }
+                  : { type: 'spring', stiffness: 300, damping: 25 }
+              }
+              style={{
+                position: 'absolute',
+                top: thumbTop,
+                height: thumbHeight,
+                borderRadius: '0.4rem',
+                cursor: 'pointer',
+                touchAction: 'none',
+              }}
+              onPointerDown={handleThumbPointerDown}
+            />
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }
-

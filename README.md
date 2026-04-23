@@ -60,6 +60,7 @@ Supports:
 
 Project generation happens inside Claude/Codex through the `triphos-frontend-init` skill.
 The strong harness is meant for generated repositories by default. Existing projects only get the same contract through an explicit `triphos-frontend-adopt` migration.
+When the generated project is standalone, the init flow also initializes git and creates an initial commit after verification. When the project is created inside a parent repository, nested git bootstrap is skipped.
 
 ## Cleanup
 

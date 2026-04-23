@@ -22,8 +22,8 @@ export function DatePickerNavigationButton({
       onClick={onClick}
       disabled={disabled}
       style={{
-        width: '3rem',
-        height: '3rem',
+        width: '2.8rem',
+        height: '2.8rem',
         borderRadius: '999px',
         border: `1px solid ${colors.border.default}`,
         backgroundColor: disabled ? colors.bg.subtle : colors.bg.elevated,
@@ -34,7 +34,7 @@ export function DatePickerNavigationButton({
         opacity: disabled ? 0.45 : 1,
       }}
     >
-      <Icon size={18} color={disabled ? colors.text.disabled : colors.text.secondary} />
+      <Icon size={16} color={disabled ? colors.text.disabled : colors.text.secondary} />
     </button>
   );
 }

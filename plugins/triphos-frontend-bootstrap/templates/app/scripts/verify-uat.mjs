@@ -44,7 +44,7 @@ await withHarnessServer(
         snapshot.dom.window.document.body.textContent?.includes('Triphos UI starter') &&
         snapshot.dom.window.document.body.textContent?.includes('Form controls'),
     );
-    for (const text of ['Form controls', 'Buttons and feedback', 'Scroll utilities']) {
+    for (const text of ['Form controls', 'Buttons', 'Feedback & Overlays', 'Loading & Progress', 'Scroll utilities']) {
       assertTriphos(
         starter.dom.window.document.body.textContent?.includes(text) ?? false,
         `UAT expected starter route text "${text}".`,
@@ -52,7 +52,7 @@ await withHarnessServer(
     }
     writeHarnessJson(resolve(artifactDir, 'starter.json'), {
       route: '/starter',
-      checks: ['Triphos UI starter', 'Form controls', 'Buttons and feedback', 'Scroll utilities'],
+      checks: ['Triphos UI starter', 'Form controls', 'Buttons', 'Feedback & Overlays', 'Loading & Progress', 'Scroll utilities'],
     });
   },
   { port: DEFAULT_PORT },

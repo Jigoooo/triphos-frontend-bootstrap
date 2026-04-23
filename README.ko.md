@@ -60,6 +60,7 @@ npx @jigoooo/triphos-frontend-bootstrap@latest
 
 프로젝트 생성은 Claude/Codex 안에서 `triphos-frontend-init` 스킬로 수행합니다.
 강한 하네스는 기본적으로 init으로 생성된 저장소를 대상으로 하며, 기존 프로젝트는 `triphos-frontend-adopt`를 명시적으로 호출한 경우에만 같은 계약을 적용합니다.
+생성된 프로젝트가 standalone 저장소라면 init 흐름이 검증 후 `git init`과 initial commit까지 수행합니다. 상위 git 저장소 안에서 생성되면 nested git bootstrap은 건너뜁니다.
 
 ## 정리
 

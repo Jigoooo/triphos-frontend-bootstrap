@@ -19,7 +19,9 @@ export function Toaster() {
           color: colors.text.primary,
           border: `1px solid ${colors.border.default}`,
           boxShadow: `0 4px 12px ${colors.shadow.floating}`,
-          fontSize: '0.9rem',
+          borderRadius: '1.6rem',
+          fontSize: '1.4rem',
+          lineHeight: 1.45,
         },
         duration: 1200,
       }}

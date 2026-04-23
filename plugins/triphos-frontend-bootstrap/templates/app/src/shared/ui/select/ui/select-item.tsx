@@ -81,7 +81,7 @@ export function SelectItem<ValueType extends ExtendedValue>({
           : highlightedItemId === itemId
             ? colors.bg.subtle
             : colors.bg.elevated,
-        color: disabled ? colors.text.disabled : colors.text.primary,
+        color: disabled ? colors.text.disabled : selected ? colors.text.primary : colors.text.primary,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -90,6 +90,7 @@ export function SelectItem<ValueType extends ExtendedValue>({
         cursor: disabled ? 'default' : 'pointer',
         textAlign: 'left',
         opacity: disabled ? 0.56 : 1,
+        transition: 'background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease',
         ...style,
       }}
     >
@@ -107,7 +108,7 @@ export function SelectItem<ValueType extends ExtendedValue>({
       {selected ? (
         <Check
           size={16}
-          color={multiple ? colors.interactive.primary : colors.interactive.primary}
+          color={colors.interactive.primary}
           style={{ flexShrink: 0 }}
         />
       ) : null}

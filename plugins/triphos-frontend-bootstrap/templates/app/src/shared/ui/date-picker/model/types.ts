@@ -49,6 +49,7 @@ export type DatePickerContextValue = {
   setDisplayMode: (mode: DatePickerMode) => void;
   minDate: Date | null;
   maxDate: Date | null;
+  placement: string;
   commitSelection: (date: Date) => void;
   setReference: (node: HTMLElement | null) => void;
   setFloating: (node: HTMLElement | null) => void;

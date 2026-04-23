@@ -1,36 +1,27 @@
 import { Link } from '@tanstack/react-router';
-import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import { Sparkles, Workflow } from 'lucide-react';
-import { create } from 'zustand';
 
 import { useMediaQuery, usePreferReducedMotion } from '@/shared/hooks';
-import { useColors } from '@/shared/theme';
+import { ResolvedThemeMode, useColors, useThemeStore } from '@/shared/theme';
+import { ThemeToggle } from '@/shared/ui/theme-toggle';
 import { toast } from '@/shared/ui/toast';
 
-type UiState = {
-  launches: number;
-  increment: () => void;
-};
-
-const useUiStore = create<UiState>((set) => ({
-  launches: 1,
-  increment: () => set((state) => ({ launches: state.launches + 1 })),
-}));
-
 export function HomePage() {
-  const launches = useUiStore((state) => state.launches);
-  const increment = useUiStore((state) => state.increment);
   const colors = useColors();
+  const resolvedMode = useThemeStore((state) => state.resolvedMode);
   const prefersReducedMotion = usePreferReducedMotion();
   const isWide = useMediaQuery('(min-width: 768px)');
+  const themeLabel = resolvedMode === ResolvedThemeMode.Dark ? 'Dark' : 'Light';
 
   return (
     <main
       style={{
-        display: 'grid',
-        placeItems: 'center',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         minHeight: '100dvh',
+        width: '100%',
         padding: isWide ? '2rem' : '1.2rem',
         backgroundColor: colors.bg.base,
       }}
@@ -44,7 +35,9 @@ export function HomePage() {
             }
           : {})}
         style={{
-          width: 'min(72rem, 100%)',
+          width: isWide ? '100%' : 'calc(100vw - 4.8rem)',
+          maxWidth: '72rem',
+          minWidth: 0,
           border: `1px solid ${colors.border.default}`,
           borderRadius: isWide ? '2.8rem' : '2rem',
           background: colors.bg.elevated,
@@ -59,7 +52,7 @@ export function HomePage() {
             flexDirection: isWide ? 'row' : 'column',
             gap: '0.5rem',
             color: colors.interactive.primary,
-            fontSize: '1.5rem',
+            fontSize: isWide ? '1.6rem' : '1.7rem',
             marginBottom: '1rem',
           }}
         >
@@ -72,6 +65,7 @@ export function HomePage() {
             lineHeight: 1.05,
             marginBottom: '1rem',
             color: colors.text.primary,
+            overflowWrap: 'anywhere',
           }}
         >
           React 19 + Compiler + FSD starter
@@ -80,8 +74,9 @@ export function HomePage() {
           style={{
             color: colors.text.secondary,
             lineHeight: 1.7,
-            fontSize: isWide ? '1.6rem' : '1.45rem',
+            fontSize: isWide ? '1.7rem' : '1.6rem',
             marginBottom: '1.5rem',
+            overflowWrap: 'anywhere',
           }}
         >
           This starter mirrors the Triphos baseline stack and leaves room for
@@ -100,6 +95,7 @@ export function HomePage() {
           <div
             style={{
               flex: isWide ? '1 1 18rem' : '1 1 100%',
+              minWidth: 0,
               border: `1px solid ${colors.border.default}`,
               borderRadius: '2rem',
               padding: '1rem',
@@ -110,24 +106,26 @@ export function HomePage() {
               style={{
                 color: colors.text.tertiary,
                 display: 'block',
-                fontSize: '1.2rem',
+                fontSize: '1.4rem',
                 marginBottom: '0.35rem',
               }}
             >
-              Today
+              Theme mode
             </span>
             <strong
               style={{
-                fontSize: '2rem',
+                fontSize: isWide ? '2.1rem' : '2.2rem',
                 color: colors.text.primary,
+                overflowWrap: 'anywhere',
               }}
             >
-              {format(new Date(), 'yyyy-MM-dd')}
+              {themeLabel}
             </strong>
           </div>
           <div
             style={{
               flex: isWide ? '1 1 18rem' : '1 1 100%',
+              minWidth: 0,
               border: `1px solid ${colors.border.default}`,
               borderRadius: '2rem',
               padding: '1rem',
@@ -138,19 +136,21 @@ export function HomePage() {
               style={{
                 color: colors.text.tertiary,
                 display: 'block',
-                fontSize: '1.2rem',
+                fontSize: '1.4rem',
                 marginBottom: '0.35rem',
               }}
             >
-              Launches
+              Starter scope
             </span>
             <strong
               style={{
-                fontSize: '2rem',
+                fontSize: isWide ? '2rem' : '2rem',
+                lineHeight: 1.25,
                 color: colors.text.primary,
+                overflowWrap: 'anywhere',
               }}
             >
-              {launches}
+              Form / Feedback / Loading
             </strong>
           </div>
         </div>
@@ -160,8 +160,10 @@ export function HomePage() {
             gap: '0.75rem',
             flexWrap: 'wrap',
             flexDirection: isWide ? 'row' : 'column',
+            alignItems: isWide ? 'center' : 'stretch',
           }}
         >
+          <ThemeToggle />
           <button
             type='button'
             style={{
@@ -171,16 +173,16 @@ export function HomePage() {
               color: colors.text.onBrand,
               cursor: 'pointer',
               font: 'inherit',
+              fontSize: '1.6rem',
               fontWeight: 700,
               padding: '0.85rem 1.25rem',
               width: isWide ? 'auto' : '100%',
             }}
             onClick={() => {
-              increment();
               toast.success('Triphos starter is wired up.');
             }}
           >
-            Increment
+            Smoke test toast
           </button>
           <Link
             to='/starter'
@@ -190,6 +192,7 @@ export function HomePage() {
               color: colors.text.primary,
               cursor: 'pointer',
               font: 'inherit',
+              fontSize: '1.5rem',
               fontWeight: 700,
               padding: '0.85rem 1.25rem',
               display: 'flex',

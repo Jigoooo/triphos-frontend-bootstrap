@@ -1,10 +1,11 @@
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
 import type { SwitchProps } from '../model/types';
 import { useColors } from '@/shared/theme';
 
 export function Switch({ checked, onChange, disabled }: SwitchProps) {
   const colors = useColors();
+  const shouldReduceMotion = useReducedMotion();
 
   return (
     <button
@@ -15,8 +16,8 @@ export function Switch({ checked, onChange, disabled }: SwitchProps) {
       onClick={() => onChange(!checked)}
       style={{
         userSelect: 'none',
-        width: '5.6rem',
-        height: '2.8rem',
+        width: '5.4rem',
+        height: '3rem',
         borderRadius: '9999px',
         border: `1px solid ${checked ? colors.interactive.primary : colors.border.default}`,
         background: checked
@@ -25,24 +26,25 @@ export function Switch({ checked, onChange, disabled }: SwitchProps) {
         padding: '0.3rem',
         display: 'flex',
         alignItems: 'center',
+        justifyContent: 'flex-start',
         cursor: disabled ? 'default' : 'pointer',
         opacity: disabled ? 0.5 : 1,
         boxShadow: `0 1px 10px -6px ${colors.shadow.floating}`,
         transition: 'background-color 0.3s ease, border-color 0.3s ease, opacity 0.16s ease',
+        overflow: 'hidden',
       }}
     >
       <motion.div
-        layout
-        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+        animate={{ x: checked ? '2.4rem' : '0rem' }}
+        transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 30 }}
         style={{
-          width: '2.2rem',
-          height: '2.2rem',
+          width: '2.4rem',
+          height: '2.4rem',
           borderRadius: '50%',
           backgroundColor: checked ? colors.bg.base : colors.bg.elevated,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          marginLeft: checked ? '3.1rem' : '0.3rem',
           border: `1px solid ${checked ? colors.border.default : colors.border.inverse}`,
           boxShadow: `0 8px 18px -12px ${colors.shadow.floating}`,
         }}

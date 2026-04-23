@@ -29,6 +29,8 @@ const requiredPaths = [
   resolve(pluginRoot, ".codex-plugin", "plugin.json"),
   resolve(pluginRoot, "scripts", "register-claude-local.mjs"),
   resolve(pluginRoot, "scripts", "register-codex-local.mjs"),
+  resolve(pluginRoot, "scripts", "finalize-init.mjs"),
+  resolve(pluginRoot, "scripts", "git-bootstrap-lib.mjs"),
   resolve(pluginRoot, "skills", "codex", "triphos-frontend-adopt", "SKILL.md"),
   resolve(pluginRoot, "skills", "codex", "triphos-frontend-init", "SKILL.md"),
   resolve(pluginRoot, "skills", "codex", "triphos-theme-setup", "SKILL.md"),

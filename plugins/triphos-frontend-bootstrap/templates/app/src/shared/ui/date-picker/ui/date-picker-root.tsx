@@ -42,17 +42,23 @@ export function DatePickerRoot({
     whileElementsMounted: autoUpdate,
     middleware: [
       offset({
-        mainAxis: 8,
+        mainAxis: 6,
       }),
       flip({
+        fallbackPlacements: ['top-start', 'bottom-start'],
+        fallbackStrategy: 'bestFit',
         padding: 12,
       }),
       size({
-        apply({ rects, elements, availableHeight }) {
+        apply({ availableHeight, availableWidth, elements }) {
+          const nextWidth = Math.min(272, Math.max(236, availableWidth));
+          const nextMaxHeight = Math.min(availableHeight, 328);
+
           Object.assign(elements.floating.style, {
-            minWidth: `${Math.max(rects.reference.width, 304)}px`,
-            maxWidth: 'min(34rem, calc(100vw - 2.4rem))',
-            maxHeight: `${availableHeight}px`,
+            width: `${nextWidth}px`,
+            maxWidth: `${nextWidth}px`,
+            minWidth: `${Math.min(nextWidth, 236)}px`,
+            maxHeight: `${nextMaxHeight}px`,
           });
         },
         padding: 12,
@@ -83,6 +89,7 @@ export function DatePickerRoot({
         setDisplayMode: picker.setDisplayMode,
         minDate: picker.minDate,
         maxDate: picker.maxDate,
+        placement: context.placement,
         commitSelection: picker.commitSelection,
         setReference: refs.setReference as (node: HTMLElement | null) => void,
         setFloating: refs.setFloating,

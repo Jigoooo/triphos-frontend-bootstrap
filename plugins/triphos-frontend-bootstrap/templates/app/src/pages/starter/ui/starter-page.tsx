@@ -1,9 +1,8 @@
 import { Link } from '@tanstack/react-router';
-import { CalendarDays, ChevronDown, LoaderCircle, MessageSquare, MousePointer2, Palette, Plus, Sparkles } from 'lucide-react';
+import { CalendarDays, ChevronDown, LoaderCircle, MessageSquare, MousePointer2, Plus, Sparkles } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 import { useFormState, useMediaQuery, useTimer } from '@/shared/hooks';
-import { formatPhoneNumber, thousandSeparator } from '@/shared/lib/formatter/formatter-lib';
 import { useColors } from '@/shared/theme';
 import { alertDialog } from '@/shared/ui/alert-dialog';
 import { useBottomSheet } from '@/shared/ui/bottom-sheet';
@@ -12,9 +11,10 @@ import { Checkbox } from '@/shared/ui/checkbox';
 import { DatePicker } from '@/shared/ui/date-picker';
 import { FormField } from '@/shared/ui/form-field';
 import { Input } from '@/shared/ui/input';
-import { BouncingDotsLoader, DelayedFallback, Skeleton, Spinner } from '@/shared/ui/loader';
+import { BouncingDotsLoader, Spinner } from '@/shared/ui/loader';
 import { useModalDialog } from '@/shared/ui/modal-dialog';
 import { OverlayScrollbar as OverlayScrollbarComponent } from '@/shared/ui/overlay-scrollbar';
+import { Progress } from '@/shared/ui/progress';
 import { RadioGroup } from '@/shared/ui/radio';
 import { MultiSelect, Select } from '@/shared/ui/select';
 import { SpeedDial } from '@/shared/ui/speed-dial';
@@ -26,6 +26,8 @@ import { ToggleButton } from '@/shared/ui/toggle-button';
 import { Tooltip } from '@/shared/ui/tooltip';
 import { Typography } from '@/shared/ui/typography';
 
+const INITIAL_TIMER_SECONDS = 30;
+
 export function StarterPage() {
   const colors = useColors();
   const openBottomSheet = useBottomSheet();
@@ -33,7 +35,7 @@ export function StarterPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isWide = useMediaQuery('(min-width: 900px)');
   const isMedium = useMediaQuery('(min-width: 640px)');
-  const { formatTime, startTimer, stopTimer, resetTimer } = useTimer(125, false);
+  const { formatTime, isRunning, resetTimer, time, toggleTimer } = useTimer(INITIAL_TIMER_SECONDS, false);
   const [selected, setSelected] = useState(false);
   const [checked, setChecked] = useState(true);
   const [switchOn, setSwitchOn] = useState(true);
@@ -43,9 +45,12 @@ export function StarterPage() {
   const [selectedSurfaces, setSelectedSurfaces] = useState(['checkbox', 'toast']);
   const [text, setText] = useState('');
   const { formState, onFormChange } = useFormState({
-    name: 'Triphos',
-    count: '12000',
+    name: 'Triphos starter',
   });
+  const progressValue = Math.round(((INITIAL_TIMER_SECONDS - time) / INITIAL_TIMER_SECONDS) * 100);
+  const timerStatusLabel = time === 0 ? 'Complete' : isRunning ? 'Running' : 'Paused';
+  const timerStatusColor =
+    time === 0 ? colors.feedback.success : isRunning ? colors.interactive.primary : colors.text.secondary;
 
   const cardStyle = {
     border: `1px solid ${colors.border.default}`,
@@ -55,6 +60,16 @@ export function StarterPage() {
     display: 'flex',
     flexDirection: 'column',
     gap: '1.2rem',
+  } satisfies React.CSSProperties;
+
+  const nestedPanelStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem',
+    padding: '1.2rem',
+    borderRadius: '1.2rem',
+    border: `1px solid ${colors.border.default}`,
+    backgroundColor: colors.bg.subtle,
   } satisfies React.CSSProperties;
 
   return (
@@ -122,6 +137,7 @@ export function StarterPage() {
                 border: `1px solid ${colors.border.default}`,
                 color: colors.text.primary,
                 textDecoration: 'none',
+                fontSize: '1.5rem',
                 fontWeight: 600,
                 width: isMedium ? 'auto' : '100%',
                 textAlign: 'center',
@@ -141,20 +157,10 @@ export function StarterPage() {
         >
           <section style={cardStyle}>
             <strong style={{ fontSize: '1.8rem', color: colors.text.primary }}>Form controls</strong>
-            <FormField label='Project name' description='useFormState + formatter baseline'>
-              <Input
-                value={formState.name}
-                onChange={(event) => onFormChange('name', event.target.value)}
-                endDecorator={<Palette size={16} color={colors.text.tertiary} />}
-              />
+            <FormField label='Project name' description='useFormState + animated focus baseline'>
+              <Input value={formState.name} onChange={(event) => onFormChange('name', event.target.value)} />
             </FormField>
-            <FormField label='Budget'>
-              <Input
-                value={thousandSeparator(formState.count)}
-                onChange={(event) => onFormChange('count', event.target.value.replaceAll(',', ''))}
-              />
-            </FormField>
-            <FormField label='Phone preview' description={formatPhoneNumber('01012341234')}>
+            <FormField label='Workspace' description={`Current workspace: ${selectValue}`}>
               <Select.Root value={selectValue} onValueChange={setSelectValue}>
                 <Select.Trigger>
                   <Select.Value placeholder='Select a workspace' />
@@ -166,7 +172,7 @@ export function StarterPage() {
                 </Select.Content>
               </Select.Root>
             </FormField>
-            <FormField label='Multi select' description='Compound pattern + simple multi selection'>
+            <FormField label='Shared surfaces' description='Multi-select chips remove inline'>
               <MultiSelect.Root values={selectedSurfaces} onValuesChange={setSelectedSurfaces}>
                 <MultiSelect.Trigger>
                   <MultiSelect.Value placeholder='Select shared surfaces' />
@@ -201,12 +207,15 @@ export function StarterPage() {
             <FormField label='Textarea'>
               <Textarea value={text} onChange={(event) => setText(event.target.value)} autoResize />
             </FormField>
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
               <Checkbox.Root checked={checked} onCheckedChange={setChecked}>
                 <Checkbox.Indicator />
                 <Checkbox.Label>Checkbox starter</Checkbox.Label>
               </Checkbox.Root>
-              <Switch checked={switchOn} onChange={setSwitchOn} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                <span style={{ fontSize: '1.4rem', color: colors.text.primary }}>Switch</span>
+                <Switch checked={switchOn} onChange={setSwitchOn} />
+              </div>
               <ToggleButton selected={selected} onClick={() => setSelected((current) => !current)}>
                 Toggle button
               </ToggleButton>
@@ -214,9 +223,27 @@ export function StarterPage() {
           </section>
 
           <section style={cardStyle}>
-            <strong style={{ fontSize: '1.8rem', color: colors.text.primary }}>Buttons and feedback</strong>
+            <strong style={{ fontSize: '1.8rem', color: colors.text.primary }}>Buttons</strong>
+            <p style={{ fontSize: '1.4rem', color: colors.text.secondary }}>
+              Shared button variants stay compact and inline-style-first.
+            </p>
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              <Button>Solid button</Button>
+              <Button variant='outline'>Outline button</Button>
+              <Button variant='ghost'>Ghost button</Button>
+            </div>
+          </section>
+
+          <section style={cardStyle}>
+            <strong style={{ fontSize: '1.8rem', color: colors.text.primary }}>Feedback &amp; Overlays</strong>
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
               <Button onClick={() => toast.success('Starter toast is working')}>Toast success</Button>
+              <Tooltip content='Tooltip starter uses @floating-ui/react'>
+                <Button variant='outline'>
+                  <MousePointer2 size={16} />
+                  Tooltip
+                </Button>
+              </Tooltip>
               <Button
                 variant='outline'
                 onClick={async () => {
@@ -262,31 +289,64 @@ export function StarterPage() {
                 Bottom sheet
               </Button>
             </div>
+          </section>
 
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-              <Tooltip content='Tooltip starter uses @floating-ui/react'>
-                <Button variant='outline'>
-                  <MousePointer2 size={16} />
-                  Tooltip
+          <section style={cardStyle}>
+            <strong style={{ fontSize: '1.8rem', color: colors.text.primary }}>Loading &amp; Progress</strong>
+            <div style={nestedPanelStyle}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: '1rem',
+                  alignItems: 'flex-start',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <span style={{ fontSize: '1.3rem', color: colors.text.secondary }}>Countdown demo</span>
+                  <strong style={{ fontSize: '3rem', color: colors.text.primary, lineHeight: 1 }}>{formatTime}</strong>
+                </div>
+                <span
+                  style={{
+                    padding: '0.35rem 0.8rem',
+                    borderRadius: '999px',
+                    border: `1px solid ${colors.border.default}`,
+                    backgroundColor: colors.bg.elevated,
+                    color: timerStatusColor,
+                    fontSize: '1.2rem',
+                    fontWeight: 700,
+                  }}
+                >
+                  {timerStatusLabel}
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                <Progress value={progressValue} />
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    gap: '1rem',
+                    fontSize: '1.3rem',
+                    color: colors.text.secondary,
+                  }}
+                >
+                  <span>Progress</span>
+                  <span>{progressValue}%</span>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                <Button onClick={toggleTimer}>{isRunning ? 'Pause' : 'Start'}</Button>
+                <Button variant='outline' onClick={resetTimer}>
+                  Reset
                 </Button>
-              </Tooltip>
-              <Button variant='ghost' onClick={startTimer}>
-                Start timer
-              </Button>
-              <Button variant='ghost' onClick={stopTimer}>
-                Stop timer
-              </Button>
-              <Button variant='ghost' onClick={resetTimer}>
-                Reset timer
-              </Button>
-              <span style={{ fontSize: '1.5rem', color: colors.text.secondary }}>{formatTime}</span>
+              </div>
             </div>
 
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
               <Spinner />
               <BouncingDotsLoader />
-              <Skeleton width='8rem' height='1.4rem' />
-              <DelayedFallback fallback={<span style={{ fontSize: '1.3rem' }}>Delayed fallback</span>} />
             </div>
           </section>
 
@@ -330,10 +390,13 @@ export function StarterPage() {
             <strong style={{ fontSize: '1.8rem', color: colors.text.primary }}>Scroll utilities</strong>
             <div
               ref={containerRef}
+              data-overlay-scroll-panel='true'
               style={{
                 position: 'relative',
                 height: '18rem',
                 overflowY: 'auto',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
                 borderRadius: '1.2rem',
                 border: `1px solid ${colors.border.default}`,
                 backgroundColor: colors.bg.subtle,
@@ -354,7 +417,11 @@ export function StarterPage() {
                       backgroundColor: colors.bg.elevated,
                     }}
                   >
-                    <LoaderCircle size={16} color={colors.interactive.primary} />
+                    <LoaderCircle
+                      size={16}
+                      color={colors.interactive.primary}
+                      style={{ animation: 'spin 0.9s linear infinite' }}
+                    />
                     <span style={{ fontSize: '1.4rem', color: colors.text.primary }}>
                       Scroll utility row {index + 1}
                     </span>
@@ -367,7 +434,7 @@ export function StarterPage() {
       </div>
 
       <SpeedDial
-        icon={<Plus size={20} />}
+        icon={<Plus size={20} strokeWidth={2.75} />}
         onActionSelect={(actionId) => toast.info(`Speed dial action: ${actionId}`)}
         actions={[
           { id: 'toast', label: 'Toast', icon: <MessageSquare size={18} /> },

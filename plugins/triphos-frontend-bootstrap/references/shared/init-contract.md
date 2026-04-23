@@ -18,3 +18,5 @@
 - Default new UI code to inline `style` props unless the style is truly global.
 - Treat `className` as banned by default. Only allow it for hard-to-express global utility hooks such as scrollbar handling.
 - After generation, prefer `pnpm install` then `pnpm verify:frontend` and `pnpm build`.
+- If the generated app is standalone (no parent git repository), initialize git and create an initial commit after verification succeeds.
+- If the generated app lives inside a parent repository, do not create a nested git repository or automatic commit.

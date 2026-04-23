@@ -49,12 +49,24 @@ export function SpeedDial({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          lineHeight: 0,
           cursor: 'pointer',
           zIndex: Z_INDEX.FAB,
           boxShadow: `0 4px 12px ${colors.shadow.floating}`,
         }}
       >
-        <motion.div animate={{ rotate: open ? 45 : 0 }} transition={springTransition}>
+        <motion.div
+          animate={{ rotate: open ? 45 : 0 }}
+          transition={springTransition}
+          style={{
+            width: '2.2rem',
+            height: '2.2rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transformOrigin: 'center',
+          }}
+        >
           {open ? openIcon ?? <X size={20} color={colors.text.onBrand} /> : icon}
         </motion.div>
       </button>
@@ -144,4 +156,3 @@ export function SpeedDial({
     </>
   );
 }
-

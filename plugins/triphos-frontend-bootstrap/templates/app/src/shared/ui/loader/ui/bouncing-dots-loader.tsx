@@ -6,15 +6,15 @@ export function BouncingDotsLoader() {
   const colors = useColors();
 
   return (
-    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
       {[0, 1, 2].map((index) => (
         <motion.div
           key={index}
-          animate={{ y: [0, -4, 0] }}
-          transition={{ repeat: Infinity, duration: 0.8, delay: index * 0.1 }}
+          animate={{ y: [0, -6, 0], scale: [1, 1.08, 1] }}
+          transition={{ repeat: Infinity, duration: 0.55, delay: index * 0.08 }}
           style={{
-            width: '0.8rem',
-            height: '0.8rem',
+            width: '1rem',
+            height: '1rem',
             borderRadius: '50%',
             backgroundColor: colors.interactive.primary,
           }}
@@ -23,4 +23,3 @@ export function BouncingDotsLoader() {
     </div>
   );
 }
-

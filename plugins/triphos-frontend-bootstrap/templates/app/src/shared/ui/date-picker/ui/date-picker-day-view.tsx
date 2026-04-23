@@ -40,7 +40,7 @@ export function DatePickerDayView() {
     !!maxDate && startOfMonth(addMonths(currentDate, 1)).getTime() > endOfMonth(maxDate).getTime();
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
       <div
         style={{
           display: 'flex',
@@ -61,7 +61,7 @@ export function DatePickerDayView() {
             border: 0,
             background: 'transparent',
             color: colors.text.primary,
-            fontSize: '1.5rem',
+            fontSize: '1.4rem',
             fontWeight: 700,
             cursor: 'pointer',
           }}
@@ -79,7 +79,7 @@ export function DatePickerDayView() {
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
-          gap: '0.4rem',
+          gap: '0.3rem',
         }}
       >
         {WEEKDAY_LABELS.map((day) => (
@@ -90,7 +90,7 @@ export function DatePickerDayView() {
               color: colors.text.tertiary,
               fontSize: '1.2rem',
               fontWeight: 700,
-              paddingBottom: '0.2rem',
+              paddingBottom: '0.1rem',
             }}
           >
             {day}
@@ -102,7 +102,7 @@ export function DatePickerDayView() {
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
-          gap: '0.4rem',
+          gap: '0.3rem',
         }}
       >
         {days.map((day) => {
@@ -121,8 +121,10 @@ export function DatePickerDayView() {
                 commitSelection(day);
               }}
               style={{
-                minHeight: '3.4rem',
-                borderRadius: '1rem',
+                width: '100%',
+                aspectRatio: '1 / 1',
+                minHeight: '3rem',
+                borderRadius: '0.9rem',
                 border: selected
                   ? `1px solid ${colors.interactive.primary}`
                   : today
@@ -140,10 +142,14 @@ export function DatePickerDayView() {
                     : currentMonth
                       ? colors.text.primary
                       : colors.text.secondary,
-                fontSize: '1.35rem',
+                fontSize: '1.25rem',
                 fontWeight: selected ? 700 : 500,
                 cursor: disabled ? 'default' : 'pointer',
                 opacity: disabled ? 0.55 : 1,
+                padding: 0,
+                display: 'grid',
+                placeItems: 'center',
+                transition: 'background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease',
               }}
             >
               {format(day, 'd')}

@@ -1,4 +1,5 @@
 import { CalendarDays, ChevronDown } from 'lucide-react';
+import { useState } from 'react';
 
 import { formatPickerDate } from '../lib/date-picker-values';
 import { useDatePickerContext } from '../model/date-picker-context';
@@ -7,30 +8,45 @@ import { useColors } from '@/shared/theme';
 
 export function DatePickerTrigger({ placeholder, style }: DatePickerTriggerProps) {
   const colors = useColors();
+  const [isFocusVisible, setIsFocusVisible] = useState(false);
   const {
     mode,
     dateFormat,
     disabled,
     selectedDate,
     placeholder: contextPlaceholder,
+    isOpen,
     setReference,
     getReferenceProps,
   } = useDatePickerContext();
 
   const label = selectedDate ? formatPickerDate(selectedDate, mode, dateFormat) : '';
+  const isActive = isOpen || isFocusVisible;
+  const referenceProps = getReferenceProps({
+    onPointerDown: () => setIsFocusVisible(false),
+    onFocus: (event) => {
+      setIsFocusVisible(event.currentTarget.matches(':focus-visible'));
+    },
+    onBlur: () => setIsFocusVisible(false),
+    onKeyDown: (event) => {
+      if (event.key === 'Tab' || event.key === 'Enter' || event.key === ' ' || event.key.startsWith('Arrow')) {
+        setIsFocusVisible(true);
+      }
+    },
+  });
 
   return (
     <button
       ref={setReference}
       type='button'
       disabled={disabled}
-      {...getReferenceProps()}
+      {...referenceProps}
       style={{
         width: '100%',
         minHeight: '4rem',
         padding: '0.9rem 1.2rem',
         borderRadius: '1.1rem',
-        border: `1px solid ${colors.border.default}`,
+        border: `1px solid ${isActive ? colors.border.focus : colors.border.default}`,
         backgroundColor: colors.bg.elevated,
         display: 'flex',
         alignItems: 'center',
@@ -38,7 +54,8 @@ export function DatePickerTrigger({ placeholder, style }: DatePickerTriggerProps
         gap: '0.8rem',
         cursor: disabled ? 'default' : 'pointer',
         opacity: disabled ? 0.5 : 1,
-        boxShadow: `0 10px 26px -22px ${colors.shadow.floating}`,
+        boxShadow: isFocusVisible ? `0 0 0 0.4rem ${colors.bg.overlayHover}` : `0 10px 26px -22px ${colors.shadow.floating}`,
+        transition: 'border-color 0.18s ease, box-shadow 0.18s ease',
         textAlign: 'left',
         ...style,
       }}

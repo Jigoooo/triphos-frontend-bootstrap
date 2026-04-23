@@ -28,7 +28,7 @@ export function DatePickerMonthView() {
     !!maxDate && addYears(currentDate, 1).getTime() > endOfMonth(maxDate).getTime();
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
       <div
         style={{
           display: 'flex',
@@ -49,7 +49,7 @@ export function DatePickerMonthView() {
             border: 0,
             background: 'transparent',
             color: colors.text.primary,
-            fontSize: '1.5rem',
+            fontSize: '1.4rem',
             fontWeight: 700,
             cursor: 'pointer',
           }}
@@ -67,7 +67,7 @@ export function DatePickerMonthView() {
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-          gap: '0.6rem',
+          gap: '0.5rem',
         }}
       >
         {MONTH_LABELS.map((monthLabel, monthIndex) => {
@@ -94,8 +94,8 @@ export function DatePickerMonthView() {
                 setDisplayMode('day');
               }}
               style={{
-                minHeight: '4rem',
-                borderRadius: '1.2rem',
+                minHeight: '3.6rem',
+                borderRadius: '1rem',
                 border: `1px solid ${selected ? colors.interactive.primary : colors.border.default}`,
                 backgroundColor: selected ? colors.interactive.primary : colors.bg.elevated,
                 color: selected
@@ -103,7 +103,7 @@ export function DatePickerMonthView() {
                   : disabled
                     ? colors.text.disabled
                     : colors.text.primary,
-                fontSize: '1.4rem',
+                fontSize: '1.3rem',
                 fontWeight: selected ? 700 : 500,
                 cursor: disabled ? 'default' : 'pointer',
                 opacity: disabled ? 0.5 : 1,
