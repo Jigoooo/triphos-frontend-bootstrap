@@ -110,7 +110,7 @@ export function resolveChromeExecutable() {
 }
 
 async function waitForServer(origin, serverProcess, logsRef) {
-  for (let attempt = 0; attempt < 80; attempt += 1) {
+  for (let attempt = 0; attempt < 160; attempt += 1) {
     if (serverProcess.exitCode !== null) {
       throw new Error(`Triphos harness dev server exited early.\n${logsRef.value}`);
     }
