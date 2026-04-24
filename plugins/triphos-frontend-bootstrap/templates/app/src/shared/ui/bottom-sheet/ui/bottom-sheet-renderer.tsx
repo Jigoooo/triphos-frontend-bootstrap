@@ -43,8 +43,8 @@ export function BottomSheetRenderer(): ReactNode {
         <>
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            animate={{ opacity: 1, pointerEvents: 'auto' }}
+            exit={{ opacity: 0, pointerEvents: 'none' }}
             transition={{ duration: 0.2 }}
             onClick={() => handleClose(false)}
             style={{
@@ -72,7 +72,9 @@ export function BottomSheetRenderer(): ReactNode {
               pointerEvents: 'none',
             }}
           >
-            <div
+            <motion.div
+              animate={{ pointerEvents: 'auto' }}
+              exit={{ pointerEvents: 'none' }}
               onClick={(event) => event.stopPropagation()}
               style={{
                 width: '100%',
@@ -98,7 +100,7 @@ export function BottomSheetRenderer(): ReactNode {
                 }}
               />
               {render()}
-            </div>
+            </motion.div>
           </motion.div>
         </>
       ) : null}
@@ -106,4 +108,3 @@ export function BottomSheetRenderer(): ReactNode {
     document.body,
   );
 }
-

@@ -68,8 +68,8 @@ export function AlertDialogRenderer(): ReactNode {
         <>
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            animate={{ opacity: 1, pointerEvents: 'auto' }}
+            exit={{ opacity: 0, pointerEvents: 'none' }}
             transition={{ duration: 0.2 }}
             style={{
               position: 'fixed',
@@ -84,8 +84,8 @@ export function AlertDialogRenderer(): ReactNode {
           />
           <motion.div
             initial={{ opacity: 0, scale: 1.08, x: '-50%', y: '-50%' }}
-            animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
-            exit={{ opacity: 0, scale: 0.96, x: '-50%', y: '-50%' }}
+            animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%', pointerEvents: 'auto' }}
+            exit={{ opacity: 0, scale: 0.96, x: '-50%', y: '-50%', pointerEvents: 'none' }}
             transition={{ type: 'spring', damping: 20, stiffness: 380, mass: 0.8 }}
             style={{
               position: 'fixed',

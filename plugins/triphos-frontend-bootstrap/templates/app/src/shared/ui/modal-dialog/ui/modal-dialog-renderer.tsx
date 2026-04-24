@@ -58,8 +58,8 @@ export function ModalDialogRenderer(): ReactNode {
         <>
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            animate={{ opacity: 1, pointerEvents: 'auto' }}
+            exit={{ opacity: 0, pointerEvents: 'none' }}
             transition={{ duration: 0.2 }}
             style={{
               position: 'fixed',
@@ -74,8 +74,8 @@ export function ModalDialogRenderer(): ReactNode {
           />
           <motion.div
             initial={{ opacity: 0, x: '-50%', y: 'calc(-50% + 24px)', scale: 0.96 }}
-            animate={{ opacity: 1, x: '-50%', y: '-50%', scale: 1 }}
-            exit={{ opacity: 0, x: '-50%', y: 'calc(-50% + 12px)', scale: 0.97 }}
+            animate={{ opacity: 1, x: '-50%', y: '-50%', scale: 1, pointerEvents: 'auto' }}
+            exit={{ opacity: 0, x: '-50%', y: 'calc(-50% + 12px)', scale: 0.97, pointerEvents: 'none' }}
             transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             style={{
               position: 'fixed',
