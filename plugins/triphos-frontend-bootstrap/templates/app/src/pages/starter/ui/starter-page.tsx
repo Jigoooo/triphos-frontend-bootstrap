@@ -268,7 +268,6 @@ export function StarterPage() {
                         </p>
                       </div>
                     ),
-                    {},
                   );
                 }}
               >
