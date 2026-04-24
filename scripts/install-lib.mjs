@@ -16,15 +16,20 @@ const PUBLIC_CODEX_SKILLS = [
   "triphos-fsd-refactor",
   "triphos-react-lint-rules",
   "triphos-api-client-setup",
-  "triphos-fsd-skill-update",
   "triphos-theme-setup",
 ];
 const HIDDEN_CODEX_SKILLS = [
   "triphos-frontend-bootstrap",
   "triphos-frontend-doctor",
 ];
-const MANAGED_CODEX_SKILLS = Array.from(
+const CURRENT_MANAGED_CODEX_SKILLS = Array.from(
   new Set([...PUBLIC_CODEX_SKILLS, ...HIDDEN_CODEX_SKILLS]),
+);
+const LEGACY_CODEX_SKILLS = [
+  "triphos-fsd-skill-update",
+];
+const CLEANUP_CODEX_SKILLS = Array.from(
+  new Set([...CURRENT_MANAGED_CODEX_SKILLS, ...LEGACY_CODEX_SKILLS]),
 );
 const CODEX_SKILL_MARKER_FILE = `.managed-${PLUGIN_NAME}-skills.json`;
 
@@ -246,7 +251,7 @@ function readManagedCodexSkillNames(skillsRoot) {
   if (!existsSync(markerPath)) {
     return {
       markerPath,
-      skillNames: MANAGED_CODEX_SKILLS,
+      skillNames: CLEANUP_CODEX_SKILLS,
     };
   }
 
@@ -264,7 +269,7 @@ function readManagedCodexSkillNames(skillsRoot) {
 
   return {
     markerPath,
-    skillNames: MANAGED_CODEX_SKILLS,
+    skillNames: CLEANUP_CODEX_SKILLS,
   };
 }
 
@@ -326,13 +331,13 @@ export function syncCodexSkills({
 }) {
   const sourceSkillsRoot = resolve(pluginInstallRoot, "skills", "codex");
   const markerPath = resolve(skillsRoot, CODEX_SKILL_MARKER_FILE);
-  const nextManagedSkillNames = MANAGED_CODEX_SKILLS;
+  const nextManagedSkillNames = CURRENT_MANAGED_CODEX_SKILLS;
 
   mkdirSync(skillsRoot, { recursive: true });
 
   const previousManagedSkillNames = existsSync(markerPath)
     ? JSON.parse(readFileSync(markerPath, "utf8"))
-    : HIDDEN_CODEX_SKILLS;
+    : CLEANUP_CODEX_SKILLS;
 
   for (const staleSkill of previousManagedSkillNames) {
     rmSync(resolve(skillsRoot, staleSkill), { recursive: true, force: true });

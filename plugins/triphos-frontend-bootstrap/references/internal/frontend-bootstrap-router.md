@@ -20,15 +20,12 @@
   `triphos-react-lint-rules`
 - `@jigoooo/api-client` bootstrap:
   `triphos-api-client-setup`
-- FSD 규칙 드리프트 검토:
-  `triphos-fsd-skill-update`
 
 ## 별칭 메모
 
 - `fsd-refactor` -> `triphos-fsd-refactor`
 - `react-lint-rules` -> `triphos-react-lint-rules`
 - `api-client-setup` -> `triphos-api-client-setup`
-- `fsd-update` / `fsd-skill-update` -> `triphos-fsd-skill-update`
 
 ## 원칙
 

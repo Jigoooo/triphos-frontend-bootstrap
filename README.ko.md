@@ -55,8 +55,6 @@ npx @jigoooo/triphos-frontend-bootstrap@latest
   React 19, React Compiler, hooks/lint 규칙에 맞게 코드와 패턴을 정리할 때 사용합니다.
 - `triphos-api-client-setup`
   baseline이 준비된 뒤 새 entity API 추가, raw API migration, 고급 `@jigoooo/api-client` customization이 필요할 때 사용합니다.
-- `triphos-fsd-skill-update`
-  FSD 관련 스킬 규칙이나 프로젝트 적용 기준을 업데이트할 때 사용합니다.
 
 프로젝트 생성은 Claude/Codex 안에서 `triphos-frontend-init` 스킬로 수행합니다.
 강한 하네스는 기본적으로 init으로 생성된 저장소를 대상으로 하며, 기존 프로젝트는 `triphos-frontend-adopt`를 명시적으로 호출한 경우에만 같은 계약을 적용합니다.

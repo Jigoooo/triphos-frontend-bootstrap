@@ -192,13 +192,12 @@ node <triphos-fsd-refactor-skill-dir>/scripts/audit-ui-components.mjs src
 
 1. **우선 `references/rules.md`의 "왜" 섹션을 다시 읽는다.** 대부분의 규칙은 변경 영향 예측 가능성을 위해 존재한다.
 2. **그래도 예외가 정당하면**, 사용자에게 명시적으로 설명하라: "이 케이스는 규칙 X에 어긋나지만, 이유 Y 때문에 예외로 두려 합니다. 동의하시나요?"
-3. **예외가 반복되면** 규칙이 잘못된 것이다. 사용자에게 "이 규칙이 자주 어긋납니다. `triphos-fsd-skill-update`로 규칙 자체를 재검토하시겠어요?" 제안.
+3. **예외가 반복되면** 규칙이 잘못된 것이다. 사용자에게 "이 규칙이 자주 어긋납니다. plugin 업데이트 흐름에서 FSD reference 자체를 재검토하는 게 맞겠습니다."라고 보고한다.
 
 규칙을 말없이 어기지 마라. 어겼다면 왜 어겼는지 리포트하라.
 
 ## 다른 스킬과의 관계
 
-- **`triphos-fsd-skill-update`**: 규칙 자체를 공식 FSD docs와 동기화. 리팩토링 중에 "이 규칙 최신인가?"가 궁금하면 사용자에게 `/fsd-skill-update` 실행을 제안. 자동 호출하지 마라.
 - **`triphos-react-lint-rules`**: React 19 + React Compiler 환경의 훅 규칙(useMemo/useCallback 제거, useEffect 내 setState 교정, useTransition/useEffectEvent 도입). 슈퍼 훅/컴포넌트를 분해하거나(Phase 3 항목 8·6), 훅을 추출할 때(Phase 5 원칙 7) **동일 세션에서 함께 참조**한다. FSD로 레이어·세그먼트를 정리하면서 훅 내부 패턴은 이 스킬로 교정 — 두 작업을 분리 commit으로 미루지 않는다.
 - **`commit`**: 리팩토링 commit 생성 시 이 스킬 사용.
 - **`ts-check`** / **`build-fix`**: 리팩토링 후 타입/빌드 실패 시 이들로 후처리.

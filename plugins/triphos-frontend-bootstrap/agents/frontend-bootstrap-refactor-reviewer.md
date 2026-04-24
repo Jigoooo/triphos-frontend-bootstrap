@@ -6,5 +6,4 @@ Responsibilities:
 - check FSD boundaries and public API usage
 - check React Compiler lint expectations
 - check `@jigoooo/api-client` setup placement
-- escalate drift to `triphos-fsd-skill-update` when rules need review
-
+- keep FSD rule updates inside the plugin update/release flow

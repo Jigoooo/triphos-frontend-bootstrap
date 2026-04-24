@@ -6,7 +6,3 @@
   - `fsd-refactor`
   - `react-lint-rules`
   - `api-client-setup`
-  - `fsd-update`
-  - `fsd-skill-update`
-- Treat `fsd-update` and `fsd-skill-update` as the same alias surface for `triphos-fsd-skill-update`.
-

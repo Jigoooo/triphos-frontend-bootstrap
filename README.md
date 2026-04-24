@@ -55,8 +55,6 @@ Supports:
   Used to align code with React 19, React Compiler, hooks, and linting conventions.
 - `triphos-api-client-setup`
   Used after the baseline is in place when a project needs additional entity APIs, raw API migration, or deeper `@jigoooo/api-client` customization.
-- `triphos-fsd-skill-update`
-  Used when FSD-related skill rules or project application guidance need to be updated.
 
 Project generation happens inside Claude/Codex through the `triphos-frontend-init` skill.
 The strong harness is meant for generated repositories by default. Existing projects only get the same contract through an explicit `triphos-frontend-adopt` migration.

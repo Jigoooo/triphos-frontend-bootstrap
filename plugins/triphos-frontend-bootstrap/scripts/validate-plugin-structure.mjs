@@ -16,7 +16,6 @@ const requiredSkillNames = [
   "triphos-frontend-adopt",
   "triphos-frontend-init",
   "triphos-fsd-refactor",
-  "triphos-fsd-skill-update",
   "triphos-react-lint-rules",
   "triphos-theme-setup",
 ];
