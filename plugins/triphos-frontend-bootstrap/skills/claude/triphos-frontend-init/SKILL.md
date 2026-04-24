@@ -22,6 +22,14 @@ argument-hint: "[target-directory]"
 4. 생성 직후 `pnpm verify:frontend`와 `pnpm build` 또는 `pnpm typecheck`로 검증한다.
 5. standalone 저장소면 `node ../../../scripts/finalize-init.mjs --target <directory>`로 `git init`과 initial commit을 수행한다. 상위 git 저장소가 있으면 skip한다.
 
+## 누락 방지 게이트
+
+- 스캐폴드 전에 이 SKILL.md의 `먼저 읽기` 파일을 전부 읽고, 템플릿/정책 계약을 기억한 뒤 실행한다.
+- 템플릿 파일을 수동으로 부분 복사하지 않는다. 생성은 항상 `scaffold-app.mjs`를 통해 수행하고, 실패 시 실패 원인을 고친 뒤 재실행한다.
+- 생성 후 대상 앱의 `package.json`에 `verify:frontend`, `verify:fsd`, `verify:react-rules`, `verify:api`, `verify:visual`, `verify:e2e`, `verify:uat`가 있는지 확인한다.
+- 생성 후 `src/shared/api`, `src/shared/theme`, `src/entities/auth`, `src/entities/member`, `docs/`, `.codex/`, `.claude/`가 모두 존재하는지 확인한다.
+- 누락된 파일이나 실패한 검증이 있으면 완료로 보고하지 말고, 누락 항목과 수정 계획을 먼저 처리한다.
+
 ## 템플릿 계약
 
 - 이 스킬로 생성된 저장소가 강한 Triphos 하네스의 기본 대상이다.

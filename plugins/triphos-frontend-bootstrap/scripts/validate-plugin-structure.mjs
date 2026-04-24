@@ -11,8 +11,37 @@ const repoPackageJson = JSON.parse(readFileSync(resolve(repoRoot, "package.json"
 const claudePluginJsonPath = resolve(pluginRoot, ".claude-plugin", "plugin.json");
 const codexPluginJsonPath = resolve(pluginRoot, ".codex-plugin", "plugin.json");
 const claudeMarketplaceJsonPath = resolve(repoRoot, ".claude-plugin", "marketplace.json");
+const requiredSkillNames = [
+  "triphos-api-client-setup",
+  "triphos-frontend-adopt",
+  "triphos-frontend-init",
+  "triphos-fsd-refactor",
+  "triphos-fsd-skill-update",
+  "triphos-react-lint-rules",
+  "triphos-theme-setup",
+];
+const requiredSkillPaths = requiredSkillNames.flatMap((skillName) => [
+  resolve(pluginRoot, "skills", "claude", skillName, "SKILL.md"),
+  resolve(pluginRoot, "skills", "codex", skillName, "SKILL.md"),
+]);
+const requiredMirroredSkillResources = [
+  resolve(pluginRoot, "skills", "claude", "triphos-api-client-setup", "references", "default-template.md"),
+  resolve(pluginRoot, "skills", "codex", "triphos-api-client-setup", "references", "default-template.md"),
+  resolve(pluginRoot, "skills", "claude", "triphos-fsd-refactor", "references", "anti-patterns.md"),
+  resolve(pluginRoot, "skills", "codex", "triphos-fsd-refactor", "references", "anti-patterns.md"),
+  resolve(pluginRoot, "skills", "claude", "triphos-fsd-refactor", "references", "layer-boundaries.md"),
+  resolve(pluginRoot, "skills", "codex", "triphos-fsd-refactor", "references", "layer-boundaries.md"),
+  resolve(pluginRoot, "skills", "claude", "triphos-fsd-refactor", "references", "rules.md"),
+  resolve(pluginRoot, "skills", "codex", "triphos-fsd-refactor", "references", "rules.md"),
+  resolve(pluginRoot, "skills", "claude", "triphos-fsd-refactor", "references", "segments.md"),
+  resolve(pluginRoot, "skills", "codex", "triphos-fsd-refactor", "references", "segments.md"),
+  resolve(pluginRoot, "skills", "claude", "triphos-fsd-refactor", "scripts", "audit-ui-components.mjs"),
+  resolve(pluginRoot, "skills", "codex", "triphos-fsd-refactor", "scripts", "audit-ui-components.mjs"),
+];
 
 const requiredPaths = [
+  ...requiredSkillPaths,
+  ...requiredMirroredSkillResources,
   resolve(repoRoot, "bin", "triphos-frontend-bootstrap"),
   resolve(repoRoot, ".codex", "hooks.json"),
   resolve(repoRoot, ".codex", "config.toml"),

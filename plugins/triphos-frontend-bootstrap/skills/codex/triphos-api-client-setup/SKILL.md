@@ -8,6 +8,11 @@ argument-hint: "[add|migrate|customize] [target?]"
 
 이 스킬은 baseline 생성 스킬이 아니다. baseline은 `triphos-frontend-init`와 `triphos-frontend-adopt`가 제공한다.
 
+## 먼저 읽기
+
+- baseline 파일이 없거나 오래된 프로젝트라면 [references/default-template.md](references/default-template.md)를 읽고 현재 템플릿의 API 형태를 확인한다.
+- 프로젝트에 이미 `src/shared/api/`가 있으면 템플릿보다 현재 코드와 백엔드 계약을 우선한다.
+
 ## 담당 범위
 
 - 새 entity API 파일 추가
@@ -24,6 +29,13 @@ argument-hint: "[add|migrate|customize] [target?]"
 - feature는 entity의 `queryOptions` / `mutationOptions` wrapper를 `useQuery` / `useMutation`에 직접 넣어 사용한다.
 - 프로젝트별 응답 shape가 다르면 무작정 템플릿을 복사하지 말고 adapter/type을 먼저 맞춘다.
 - 작업 후에는 `pnpm verify:api`, `pnpm lint`, `pnpm typecheck`를 통과시킨다.
+
+## 누락 방지 게이트
+
+- 작업 전 `src/entities/**/api`, `src/entities/**/model/query-keys.ts`, `query-options.ts`, `mutation-options.ts` 존재 여부를 스캔하고 누락 파일을 리포트한다.
+- migration 작업이면 `fetch(`, `axios`, `@jigoooo/api-client` 직접 호출, `api.get/post/put/patch/delete`를 전체 `src/`에서 검색하고 각 후보를 `migrate`, `defer`, `pass` 중 하나로 분류한다.
+- 새 entity API 추가 시 `api`, `query-keys`, `query-options`, `mutation-options`, public `index.ts` export를 한 세트로 처리한다.
+- `verify:api`가 없는 레거시 프로젝트에서는 최소한 raw HTTP scan, TypeScript check, lint 결과를 대체 검증으로 남긴다.
 
 ## 계약 확인 게이트
 
