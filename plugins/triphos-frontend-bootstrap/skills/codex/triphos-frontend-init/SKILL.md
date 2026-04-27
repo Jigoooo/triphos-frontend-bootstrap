@@ -55,6 +55,7 @@ argument-hint: "[target-directory]"
 - 페이지 컴포넌트는 placeholder 한 줄로 끝내지 않는다. `useColors()` 토큰 매핑, 시멘틱 영역 (hero/section/cta), 반응형 break (`useMediaQuery`)를 최소 한 번씩 활용한다.
 - 컬러/스타일 제안 전에 `src/shared/theme/`의 토큰을 먼저 읽고 후보 2~3개를 사용자에게 제시한 뒤 결정한다.
 - 외부 디자인 영감/참고자료가 필요하면 Context7 또는 web fetch로 1차 조사 후 출처를 명시한다.
+- SSR 베이스(`--template app-ssr`)이고 사용자가 SEO/a11y/sitemap/JSON-LD/Lighthouse/접근성 키워드를 언급하면 `triphos-seo-a11y-audit` 스킬로 분기한다.
 
 ## 템플릿 계약
 

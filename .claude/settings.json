@@ -22,5 +22,10 @@
         ]
       }
     ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git -C /Users/kimjigoooo/workspace/plugin/triphos-frontend-bootstrap status --short)"
+    ]
   }
 }

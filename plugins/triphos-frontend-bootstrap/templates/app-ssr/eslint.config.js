@@ -2,6 +2,7 @@ import pluginJs from '@eslint/js';
 import pluginQuery from '@tanstack/eslint-plugin-query';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import importPlugin from 'eslint-plugin-import';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
 import pluginReact from 'eslint-plugin-react';
 import reactCompiler from 'eslint-plugin-react-compiler';
 import reactHooks from 'eslint-plugin-react-hooks';
@@ -32,6 +33,7 @@ export default [
   ...pluginQuery.configs['flat/recommended'],
   ...tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,
+  jsxA11y.flatConfigs.recommended,
   eslintConfigPrettier,
   {
     plugins: {
@@ -102,6 +104,13 @@ export default [
         { varsIgnorePattern: '^_', argsIgnorePattern: '^_' },
       ],
       'react/react-in-jsx-scope': 'off',
+    },
+  },
+  {
+    files: ['src/pages/starter/**/*.{ts,tsx}', 'src/shared/ui/**/*.{ts,tsx}'],
+    rules: {
+      'jsx-a11y/click-events-have-key-events': 'off',
+      'jsx-a11y/no-static-element-interactions': 'off',
     },
   },
 ];

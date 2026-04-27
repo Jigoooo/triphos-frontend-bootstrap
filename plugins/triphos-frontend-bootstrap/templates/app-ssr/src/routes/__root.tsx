@@ -9,6 +9,12 @@ import {
 import { useEffect, useRef } from 'react';
 
 import { bootstrapApi } from '@/app/providers/api-bootstrap';
+import {
+  buildMeta,
+  jsonLdOrganization,
+  jsonLdScript,
+  jsonLdWebSite,
+} from '@/shared/lib/seo';
 import { initSystemThemeListener } from '@/shared/theme';
 import { AlertDialogRenderer } from '@/shared/ui/alert-dialog';
 import { BottomSheetRenderer } from '@/shared/ui/bottom-sheet';
@@ -23,18 +29,25 @@ export interface RouterContext {
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'Triphos Frontend App' },
-      {
-        name: 'description',
-        content: 'Triphos frontend bootstrap baseline application.',
-      },
-    ],
-    links: [{ rel: 'stylesheet', href: indexCssUrl }],
-  }),
+  head: () => {
+    const built = buildMeta({
+      title: 'Triphos Frontend App',
+      description: 'Triphos frontend bootstrap baseline application.',
+      path: '/',
+    });
+    return {
+      meta: [
+        { charSet: 'utf-8' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        ...built.meta,
+      ],
+      links: [{ rel: 'stylesheet', href: indexCssUrl }, ...built.links],
+      scripts: [
+        jsonLdScript(jsonLdOrganization()),
+        jsonLdScript(jsonLdWebSite()),
+      ],
+    };
+  },
   component: RootComponent,
 });
 

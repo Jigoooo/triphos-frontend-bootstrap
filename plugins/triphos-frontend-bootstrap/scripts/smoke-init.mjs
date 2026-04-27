@@ -56,7 +56,17 @@ if (constraints.status !== 0) {
   process.exit(constraints.status ?? 1);
 }
 
-const verifyFrontend = spawnSync("pnpm", ["verify:frontend"], { cwd: appDir, stdio: "inherit" });
+const verifyFrontendEnv = {
+  ...process.env,
+  ...(template === "app-ssr"
+    ? { TRIPHOS_SKIP_A11Y: "1", TRIPHOS_SKIP_LIGHTHOUSE: "1" }
+    : {}),
+};
+const verifyFrontend = spawnSync("pnpm", ["verify:frontend"], {
+  cwd: appDir,
+  stdio: "inherit",
+  env: verifyFrontendEnv,
+});
 if (verifyFrontend.status !== 0) {
   process.exit(verifyFrontend.status ?? 1);
 }

@@ -283,6 +283,47 @@ if (isSsr) {
   expect(!existsSync(resolve(target, 'src/app/router.tsx')), 'SSR template must keep router definition in src/router.tsx (TanStack Start auto-resolves it there). Remove src/app/router.tsx.');
   expect(!existsSync(resolve(target, 'src/main.tsx')), 'SSR template must not ship src/main.tsx (TanStack Start owns the entry)');
   expect(!existsSync(resolve(target, 'index.html')), 'SSR template must not ship index.html (the root route renders the document)');
+
+  for (const seoPath of [
+    'src/shared/lib/seo/index.ts',
+    'src/shared/lib/seo/seo-config.ts',
+    'src/shared/lib/seo/build-meta.ts',
+    'src/shared/lib/seo/build-json-ld.ts',
+    'src/shared/lib/seo/build-sitemap-entry.ts',
+    'src/routes/sitemap[.]xml.ts',
+    'src/routes/llms[.]txt.ts',
+    'src/routes/llms-full[.]txt.ts',
+    'public/robots.txt',
+    'lighthouserc.json',
+    'scripts/verify-seo.mjs',
+    'scripts/verify-a11y.mjs',
+    'scripts/verify-lighthouse.mjs',
+  ]) {
+    expect(existsSync(resolve(target, seoPath)), `SSR template must ship ${seoPath} for SEO/a11y baseline`);
+  }
+
+  const eslintConfig = readFileSync(resolve(target, 'eslint.config.js'), 'utf8');
+  expectTextIncludes(eslintConfig, "from 'eslint-plugin-jsx-a11y'", 'SSR eslint.config.js must import eslint-plugin-jsx-a11y');
+  expectTextIncludes(eslintConfig, 'jsxA11y.flatConfigs.recommended', 'SSR eslint.config.js must register jsxA11y.flatConfigs.recommended');
+
+  const robots = readFileSync(resolve(target, 'public/robots.txt'), 'utf8');
+  expectTextIncludes(robots, 'Sitemap:', 'public/robots.txt must point to sitemap');
+
+  const rootRoute = readFileSync(resolve(target, 'src/routes/__root.tsx'), 'utf8');
+  expectTextIncludes(rootRoute, 'jsonLdScript', '__root.tsx must inject JSON-LD via jsonLdScript helper');
+  expectTextIncludes(rootRoute, 'buildMeta', '__root.tsx must build OG/Twitter meta via buildMeta helper');
+
+  expect(packageJson.scripts?.['verify:seo'] === 'node ./scripts/verify-seo.mjs', 'SSR package.json scripts.verify:seo must be "node ./scripts/verify-seo.mjs"');
+  expect(packageJson.scripts?.['verify:a11y'] === 'node ./scripts/verify-a11y.mjs', 'SSR package.json scripts.verify:a11y must be "node ./scripts/verify-a11y.mjs"');
+  expect(packageJson.scripts?.['verify:lighthouse'] === 'node ./scripts/verify-lighthouse.mjs', 'SSR package.json scripts.verify:lighthouse must be "node ./scripts/verify-lighthouse.mjs"');
+  expect(packageJson.scripts?.['verify:frontend']?.includes('pnpm verify:seo'), 'SSR verify:frontend chain must include pnpm verify:seo');
+  expect(packageJson.scripts?.['verify:frontend']?.includes('pnpm verify:a11y'), 'SSR verify:frontend chain must include pnpm verify:a11y');
+  expect(packageJson.scripts?.['verify:frontend']?.includes('pnpm verify:lighthouse'), 'SSR verify:frontend chain must include pnpm verify:lighthouse');
+  expect(packageJson.devDependencies?.['eslint-plugin-jsx-a11y'], 'SSR package.json must include eslint-plugin-jsx-a11y devDep');
+  expect(packageJson.devDependencies?.['@axe-core/playwright'], 'SSR package.json must include @axe-core/playwright devDep');
+  expect(packageJson.devDependencies?.['@lhci/cli'], 'SSR package.json must include @lhci/cli devDep');
+  expect(packageJson.devDependencies?.['lighthouse'], 'SSR package.json must include lighthouse devDep');
+  expect(packageJson.devDependencies?.['playwright'], 'SSR package.json must include playwright devDep');
 }
 
 const sharedApi = readFileSync(resolve(target, 'src/shared/api/index.ts'), 'utf8');

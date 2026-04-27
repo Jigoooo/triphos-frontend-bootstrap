@@ -1,6 +1,9 @@
 node_modules
 dist
 .tanstack
+.lighthouseci
+.lighthouserc.runtime.json
+.output
 src/routeTree.gen.ts
 .omx
 .omc
