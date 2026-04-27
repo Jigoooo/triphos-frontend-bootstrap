@@ -10,6 +10,7 @@ import {
   parseStopHookInput,
   runVerification,
 } from './stop-verify-lib.mjs';
+import { buildTraceEntry, recordFailureTrace } from './trace-lib.mjs';
 
 const payload = parseStopHookInput(readFileSync(0, 'utf8'));
 const changedFiles = listChangedFiles(process.cwd());
@@ -52,6 +53,22 @@ const result = runVerification(process.cwd(), 'pnpm', ['verify:repo']);
 
 if (result.status === 0) {
   process.exit(0);
+}
+
+try {
+  recordFailureTrace(
+    process.cwd(),
+    buildTraceEntry({
+      surface: 'claude',
+      exitStatus: result.status,
+      verifyCommand: 'pnpm verify:repo',
+      changedFiles: Array.isArray(changedFiles) ? changedFiles : [],
+      stderr: result.stderr,
+      stdout: result.stdout,
+    }),
+  );
+} catch {
+  // Trace recording must never break the verifier exit flow.
 }
 
 const reason = formatVerificationFailureMessage('repository', 'pnpm verify:repo', result);
