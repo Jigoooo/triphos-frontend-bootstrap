@@ -4,6 +4,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 
+import { homedir } from "node:os";
+
 import {
   buildTraceEntry,
   extractFailureSignature,
@@ -11,6 +13,7 @@ import {
   pruneOldTraces,
   readRecentFailures,
   recordFailureTrace,
+  resolveTraceDir,
   summarizeRecentFailures,
 } from "../scripts/hooks/trace-lib.mjs";
 
@@ -195,6 +198,16 @@ test("pruneOldTraces returns 0 when directory is missing or empty", () => {
   } finally {
     cleanup();
   }
+});
+
+test("resolveTraceDir defaults to repo-local and switches on TRIPHOS_TRACE_SCOPE", () => {
+  const cwd = "/repo/x";
+  assert.equal(resolveTraceDir(cwd, {}), join(cwd, ".triphos/traces"));
+  assert.equal(resolveTraceDir(cwd, { TRIPHOS_TRACE_SCOPE: "" }), join(cwd, ".triphos/traces"));
+  assert.equal(resolveTraceDir(cwd, { TRIPHOS_TRACE_SCOPE: "local" }), join(cwd, ".triphos/traces"));
+  assert.equal(resolveTraceDir(cwd, { TRIPHOS_TRACE_SCOPE: "global" }), join(homedir(), ".triphos/traces"));
+  assert.equal(resolveTraceDir(cwd, { TRIPHOS_TRACE_SCOPE: "USER" }), join(homedir(), ".triphos/traces"));
+  assert.equal(resolveTraceDir(cwd, { TRIPHOS_TRACE_SCOPE: "home" }), join(homedir(), ".triphos/traces"));
 });
 
 test("isTraceInjectEnabled honours TRIPHOS_TRACE_INJECT toggle", () => {

@@ -31,3 +31,4 @@
 - query key는 `@lukemorales/query-key-factory`로 관리하고, entity `model/`에 `query-keys.ts`, `query-options.ts`, `mutation-options.ts`를 둔다.
 - feature는 entity wrapper를 `useQuery`, `useMutation`에 직접 넣어 사용하고 query key/mutationFn을 다시 inline 정의하지 않는다.
 - React, Vite, TypeScript, MCP 설정을 바꿀 때는 공식 문서나 MCP-backed reference를 먼저 확인한다.
+- 라우팅은 `@tanstack/react-router`의 **file-based**만 사용한다. 새 route는 `src/routes/<segment>.tsx`에 `createFileRoute('/<segment>')({ component })`로 추가하고, root layout은 `src/routes/__root.tsx`만 수정한다. `createBrowserRouter`/`react-router-dom` 사용은 금지이며, 결정 전 [TanStack Router file-based routing 문서](https://tanstack.com/router/latest/docs/framework/react/routing/file-based-routing)를 먼저 확인한다.

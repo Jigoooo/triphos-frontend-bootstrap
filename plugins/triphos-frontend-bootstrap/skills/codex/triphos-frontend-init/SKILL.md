@@ -30,6 +30,22 @@ argument-hint: "[target-directory]"
 - 생성 후 `src/shared/api`, `src/shared/theme`, `src/entities/auth`, `src/entities/member`, `docs/`, `.codex/`, `.claude/`가 모두 존재하는지 확인한다.
 - 누락된 파일이나 실패한 검증이 있으면 완료로 보고하지 말고, 누락 항목과 수정 계획을 먼저 처리한다.
 
+## 라우팅 계약 (file-based, 무조건)
+
+- 라우팅은 `@tanstack/react-router`의 **file-based routing**만 사용한다. `createRouter`/`createRoute`/`createRootRoute`를 직접 호출하지 않는다.
+- 새 route는 `src/routes/<segment>.tsx`에 `createFileRoute('/<segment>')({ component })` 형태로 추가한다.
+- root layout은 `src/routes/__root.tsx`의 `createRootRoute({ component })`로만 정의한다.
+- `routeTree.gen.ts`는 `tsr generate` 또는 vite 시작 시 자동 생성되며 git에 커밋하지 않는다.
+- `react-router-dom`/`react-router`/`createBrowserRouter`/`createHashRouter`/`createMemoryRouter` 사용은 금지다. verifier가 차단한다.
+- 라우팅 관련 결정 전에 [TanStack Router file-based routing 공식 문서](https://tanstack.com/router/latest/docs/framework/react/routing/file-based-routing)와 [Vite Plugin 가이드](https://tanstack.com/router/latest/docs/framework/react/installation/with-vite)를 먼저 확인한다.
+
+## post-init 작업 가이드
+
+- init 직후 사용자가 페이지/위젯 추가, 디자인 변경, 참고자료 요청을 보낼 수 있다. 요구사항이 모호하면 **추측하지 말고** 핵심 1~3개 질문으로 좁힌다 (목적, 사용자 시나리오, 시각 톤).
+- 페이지 컴포넌트는 placeholder 한 줄로 끝내지 않는다. `useColors()` 토큰 매핑, 시멘틱 영역 (hero/section/cta), 반응형 break (`useMediaQuery`)를 최소 한 번씩 활용한다.
+- 컬러/스타일 제안 전에 `src/shared/theme/`의 토큰을 먼저 읽고 후보 2~3개를 사용자에게 제시한 뒤 결정한다.
+- 외부 디자인 영감/참고자료가 필요하면 Context7 또는 web fetch로 1차 조사 후 출처를 명시한다.
+
 ## 템플릿 계약
 
 - 이 스킬로 생성된 저장소가 강한 Triphos 하네스의 기본 대상이다.

@@ -1,8 +1,17 @@
 import { mkdirSync, readdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
 import { join } from "node:path";
 import { randomBytes } from "node:crypto";
 
 const TRACE_DIR = ".triphos/traces";
+
+export function resolveTraceDir(cwd, env = process.env) {
+  const scope = String(env.TRIPHOS_TRACE_SCOPE ?? "").trim().toLowerCase();
+  if (scope === "global" || scope === "user" || scope === "home") {
+    return join(homedir(), TRACE_DIR);
+  }
+  return join(cwd, TRACE_DIR);
+}
 const NOISE_PREFIXES = [
   "Triphos repository verification failed.",
   "Run pnpm verify:repo manually after fixing the reported issues.",
@@ -46,7 +55,7 @@ export function buildTraceEntry({ surface, exitStatus, verifyCommand, changedFil
 
 export function recordFailureTrace(cwd, entry) {
   try {
-    const dir = join(cwd, TRACE_DIR);
+    const dir = resolveTraceDir(cwd);
     mkdirSync(dir, { recursive: true });
     const safeTs = entry.ts.replace(/[:.]/g, "-");
     const suffix = randomBytes(2).toString("hex");
@@ -60,7 +69,7 @@ export function recordFailureTrace(cwd, entry) {
 
 export function pruneOldTraces(cwd, { retentionDays = DEFAULT_RETENTION_DAYS, now = new Date() } = {}) {
   try {
-    const dir = join(cwd, TRACE_DIR);
+    const dir = resolveTraceDir(cwd);
     const files = readdirSync(dir).filter((name) => name.endsWith(".jsonl"));
     const cutoff = now.getTime() - retentionDays * 24 * 60 * 60 * 1000;
     let removed = 0;
@@ -91,7 +100,7 @@ export function isTraceInjectEnabled(env = process.env) {
 
 export function readRecentFailures(cwd, limit) {
   try {
-    const dir = join(cwd, TRACE_DIR);
+    const dir = resolveTraceDir(cwd);
     const files = readdirSync(dir).filter((name) => name.endsWith(".jsonl")).sort();
     const recent = files.slice(-Math.max(limit, 0));
     return recent
