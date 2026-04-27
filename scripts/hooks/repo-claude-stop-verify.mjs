@@ -10,7 +10,7 @@ import {
   parseStopHookInput,
   runVerification,
 } from './stop-verify-lib.mjs';
-import { buildTraceEntry, recordFailureTrace } from './trace-lib.mjs';
+import { buildTraceEntry, pruneOldTraces, recordFailureTrace } from './trace-lib.mjs';
 
 const payload = parseStopHookInput(readFileSync(0, 'utf8'));
 const changedFiles = listChangedFiles(process.cwd());
@@ -67,6 +67,7 @@ try {
       stdout: result.stdout,
     }),
   );
+  pruneOldTraces(process.cwd());
 } catch {
   // Trace recording must never break the verifier exit flow.
 }

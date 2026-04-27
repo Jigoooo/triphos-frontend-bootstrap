@@ -54,6 +54,7 @@
     "register:claude": "node plugins/triphos-frontend-bootstrap/scripts/register-claude-local.mjs",
     "register:codex": "node plugins/triphos-frontend-bootstrap/scripts/register-codex-local.mjs",
     "smoke:init": "node plugins/triphos-frontend-bootstrap/scripts/smoke-init.mjs",
+    "traces:summary": "node ./scripts/traces-summary.mjs",
     "verify:repo": "pnpm run validate:structure && pnpm run check:template && pnpm run check:parity && pnpm test && pnpm run smoke:init",
     "prepublishOnly": "pnpm run sync:versions && pnpm run verify:repo",
     "publish:dry": "npm publish --dry-run"

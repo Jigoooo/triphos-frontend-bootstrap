@@ -1,4 +1,4 @@
-import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { randomBytes } from "node:crypto";
 
@@ -7,6 +7,7 @@ const NOISE_PREFIXES = [
   "Triphos repository verification failed.",
   "Run pnpm verify:repo manually after fixing the reported issues.",
 ];
+const DEFAULT_RETENTION_DAYS = 30;
 
 export function extractFailureSignature(stderr, stdout) {
   const haystack = [stdout, stderr].filter(Boolean).join("\n");
@@ -55,6 +56,37 @@ export function recordFailureTrace(cwd, entry) {
   } catch {
     return null;
   }
+}
+
+export function pruneOldTraces(cwd, { retentionDays = DEFAULT_RETENTION_DAYS, now = new Date() } = {}) {
+  try {
+    const dir = join(cwd, TRACE_DIR);
+    const files = readdirSync(dir).filter((name) => name.endsWith(".jsonl"));
+    const cutoff = now.getTime() - retentionDays * 24 * 60 * 60 * 1000;
+    let removed = 0;
+    for (const name of files) {
+      const fullPath = join(dir, name);
+      try {
+        const mtime = statSync(fullPath).mtimeMs;
+        if (mtime < cutoff) {
+          unlinkSync(fullPath);
+          removed += 1;
+        }
+      } catch {
+        // Skip files that disappear or cannot be stat'd.
+      }
+    }
+    return removed;
+  } catch {
+    return 0;
+  }
+}
+
+export function isTraceInjectEnabled(env = process.env) {
+  const value = env.TRIPHOS_TRACE_INJECT;
+  if (value === undefined || value === null || value === "") return true;
+  const normalized = String(value).trim().toLowerCase();
+  return !["0", "false", "no", "off"].includes(normalized);
 }
 
 export function readRecentFailures(cwd, limit) {

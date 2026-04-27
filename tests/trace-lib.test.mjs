@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync, readdirSync, readFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, rmSync, utimesSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -7,6 +7,8 @@ import test from "node:test";
 import {
   buildTraceEntry,
   extractFailureSignature,
+  isTraceInjectEnabled,
+  pruneOldTraces,
   readRecentFailures,
   recordFailureTrace,
   summarizeRecentFailures,
@@ -157,6 +159,53 @@ test("summarizeRecentFailures groups duplicates and preserves first-seen order",
   } finally {
     cleanup();
   }
+});
+
+test("pruneOldTraces deletes files older than retention window", () => {
+  const { cwd, cleanup } = makeTempCwd();
+  try {
+    const base = {
+      surface: "claude",
+      exitStatus: 1,
+      verifyCommand: "pnpm verify:repo",
+      changedFiles: [],
+      stderr: "Skill parity check failed:\n- a: b",
+      stdout: "",
+    };
+    const oldFile = recordFailureTrace(cwd, buildTraceEntry({ ...base, now: new Date("2025-01-01T00:00:00.000Z") }));
+    const freshFile = recordFailureTrace(cwd, buildTraceEntry({ ...base, now: new Date() }));
+
+    const ancientMtime = new Date("2025-01-01T00:00:00.000Z");
+    utimesSync(oldFile, ancientMtime, ancientMtime);
+
+    const removed = pruneOldTraces(cwd, { retentionDays: 30 });
+    assert.equal(removed, 1);
+
+    const remaining = readdirSync(join(cwd, ".triphos/traces"));
+    assert.deepEqual(remaining, [freshFile.split("/").at(-1)]);
+  } finally {
+    cleanup();
+  }
+});
+
+test("pruneOldTraces returns 0 when directory is missing or empty", () => {
+  const { cwd, cleanup } = makeTempCwd();
+  try {
+    assert.equal(pruneOldTraces(cwd), 0);
+  } finally {
+    cleanup();
+  }
+});
+
+test("isTraceInjectEnabled honours TRIPHOS_TRACE_INJECT toggle", () => {
+  assert.equal(isTraceInjectEnabled({}), true);
+  assert.equal(isTraceInjectEnabled({ TRIPHOS_TRACE_INJECT: "" }), true);
+  assert.equal(isTraceInjectEnabled({ TRIPHOS_TRACE_INJECT: "1" }), true);
+  assert.equal(isTraceInjectEnabled({ TRIPHOS_TRACE_INJECT: "true" }), true);
+  assert.equal(isTraceInjectEnabled({ TRIPHOS_TRACE_INJECT: "0" }), false);
+  assert.equal(isTraceInjectEnabled({ TRIPHOS_TRACE_INJECT: "false" }), false);
+  assert.equal(isTraceInjectEnabled({ TRIPHOS_TRACE_INJECT: "OFF" }), false);
+  assert.equal(isTraceInjectEnabled({ TRIPHOS_TRACE_INJECT: "no" }), false);
 });
 
 test("readRecentFailures respects limit and chronological order", () => {
