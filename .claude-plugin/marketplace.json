@@ -10,7 +10,7 @@
     {
       "name": "triphos-frontend-bootstrap",
       "description": "Bootstrap and maintain a Triphos-standard React frontend workspace with init/adopt flows, repo-local runtime enforcement, shared/api baseline, and verification-first tooling.",
-      "version": "0.6.23",
+      "version": "0.7.0",
       "author": {
         "name": "Jigoooo",
         "email": "opensource@triphos.dev"
@@ -27,5 +27,5 @@
       ]
     }
   ],
-  "version": "0.6.23"
+  "version": "0.7.0"
 }
