@@ -1,8 +1,11 @@
 ---
 name: triphos-theme-setup
 description: Triphos theme setup skill. Use when initializing or extending `src/shared/theme`, design tokens, color primitives, semantic color maps, or theme stores in a Triphos frontend project. This skill is also the theme companion for `triphos-frontend-init`.
+model: haiku
 argument-hint: "[theme-task]"
 ---
+
+> **모델 권장**: 이 작업은 단일 호출 패턴이라 가벼운 모델이면 충분하다. Claude는 frontmatter `model: haiku`로 자동 다운그레이드되고, Codex는 `/model gpt-5.4-mini`로 전환하면 비용을 절감할 수 있다.
 
 # triphos-theme-setup
 

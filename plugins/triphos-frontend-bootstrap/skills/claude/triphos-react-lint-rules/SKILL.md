@@ -1,7 +1,10 @@
 ---
 name: triphos-react-lint-rules
 description: React 19 + React Compiler + Triphos 프론트엔드 규칙을 적용한다. 훅 lint 수정, React Compiler 정리, inline style 강제, className 예외 판단, useMemo/useCallback 제거, useEffectEvent/useTransition 도입 판단 시 사용한다.
+model: haiku
 ---
+
+> **모델 권장**: 이 작업은 단일 호출 패턴이라 가벼운 모델이면 충분하다. Claude는 frontmatter `model: haiku`로 자동 다운그레이드되고, Codex는 `/model gpt-5.4-mini`로 전환하면 비용을 절감할 수 있다.
 
 # triphos-react-lint-rules
 

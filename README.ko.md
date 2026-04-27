@@ -68,3 +68,46 @@ tfb delete
 
 이 명령은 Claude/Codex 에 설치된 Triphos 플러그인을 제거하고, 동기화된 Codex 스킬과 Claude 플러그인 캐시 및 marketplace clone 을 정리합니다.
 전역 `tfb` CLI 자체는 유지됩니다.
+
+## 모델 라우팅 전략
+
+이 플러그인은 작업 복잡도에 따라 모델을 분리해 토큰 비용을 절감한다. 사용자가 메인 세션을 Opus(또는 GPT-5.5)로 두더라도 다음과 같이 자동 라우팅된다.
+
+### Agent 별 모델
+
+| Agent | Claude | Codex | reasoning_effort |
+| --- | --- | --- | --- |
+| `frontend-bootstrap-planner` | opus | gpt-5.5 | high |
+| `frontend-bootstrap-executor` | sonnet | gpt-5.4 | medium |
+| `frontend-bootstrap-verifier` | sonnet | gpt-5.4-mini | medium |
+| `frontend-bootstrap-refactor-reviewer` | sonnet | gpt-5.4 | medium |
+
+### Skill 별 모델 (단일 호출)
+
+- `triphos-theme-setup`, `triphos-react-lint-rules`: Claude `model: haiku`, Codex `gpt-5.4-mini` 권장.
+
+### Codex profile 권장 설정
+
+`~/.codex/config.toml`:
+
+```toml
+[profiles.plan]
+model = "gpt-5.5"
+model_reasoning_effort = "high"
+
+[profiles.exec]
+model = "gpt-5.4-mini"
+model_reasoning_effort = "low"
+```
+
+`codex --profile plan` / `codex --profile exec`로 시작.
+
+### 환경변수 escape hatch
+
+모든 subagent를 임시로 강제 다운그레이드할 때:
+
+```bash
+CLAUDE_CODE_SUBAGENT_MODEL=haiku claude
+```
+
+상세 근거는 `.claude/plans/staged-chasing-acorn.md` 또는 ADR을 참고.

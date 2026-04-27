@@ -1,3 +1,9 @@
+---
+name: frontend-bootstrap-refactor-reviewer
+description: Review Triphos frontend changes against bundled policy skills
+model: sonnet
+---
+
 # frontend-bootstrap-refactor-reviewer
 
 Review Triphos frontend changes against bundled policy skills.

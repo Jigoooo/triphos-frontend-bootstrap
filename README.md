@@ -68,3 +68,46 @@ tfb delete
 
 This removes the installed Triphos plugin from Claude and Codex, deletes synced Codex skills, and cleans the Claude plugin cache and marketplace clone when no Triphos install remains.
 It keeps the global `tfb` CLI installed.
+
+## Model Routing Strategy
+
+This plugin routes agents to different models based on task complexity, reducing token costs. Even if the user runs the main session on Opus (or GPT-5.5), subagents are automatically routed as follows.
+
+### Model per Agent
+
+| Agent | Claude | Codex | reasoning_effort |
+| --- | --- | --- | --- |
+| `frontend-bootstrap-planner` | opus | gpt-5.5 | high |
+| `frontend-bootstrap-executor` | sonnet | gpt-5.4 | medium |
+| `frontend-bootstrap-verifier` | sonnet | gpt-5.4-mini | medium |
+| `frontend-bootstrap-refactor-reviewer` | sonnet | gpt-5.4 | medium |
+
+### Model per Skill (single-call)
+
+- `triphos-theme-setup`, `triphos-react-lint-rules`: Claude `model: haiku`, Codex `gpt-5.4-mini` recommended.
+
+### Recommended Codex profile config
+
+`~/.codex/config.toml`:
+
+```toml
+[profiles.plan]
+model = "gpt-5.5"
+model_reasoning_effort = "high"
+
+[profiles.exec]
+model = "gpt-5.4-mini"
+model_reasoning_effort = "low"
+```
+
+Start with `codex --profile plan` / `codex --profile exec`.
+
+### Environment variable escape hatch
+
+To temporarily force all subagents to a cheaper model:
+
+```bash
+CLAUDE_CODE_SUBAGENT_MODEL=haiku claude
+```
+
+See `.claude/plans/staged-chasing-acorn.md` or the ADR for full rationale.

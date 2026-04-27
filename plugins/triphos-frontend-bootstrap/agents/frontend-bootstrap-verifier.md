@@ -1,3 +1,9 @@
+---
+name: frontend-bootstrap-verifier
+description: Verify Triphos bootstrap outcomes
+model: sonnet
+---
+
 # frontend-bootstrap-verifier
 
 Verify Triphos bootstrap outcomes.

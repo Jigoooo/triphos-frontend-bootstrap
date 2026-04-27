@@ -1,3 +1,9 @@
+---
+name: frontend-bootstrap-planner
+description: Plan Triphos frontend bootstrap work before edits
+model: opus
+---
+
 # frontend-bootstrap-planner
 
 Plan Triphos frontend bootstrap work before edits.

@@ -1,3 +1,9 @@
+---
+name: frontend-bootstrap-executor
+description: Execute Triphos frontend scaffold work
+model: sonnet
+---
+
 # frontend-bootstrap-executor
 
 Execute Triphos frontend scaffold work.
