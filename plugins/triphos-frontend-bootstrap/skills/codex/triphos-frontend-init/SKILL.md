@@ -16,11 +16,12 @@ argument-hint: "[target-directory]"
 
 ## 워크플로우
 
-1. 환경이 불명확하면 `validate-plugin-structure.mjs`와 `doctor.mjs`를 먼저 실행한다.
-2. 대상 디렉터리가 새 디렉터리이거나 허용된 런타임 상태물만 포함하는지 확인한다.
-3. `node ../../../scripts/scaffold-app.mjs --target <directory> --name <package-name> --install`를 실행한다.
-4. 생성 직후 `pnpm verify:frontend`와 `pnpm build` 또는 `pnpm typecheck`로 검증한다.
-5. standalone 저장소면 `node ../../../scripts/finalize-init.mjs --target <directory>`로 `git init`과 initial commit을 수행한다. 상위 git 저장소가 있으면 skip한다.
+1. **SSR/SEO 결정**: 작업 시작 전 사용자에게 "이 프로젝트가 SSR/SEO가 필요합니까?"를 묻는다. 랜딩/마케팅/제품 소개/공개 페이지가 주이면 → SSR, 내부 도구/대시보드이면 → SPA. 답을 못 들으면 SPA(default)로 진행하되 결정 후 변경 가능함을 알린다.
+2. 환경이 불명확하면 `validate-plugin-structure.mjs`와 `doctor.mjs`를 먼저 실행한다.
+3. 대상 디렉터리가 새 디렉터리이거나 허용된 런타임 상태물만 포함하는지 확인한다.
+4. SSR이면 `node ../../../scripts/scaffold-app.mjs --target <directory> --name <package-name> --template app-ssr --install`, SPA이면 `--template app`(생략 가능)로 실행한다.
+5. 생성 직후 `pnpm verify:frontend`와 `pnpm build` 또는 `pnpm typecheck`로 검증한다.
+6. standalone 저장소면 `node ../../../scripts/finalize-init.mjs --target <directory>`로 `git init`과 initial commit을 수행한다. 상위 git 저장소가 있으면 skip한다.
 
 ## 누락 방지 게이트
 
@@ -29,6 +30,15 @@ argument-hint: "[target-directory]"
 - 생성 후 대상 앱의 `package.json`에 `verify:frontend`, `verify:fsd`, `verify:react-rules`, `verify:api`, `verify:visual`, `verify:e2e`, `verify:uat`가 있는지 확인한다.
 - 생성 후 `src/shared/api`, `src/shared/theme`, `src/entities/auth`, `src/entities/member`, `docs/`, `.codex/`, `.claude/`가 모두 존재하는지 확인한다.
 - 누락된 파일이나 실패한 검증이 있으면 완료로 보고하지 말고, 누락 항목과 수정 계획을 먼저 처리한다.
+
+## SSR/SEO 계약 (TanStack Start, Nitro)
+
+- `--template app-ssr`로 생성된 프로젝트는 **TanStack Start + Nitro Node 서버** 기반이다. dev=`pnpm dev`, build=`pnpm build`, run=`pnpm start` (`node .output/server/index.mjs`).
+- SSR 전환은 한 번에 결정하고 그 후 retrofit하지 않는다. 사용자가 SPA로 시작했다가 나중에 SSR이 필요하면 새 프로젝트로 재생성을 권장한다.
+- SSR 환경에서 깨지는 모듈 top-level browser API 호출(`window`, `document`, `localStorage`, `sessionStorage`, `navigator`, `matchMedia`)은 금지다. `@/shared/lib/is-browser`의 `isBrowser` 가드 또는 `useEffect`/`useMounted` 안에서만 호출한다. zustand persist storage는 `createJSONStorage(() => (isBrowser ? localStorage : noopStorage))` 패턴, createPortal 컴포넌트는 mount 전 `null` 반환으로 hydration 충돌을 피한다.
+- 메타/SEO는 `src/routes/<segment>.tsx`의 `head: () => ({ meta, links })` 또는 `__root.tsx`의 `head` 옵션으로 관리한다. 결정 전 [TanStack Start docs](https://tanstack.com/start/latest/docs/framework/react)를 먼저 확인한다.
+- server-only 로직은 `createServerFn` 또는 route file `loader`로 분리한다.
+- SSR 변경 전에 fixture에서 `pnpm build && pnpm start`로 SSR HTML 응답을 한 번 확인한다.
 
 ## 라우팅 계약 (file-based, 무조건)
 

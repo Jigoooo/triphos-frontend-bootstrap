@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const pluginRoot = resolve(scriptDir, "..");
-const templateRoot = resolve(pluginRoot, "templates", "app");
+const TEMPLATE_VARIANTS = new Set(["app", "app-ssr"]);
 const IGNORED_TEMPLATE_ENTRIES = new Set(["node_modules", "dist", ".triphos", ".triphos-template-source"]);
 const IGNORED_TARGET_ENTRIES = new Set([
   ".omx",
@@ -89,11 +89,23 @@ const args = parseArgs(process.argv.slice(2));
 const target = args.target ? resolve(process.cwd(), args.target) : null;
 const name = args.name || "triphos-frontend-app";
 const install = Boolean(args.install);
+const templateVariant = typeof args.template === "string" ? args.template : "app";
 
 if (!target) {
-  console.error("Usage: node scaffold-app.mjs --target <dir> [--name <package-name>] [--install]");
+  console.error(
+    "Usage: node scaffold-app.mjs --target <dir> [--name <package-name>] [--template app|app-ssr] [--install]",
+  );
   process.exit(1);
 }
+
+if (!TEMPLATE_VARIANTS.has(templateVariant)) {
+  console.error(
+    `Unknown template variant: ${templateVariant}. Expected one of: ${[...TEMPLATE_VARIANTS].join(", ")}.`,
+  );
+  process.exit(1);
+}
+
+const templateRoot = resolve(pluginRoot, "templates", templateVariant);
 
 ensurePnpm();
 ensureScaffoldReadyDirectory(target);
@@ -123,4 +135,4 @@ if (install) {
   }
 }
 
-console.log(`Scaffolded Triphos app at ${target}`);
+console.log(`Scaffolded Triphos app (${templateVariant}) at ${target}`);

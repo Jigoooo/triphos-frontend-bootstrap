@@ -1,0 +1,18 @@
+import { DatePickerDayView } from './date-picker-day-view';
+import { DatePickerMonthView } from './date-picker-month-view';
+import { DatePickerYearView } from './date-picker-year-view';
+import { useDatePickerContext } from '../model/date-picker-context';
+
+export function DatePickerCalendar() {
+  const { displayMode } = useDatePickerContext();
+
+  switch (displayMode) {
+    case 'year':
+      return <DatePickerYearView />;
+    case 'month':
+      return <DatePickerMonthView />;
+    case 'day':
+    default:
+      return <DatePickerDayView />;
+  }
+}

@@ -125,6 +125,15 @@ const requiredFiles = [
   'tsr.config.json',
 ];
 
+const variantArg = typeof args.variant === 'string' ? args.variant : null;
+const isSsr =
+  variantArg === 'app-ssr' ||
+  (variantArg === null && target.replace(/\\/g, '/').replace(/\/$/, '').endsWith('app-ssr'));
+
+if (isSsr) {
+  requiredFiles.push('src/shared/lib/is-browser.ts', 'src/shared/hooks/lifecycle/use-mounted.ts');
+}
+
 const missing = requiredFiles.filter((relativePath) => !existsSync(resolve(target, relativePath)));
 if (missing.length > 0) {
   console.error('Missing required scaffold files:');
@@ -220,6 +229,14 @@ expect(packageJson.scripts?.['verify:uat'] === 'node ./scripts/verify-uat.mjs', 
 expect(packageJson.scripts?.['routes:generate'] === 'tsr generate', 'Expected package.json scripts.routes:generate to be "tsr generate"');
 expect(packageJson.devDependencies?.['@tanstack/router-cli'], 'Expected package.json to include @tanstack/router-cli devDep');
 expect(packageJson.devDependencies?.['@tanstack/router-plugin'], 'Expected package.json to include @tanstack/router-plugin devDep');
+
+if (isSsr) {
+  expect(packageJson.scripts?.start === 'node .output/server/index.mjs', 'SSR package.json scripts.start must be "node .output/server/index.mjs" (Nitro Node output)');
+  expect(packageJson.dependencies?.['@tanstack/react-start'], 'SSR package.json must include @tanstack/react-start dep');
+  expect(packageJson.dependencies?.['@tanstack/react-router-ssr-query'], 'SSR package.json must include @tanstack/react-router-ssr-query dep');
+  expect(packageJson.dependencies?.['nitro'], 'SSR package.json must include nitro dep');
+  expect(packageJson.devDependencies?.['vite-tsconfig-paths'], 'SSR package.json must include vite-tsconfig-paths devDep');
+}
 expect(packageJson.scripts?.['verify:frontend']?.startsWith('pnpm routes:generate'), 'Expected verify:frontend to begin with pnpm routes:generate');
 expect(packageJson.scripts?.['verify:frontend']?.includes('pnpm verify:fsd'), 'Expected package.json scripts.verify:frontend');
 expect(packageJson.scripts?.['verify:frontend']?.includes('pnpm verify:plans'), 'Expected package.json scripts.verify:frontend to include verify:plans');
@@ -238,17 +255,35 @@ expectTextIncludes(viteConfig, '[apiPrefix]: {', 'Expected vite.config.ts server
 expectTextIncludes(viteConfig, 'target: apiOrigin', 'Expected vite.config.ts server.proxy target to use apiOrigin');
 expectTextIncludes(viteConfig, 'changeOrigin: true', 'Expected vite.config.ts server.proxy to enable changeOrigin');
 expect(!viteConfig.includes('global: \'globalThis\''), 'Expected vite.config.ts to remove the global define shim');
-expectTextIncludes(viteConfig, "from '@tanstack/router-plugin/vite'", 'Expected vite.config.ts to import tanstackRouter from @tanstack/router-plugin/vite');
-expectTextIncludes(viteConfig, 'tanstackRouter(', 'Expected vite.config.ts to register tanstackRouter() before react()');
+
+if (isSsr) {
+  expectTextIncludes(viteConfig, "from '@tanstack/react-start/plugin/vite'", 'Expected SSR vite.config.ts to import tanstackStart from @tanstack/react-start/plugin/vite');
+  expectTextIncludes(viteConfig, 'tanstackStart(', 'Expected SSR vite.config.ts to register tanstackStart()');
+  expectTextIncludes(viteConfig, "from 'nitro/vite'", 'Expected SSR vite.config.ts to import nitro from nitro/vite');
+  expectTextIncludes(viteConfig, 'nitro(', 'Expected SSR vite.config.ts to register nitro()');
+  expect(!viteConfig.includes('tanstackRouter('), 'SSR vite.config.ts must not register tanstackRouter() (Start handles router plugin internally)');
+} else {
+  expectTextIncludes(viteConfig, "from '@tanstack/router-plugin/vite'", 'Expected vite.config.ts to import tanstackRouter from @tanstack/router-plugin/vite');
+  expectTextIncludes(viteConfig, 'tanstackRouter(', 'Expected vite.config.ts to register tanstackRouter() before react()');
+}
 
 const tsrConfig = JSON.parse(readFileSync(resolve(target, 'tsr.config.json'), 'utf8'));
 expect(tsrConfig.routesDirectory === './src/routes', 'Expected tsr.config.json routesDirectory to be ./src/routes');
 expect(tsrConfig.generatedRouteTree === './src/routeTree.gen.ts', 'Expected tsr.config.json generatedRouteTree to be ./src/routeTree.gen.ts');
 
-const routerEntry = readFileSync(resolve(target, 'src/app/router.tsx'), 'utf8');
-expect(!routerEntry.includes('createRootRoute'), 'src/app/router.tsx must not call createRootRoute (file-based: define it in src/routes/__root.tsx)');
-expect(!routerEntry.includes('createRoute('), 'src/app/router.tsx must not call createRoute (file-based: each route lives under src/routes/)');
-expectTextIncludes(routerEntry, "from '@/routeTree.gen'", 'Expected src/app/router.tsx to import routeTree from generated @/routeTree.gen');
+const routerEntryPath = isSsr ? 'src/router.tsx' : 'src/app/router.tsx';
+const routerEntry = readFileSync(resolve(target, routerEntryPath), 'utf8');
+expect(!routerEntry.includes('createRootRoute'), `${routerEntryPath} must not call createRootRoute (file-based: define it in src/routes/__root.tsx)`);
+expect(!routerEntry.includes('createRoute('), `${routerEntryPath} must not call createRoute (file-based: each route lives under src/routes/)`);
+expectTextIncludes(routerEntry, "from '@/routeTree.gen'", `Expected ${routerEntryPath} to import routeTree from generated @/routeTree.gen`);
+
+if (isSsr) {
+  expectTextIncludes(routerEntry, 'export function getRouter', 'SSR src/router.tsx must export getRouter() so TanStack Start can build a fresh router per request');
+  expectTextIncludes(routerEntry, "from '@tanstack/react-router-ssr-query'", 'SSR src/router.tsx must import setupRouterSsrQueryIntegration from @tanstack/react-router-ssr-query');
+  expect(!existsSync(resolve(target, 'src/app/router.tsx')), 'SSR template must keep router definition in src/router.tsx (TanStack Start auto-resolves it there). Remove src/app/router.tsx.');
+  expect(!existsSync(resolve(target, 'src/main.tsx')), 'SSR template must not ship src/main.tsx (TanStack Start owns the entry)');
+  expect(!existsSync(resolve(target, 'index.html')), 'SSR template must not ship index.html (the root route renders the document)');
+}
 
 const sharedApi = readFileSync(resolve(target, 'src/shared/api/index.ts'), 'utf8');
 expectTextIncludes(sharedApi, 'apiWithAdapter', 'Expected shared/api public API to export apiWithAdapter');

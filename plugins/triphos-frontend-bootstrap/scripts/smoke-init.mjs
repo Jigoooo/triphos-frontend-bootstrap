@@ -5,7 +5,26 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
-const fixtureRoot = mkdtempSync(resolve(tmpdir(), "triphos-fixture-"));
+function parseArgs(argv) {
+  const args = {};
+  for (let index = 0; index < argv.length; index += 1) {
+    const token = argv[index];
+    if (!token.startsWith("--")) continue;
+    const key = token.slice(2);
+    const next = argv[index + 1];
+    if (!next || next.startsWith("--")) {
+      args[key] = true;
+      continue;
+    }
+    args[key] = next;
+    index += 1;
+  }
+  return args;
+}
+
+const { template = "app" } = parseArgs(process.argv.slice(2));
+const fixturePrefix = template === "app-ssr" ? "triphos-fixture-ssr-" : "triphos-fixture-";
+const fixtureRoot = mkdtempSync(resolve(tmpdir(), fixturePrefix));
 const appDir = resolve(fixtureRoot, "typescript-pnpm");
 const scriptDir = new URL(".", import.meta.url).pathname;
 
@@ -17,6 +36,8 @@ const scaffold = spawnSync(
     appDir,
     "--name",
     "triphos-fixture-app",
+    "--template",
+    template,
     "--install",
   ],
   { stdio: "inherit" },
@@ -28,7 +49,7 @@ if (scaffold.status !== 0) {
 
 const constraints = spawnSync(
   "node",
-  [resolve(scriptDir, "check-app-constraints.mjs"), "--target", appDir],
+  [resolve(scriptDir, "check-app-constraints.mjs"), "--target", appDir, "--variant", template],
   { stdio: "inherit" },
 );
 if (constraints.status !== 0) {
@@ -79,4 +100,4 @@ if (gitStatus.status !== 0 || gitStatus.stdout.trim().length > 0) {
   process.exit(gitStatus.status ?? 1);
 }
 
-console.log(`Smoke init passed: ${appDir}`);
+console.log(`Smoke init passed (${template}): ${appDir}`);

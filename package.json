@@ -50,12 +50,14 @@
     "sync:versions": "node ./scripts/sync-plugin-versions.mjs",
     "validate:structure": "node plugins/triphos-frontend-bootstrap/scripts/validate-plugin-structure.mjs",
     "check:template": "node plugins/triphos-frontend-bootstrap/scripts/check-app-constraints.mjs --target plugins/triphos-frontend-bootstrap/templates/app",
+    "check:template:ssr": "node plugins/triphos-frontend-bootstrap/scripts/check-app-constraints.mjs --target plugins/triphos-frontend-bootstrap/templates/app-ssr",
     "check:parity": "node plugins/triphos-frontend-bootstrap/scripts/check-skill-parity.mjs",
     "register:claude": "node plugins/triphos-frontend-bootstrap/scripts/register-claude-local.mjs",
     "register:codex": "node plugins/triphos-frontend-bootstrap/scripts/register-codex-local.mjs",
     "smoke:init": "node plugins/triphos-frontend-bootstrap/scripts/smoke-init.mjs",
+    "smoke:init:ssr": "node plugins/triphos-frontend-bootstrap/scripts/smoke-init.mjs --template app-ssr",
     "traces:summary": "node ./scripts/traces-summary.mjs",
-    "verify:repo": "pnpm run validate:structure && pnpm run check:template && pnpm run check:parity && pnpm test && pnpm run smoke:init",
+    "verify:repo": "pnpm run validate:structure && pnpm run check:template && pnpm run check:template:ssr && pnpm run check:parity && pnpm test && pnpm run smoke:init && pnpm run smoke:init:ssr",
     "prepublishOnly": "pnpm run sync:versions && pnpm run verify:repo",
     "publish:dry": "npm publish --dry-run"
   }
