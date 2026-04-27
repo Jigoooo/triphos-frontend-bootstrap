@@ -29,8 +29,13 @@ export interface RouterContext {
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
+  // Root head supplies charset/viewport, the global stylesheet, the site-wide
+  // Organization + WebSite JSON-LD, and a safety-net `buildMeta` so a route
+  // shipping without head() still gets a usable OG/canonical block. Page
+  // routes override og:title/og:description/canonical through their own
+  // `buildMeta` call; TanStack Start keeps the last value per meta key.
   head: () => {
-    const built = buildMeta({
+    const fallback = buildMeta({
       title: 'Triphos Frontend App',
       description: 'Triphos frontend bootstrap baseline application.',
       path: '/',
@@ -39,9 +44,9 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       meta: [
         { charSet: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        ...built.meta,
+        ...fallback.meta,
       ],
-      links: [{ rel: 'stylesheet', href: indexCssUrl }, ...built.links],
+      links: [{ rel: 'stylesheet', href: indexCssUrl }, ...fallback.links],
       scripts: [
         jsonLdScript(jsonLdOrganization()),
         jsonLdScript(jsonLdWebSite()),

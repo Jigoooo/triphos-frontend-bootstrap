@@ -30,34 +30,57 @@ function listRouteFiles(rootDir) {
   return files;
 }
 
+const NON_PAGE_BASENAMES = new Set([
+  '__root.tsx',
+  '__root.ts',
+  'sitemap[.]xml.ts',
+  'llms[.]txt.ts',
+  'llms-full[.]txt.ts',
+  'robots[.]txt.ts',
+  'routeTree.gen.ts',
+]);
+
 function isPageRoute(file) {
   const base = file.split('/').pop() ?? '';
-  if (base === '__root.tsx' || base === '__root.ts') return false;
-  if (base.includes('sitemap') || base.includes('llms') || base.includes('robots')) return false;
-  if (base === 'routeTree.gen.ts') return false;
-  return true;
+  return !NON_PAGE_BASENAMES.has(base);
 }
 
 function hasHeadDefinition(content) {
   return /\bhead\s*:\s*\(/.test(content) || /\bhead\s*\(/.test(content);
 }
 
+// `buildMeta` is the canonical helper that emits title + description + OG +
+// Twitter + canonical link in one call. The heuristic insists on real args
+// (title:, description:, path:) so that an accidentally emptied call site
+// (e.g. `buildMeta({})`) still trips the verifier.
+function callsBuildMetaWithRequiredArgs(content) {
+  const callRe = /buildMeta\s*\(\s*\{([\s\S]*?)\}\s*\)/g;
+  let match;
+  while ((match = callRe.exec(content)) !== null) {
+    const body = match[1];
+    if (/\btitle\s*:/.test(body) && /\bdescription\s*:/.test(body) && /\bpath\s*:/.test(body)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function hasMetaTitle(content) {
-  return /\btitle\b\s*:/.test(content) || /buildMeta\s*\(/.test(content);
+  return /\btitle\b\s*:/.test(content) || callsBuildMetaWithRequiredArgs(content);
 }
 
 function hasMetaDescription(content) {
-  return /name\s*:\s*['"]description['"]/.test(content) || /buildMeta\s*\(/.test(content);
+  return /name\s*:\s*['"]description['"]/.test(content) || callsBuildMetaWithRequiredArgs(content);
 }
 
 function rootHasOgTags(content) {
   const ogProps = ['og:title', 'og:description', 'og:type', 'og:image', 'og:url'];
   const matched = ogProps.filter((prop) => content.includes(prop));
-  return matched.length >= 3 || /buildMeta\s*\(/.test(content);
+  return matched.length >= 3 || callsBuildMetaWithRequiredArgs(content);
 }
 
 function rootHasTwitterCard(content) {
-  return /twitter:card/.test(content) || /buildMeta\s*\(/.test(content);
+  return /twitter:card/.test(content) || callsBuildMetaWithRequiredArgs(content);
 }
 
 function rootHasJsonLd(content) {
@@ -72,8 +95,8 @@ if (!rootFile) {
 } else {
   const rootContent = readFileSync(rootFile, 'utf8');
   expect(hasHeadDefinition(rootContent), '__root.tsx must define head()');
-  expect(rootHasOgTags(rootContent), '__root.tsx must include 3+ OG tags (or call buildMeta)');
-  expect(rootHasTwitterCard(rootContent), '__root.tsx must include twitter:card (or call buildMeta)');
+  expect(rootHasOgTags(rootContent), '__root.tsx must include 3+ OG tags (or call buildMeta with title/description/path)');
+  expect(rootHasTwitterCard(rootContent), '__root.tsx must include twitter:card (or call buildMeta with title/description/path)');
   expect(rootHasJsonLd(rootContent), '__root.tsx must include JSON-LD (jsonLdScript or application/ld+json)');
 }
 
@@ -83,8 +106,14 @@ for (const file of allRouteFiles) {
   const content = readFileSync(file, 'utf8');
   if (!/createFileRoute\s*\(/.test(content)) continue;
   expect(hasHeadDefinition(content), `${rel}: page route must define head()`);
-  expect(hasMetaTitle(content), `${rel}: page head must include title (or call buildMeta)`);
-  expect(hasMetaDescription(content), `${rel}: page head must include description (or call buildMeta)`);
+  expect(
+    hasMetaTitle(content),
+    `${rel}: page head must include title (or call buildMeta with title/description/path)`,
+  );
+  expect(
+    hasMetaDescription(content),
+    `${rel}: page head must include description (or call buildMeta with title/description/path)`,
+  );
 }
 
 if (errors.length > 0) {

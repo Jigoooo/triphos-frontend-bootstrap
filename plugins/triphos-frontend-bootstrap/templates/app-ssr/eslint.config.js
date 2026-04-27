@@ -106,6 +106,10 @@ export default [
       'react/react-in-jsx-scope': 'off',
     },
   },
+  // starter route + shared/ui는 컴포넌트 시연/회귀 검증면이라 키보드 핸들러 없이
+  // 클릭만 보여주는 데모 케이스가 많다. 사용자 페이지에는 이 override를
+  // 확장하지 말고, 실제 인터랙션 컴포넌트는 ARIA 패턴(tabIndex=0 + onKeyDown)을
+  // 따라야 한다.
   {
     files: ['src/pages/starter/**/*.{ts,tsx}', 'src/shared/ui/**/*.{ts,tsx}'],
     rules: {

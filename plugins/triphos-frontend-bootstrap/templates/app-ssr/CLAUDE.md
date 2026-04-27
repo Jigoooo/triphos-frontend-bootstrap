@@ -34,5 +34,65 @@
 - 라우팅은 `@tanstack/react-router`의 **file-based**만 사용한다. 새 route는 `src/routes/<segment>.tsx`에 `createFileRoute('/<segment>')({ component })`로 추가하고, root layout은 `src/routes/__root.tsx`만 수정한다. `createBrowserRouter`/`react-router-dom` 사용은 금지이며, 결정 전 [TanStack Router file-based routing 문서](https://tanstack.com/router/latest/docs/framework/react/routing/file-based-routing)를 먼저 확인한다.
 - 이 앱은 **TanStack Start (SSR + Nitro)** 기반이다. `@tanstack/react-start`, `@tanstack/react-router-ssr-query`, `nitro` 가 필수 dep이며, `vite.config.ts`의 `tanstackStart()` + `nitro()` plugin 순서를 임의로 바꾸지 않는다. dev는 `pnpm dev`, production build는 `pnpm build`, 서버 실행은 `pnpm start` (`node .output/server/index.mjs`)이다.
 - SSR 환경에서 깨지는 모듈 top-level browser API 호출(`window`, `document`, `localStorage`, `sessionStorage`, `navigator`, `matchMedia`)은 금지이며, 반드시 `@/shared/lib/is-browser`의 `isBrowser` 가드 또는 `useEffect` / `@/shared/hooks/lifecycle/use-mounted`의 `useMounted` 안에서만 호출한다. zustand persist의 storage는 `createJSONStorage(() => (isBrowser ? localStorage : noopStorage))` 패턴을 따른다. createPortal 사용 컴포넌트는 mount 전 `null` 반환으로 hydration 충돌을 피한다.
-- 메타/SEO는 `src/routes/<segment>.tsx`의 `head: () => ({ meta, links })` 또는 `src/routes/__root.tsx`의 `head` 옵션으로 관리한다. 결정 전 [TanStack Start head/meta 문서](https://tanstack.com/start/latest/docs/framework/react/guide/document-head)를 먼저 확인한다.
+- 메타/SEO는 `src/routes/<segment>.tsx`의 `head: () => ({ meta, links, scripts })`로 관리하며 반드시 `@/shared/lib/seo`의 `buildMeta` + `jsonLdScript` 헬퍼를 사용한다. 결정 전 [TanStack Start head/meta 문서](https://tanstack.com/start/latest/docs/framework/react/guide/document-head)와 [SEO 정책](#seo--a11y-가이드)을 먼저 확인한다. SEO/a11y 키워드(검색 노출, OG, JSON-LD, sitemap, llms.txt, 접근성, axe, Lighthouse)가 들어오면 `triphos-seo-a11y-audit` 스킬로 분기한다.
 - server-only 로직은 `createServerFn` 또는 route file 내 `loader`로 분리한다. 결정 전 [TanStack Start server functions 문서](https://tanstack.com/start/latest/docs/framework/react/guide/server-functions)를 먼저 확인한다.
+
+## SEO & a11y 가이드
+
+### head() 패턴
+
+모든 page route는 다음 형태로 head를 정의한다.
+
+```tsx
+import { createFileRoute } from '@tanstack/react-router';
+import { buildMeta, jsonLdScript, jsonLdWebPage } from '@/shared/lib/seo';
+
+export const Route = createFileRoute('/about')({
+  head: () => {
+    const built = buildMeta({
+      title: 'About Triphos',
+      description: 'Triphos를 소개합니다.',
+      path: '/about',
+    });
+    return {
+      meta: built.meta,
+      links: built.links,
+      scripts: [jsonLdScript(jsonLdWebPage({ name: 'About', description: '소개', path: '/about' }))],
+    };
+  },
+  component: AboutPage,
+});
+```
+
+`buildMeta` 옵션: `title` / `description` / `path`(필수) + `ogType` / `ogImage` / `twitterCard` / `noIndex`(선택). `noIndex: true`이면 og/twitter/canonical은 자동 제거되고 `robots: noindex, nofollow`만 emit된다. 자세한 옵션은 `triphos-seo-a11y-audit` 스킬 또는 `references/shared/seo-policy.md` 참조.
+
+### JSON-LD 타입 선택
+
+- `jsonLdWebPage` — 일반 페이지 (기본)
+- `jsonLdArticle` — 블로그/뉴스
+- `jsonLdBreadcrumbs` — 깊은 navigation
+- `jsonLdOrganization` / `jsonLdWebSite` — `__root.tsx`에서만 한 번씩
+
+### sitemap / llms / robots 갱신
+
+- `src/routes/sitemap[.]xml.ts`의 `ENTRIES`에 `{ path, changefreq, priority }` 추가 (priority 0~1, lastmod ISO 8601)
+- `src/routes/llms[.]txt.ts`(요약본)와 `src/routes/llms-full[.]txt.ts`(전체본) 둘 다 갱신
+- `src/routes/robots[.]txt.ts`는 `getBaseUrl()`로 절대 URL Sitemap을 생성한다. `public/robots.txt` 정적 파일은 사용 금지.
+- `seo-config.ts`의 `SITE_NAME` / `SITE_DESCRIPTION` / `DEFAULT_LOCALE` / `DEFAULT_OG_IMAGE`는 프로젝트 시작 시 실제 값으로 교체.
+
+### a11y 체크리스트
+
+- button / link: visible text 또는 `aria-label` (icon-only는 `aria-label` 필수)
+- `<img>`: `alt` 필수 (장식이면 `alt=""`)
+- form input: `<label htmlFor>`로 매칭
+- `aria-hidden="true"` 요소는 focusable 자식 금지
+- `role="button"` 등 ARIA 위젯은 `tabIndex=0` + 키보드 핸들러 동반
+- color contrast WCAG AA 4.5:1 — 색은 항상 `useColors()` 토큰 (inline hex 금지). 위반 시 `shared/theme`에서 토큰을 조정한다.
+- focus-visible outline은 CSS reset에서 제거하지 않는다.
+
+### 검증 명령
+
+- `pnpm verify:seo` — head/meta/buildMeta 정적 휴리스틱
+- `pnpm lint` — eslint-plugin-jsx-a11y 정적 검증
+- `pnpm verify:a11y` — @axe-core/playwright runtime (serious/critical 0). 새 라우트 추가 시 `scripts/verify-a11y.mjs`의 URL 배열도 갱신.
+- `pnpm verify:lighthouse` — perf>=0.85 / a11y>=0.95 / best-practices>=0.9 / seo>=0.95

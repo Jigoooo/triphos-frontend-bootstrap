@@ -293,7 +293,7 @@ if (isSsr) {
     'src/routes/sitemap[.]xml.ts',
     'src/routes/llms[.]txt.ts',
     'src/routes/llms-full[.]txt.ts',
-    'public/robots.txt',
+    'src/routes/robots[.]txt.ts',
     'lighthouserc.json',
     'scripts/verify-seo.mjs',
     'scripts/verify-a11y.mjs',
@@ -306,8 +306,10 @@ if (isSsr) {
   expectTextIncludes(eslintConfig, "from 'eslint-plugin-jsx-a11y'", 'SSR eslint.config.js must import eslint-plugin-jsx-a11y');
   expectTextIncludes(eslintConfig, 'jsxA11y.flatConfigs.recommended', 'SSR eslint.config.js must register jsxA11y.flatConfigs.recommended');
 
-  const robots = readFileSync(resolve(target, 'public/robots.txt'), 'utf8');
-  expectTextIncludes(robots, 'Sitemap:', 'public/robots.txt must point to sitemap');
+  const robotsRoute = readFileSync(resolve(target, 'src/routes/robots[.]txt.ts'), 'utf8');
+  expectTextIncludes(robotsRoute, 'getBaseUrl', 'src/routes/robots[.]txt.ts must build absolute Sitemap URL via getBaseUrl helper');
+  expectTextIncludes(robotsRoute, 'Sitemap:', 'src/routes/robots[.]txt.ts must include the Sitemap line');
+  expect(!existsSync(resolve(target, 'public/robots.txt')), 'public/robots.txt must be removed in favour of the file-based robots route (absolute Sitemap URL standard)');
 
   const rootRoute = readFileSync(resolve(target, 'src/routes/__root.tsx'), 'utf8');
   expectTextIncludes(rootRoute, 'jsonLdScript', '__root.tsx must inject JSON-LD via jsonLdScript helper');
@@ -316,14 +318,42 @@ if (isSsr) {
   expect(packageJson.scripts?.['verify:seo'] === 'node ./scripts/verify-seo.mjs', 'SSR package.json scripts.verify:seo must be "node ./scripts/verify-seo.mjs"');
   expect(packageJson.scripts?.['verify:a11y'] === 'node ./scripts/verify-a11y.mjs', 'SSR package.json scripts.verify:a11y must be "node ./scripts/verify-a11y.mjs"');
   expect(packageJson.scripts?.['verify:lighthouse'] === 'node ./scripts/verify-lighthouse.mjs', 'SSR package.json scripts.verify:lighthouse must be "node ./scripts/verify-lighthouse.mjs"');
-  expect(packageJson.scripts?.['verify:frontend']?.includes('pnpm verify:seo'), 'SSR verify:frontend chain must include pnpm verify:seo');
-  expect(packageJson.scripts?.['verify:frontend']?.includes('pnpm verify:a11y'), 'SSR verify:frontend chain must include pnpm verify:a11y');
-  expect(packageJson.scripts?.['verify:frontend']?.includes('pnpm verify:lighthouse'), 'SSR verify:frontend chain must include pnpm verify:lighthouse');
+  const ssrVerifyFrontend = packageJson.scripts?.['verify:frontend'] ?? '';
+  expect(ssrVerifyFrontend.includes('pnpm verify:seo'), 'SSR verify:frontend chain must include pnpm verify:seo');
+  expect(ssrVerifyFrontend.includes('pnpm verify:a11y'), 'SSR verify:frontend chain must include pnpm verify:a11y');
+  expect(ssrVerifyFrontend.includes('pnpm verify:lighthouse'), 'SSR verify:frontend chain must include pnpm verify:lighthouse');
+  expect(
+    /pnpm routes:generate\s*&&\s*pnpm verify:seo\b/.test(ssrVerifyFrontend),
+    'SSR verify:frontend chain must run pnpm verify:seo immediately after pnpm routes:generate so newly added routes are caught early',
+  );
   expect(packageJson.devDependencies?.['eslint-plugin-jsx-a11y'], 'SSR package.json must include eslint-plugin-jsx-a11y devDep');
   expect(packageJson.devDependencies?.['@axe-core/playwright'], 'SSR package.json must include @axe-core/playwright devDep');
   expect(packageJson.devDependencies?.['@lhci/cli'], 'SSR package.json must include @lhci/cli devDep');
   expect(packageJson.devDependencies?.['lighthouse'], 'SSR package.json must include lighthouse devDep');
   expect(packageJson.devDependencies?.['playwright'], 'SSR package.json must include playwright devDep');
+
+  const lighthouseRc = JSON.parse(readFileSync(resolve(target, 'lighthouserc.json'), 'utf8'));
+  const a11yAssertion = lighthouseRc.ci?.assert?.assertions?.['categories:accessibility'];
+  const a11yMinScore = Array.isArray(a11yAssertion) ? a11yAssertion[1]?.minScore : undefined;
+  expect(a11yMinScore === 0.95, 'lighthouserc.json categories:accessibility minScore must be 0.95 to match the SEO threshold and the documented 0.8.0 plan');
+  const seoAssertion = lighthouseRc.ci?.assert?.assertions?.['categories:seo'];
+  const seoMinScore = Array.isArray(seoAssertion) ? seoAssertion[1]?.minScore : undefined;
+  expect(seoMinScore === 0.95, 'lighthouserc.json categories:seo minScore must be 0.95');
+
+  expect(existsSync(resolve(target, 'public/og-default.png')), 'SSR template must ship public/og-default.png as the default OG image (replace before launch)');
+
+  const sitemapRoute = readFileSync(resolve(target, 'src/routes/sitemap[.]xml.ts'), 'utf8');
+  expectTextIncludes(sitemapRoute, 'ENTRIES', 'src/routes/sitemap[.]xml.ts must declare an ENTRIES array consumed by buildSitemapXml');
+  expectTextIncludes(sitemapRoute, 'buildSitemapXml', 'src/routes/sitemap[.]xml.ts must call buildSitemapXml from @/shared/lib/seo');
+
+  const sitemapEntry = readFileSync(resolve(target, 'src/shared/lib/seo/build-sitemap-entry.ts'), 'utf8');
+  expectTextIncludes(sitemapEntry, 'clampPriority', 'build-sitemap-entry.ts must clamp priority to the 0.0-1.0 range to keep generated sitemaps schema-valid');
+
+  const buildMetaSrc = readFileSync(resolve(target, 'src/shared/lib/seo/build-meta.ts'), 'utf8');
+  expectTextIncludes(buildMetaSrc, 'noIndex', 'build-meta.ts must implement a noIndex branch so noindex pages do not leak og/twitter/canonical');
+
+  const verifySeo = readFileSync(resolve(target, 'scripts/verify-seo.mjs'), 'utf8');
+  expectTextIncludes(verifySeo, 'callsBuildMetaWithRequiredArgs', 'verify-seo.mjs must validate that buildMeta() is called with title/description/path so empty calls fail the heuristic');
 }
 
 const sharedApi = readFileSync(resolve(target, 'src/shared/api/index.ts'), 'utf8');

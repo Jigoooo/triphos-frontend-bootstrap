@@ -41,6 +41,21 @@ function clamp(text: string, max: number): string {
 export function buildMeta(input: BuildMetaInput): BuiltHead {
   const title = clamp(input.title, TITLE_BUDGET);
   const description = clamp(input.description, DESCRIPTION_BUDGET);
+
+  // noIndex pages must not leak OG/Twitter/canonical metadata: social caches
+  // would still serve the page and search engines could pick up canonical hints
+  // even though we asked them not to index. Emit only the bare minimum.
+  if (input.noIndex) {
+    return {
+      meta: [
+        { title },
+        { name: 'description', content: description },
+        { name: 'robots', content: 'noindex, nofollow' },
+      ],
+      links: [],
+    };
+  }
+
   const ogType = input.ogType ?? 'website';
   const ogImage = absoluteUrl(input.ogImage ?? DEFAULT_OG_IMAGE);
   const ogUrl = absoluteUrl(input.path);
@@ -61,10 +76,6 @@ export function buildMeta(input: BuildMetaInput): BuiltHead {
     { name: 'twitter:description', content: description },
     { name: 'twitter:image', content: ogImage },
   ];
-
-  if (input.noIndex) {
-    meta.push({ name: 'robots', content: 'noindex, nofollow' });
-  }
 
   const links: LinkTag[] = [{ rel: 'canonical', href: ogUrl }];
 
