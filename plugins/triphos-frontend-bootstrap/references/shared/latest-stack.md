@@ -36,8 +36,8 @@ This file captures the approved official reference set for the bootstrap.
   - `exactOptionalPropertyTypes`: https://www.typescriptlang.org/tsconfig/exactOptionalPropertyTypes.html
   - `noUncheckedIndexedAccess`: https://www.typescriptlang.org/tsconfig/noUncheckedIndexedAccess.html
 
-## Not default yet
+## SSR baseline
 
-- TanStack Start is still treated as a future preset, not the default scaffold baseline.
+- TanStack Start (SSR + Nitro Node) is the official SSR template since 0.7.0. Use `triphos-frontend-init --template app-ssr` for the SSR baseline; the SPA template (`--template app`, default) keeps client-only TanStack Router + Vite without Start/Nitro.
   - https://tanstack.com/start/v1
   - https://tanstack.com/blog/announcing-tanstack-start-v1

@@ -126,9 +126,33 @@ const requiredFiles = [
 ];
 
 const variantArg = typeof args.variant === 'string' ? args.variant : null;
-const isSsr =
-  variantArg === 'app-ssr' ||
-  (variantArg === null && target.replace(/\\/g, '/').replace(/\/$/, '').endsWith('app-ssr'));
+if (variantArg && variantArg !== 'app' && variantArg !== 'app-ssr') {
+  console.error(`Unsupported --variant value: ${variantArg} (expected "app" or "app-ssr")`);
+  process.exit(1);
+}
+const normalizedTarget = target.replace(/\\/g, '/').replace(/\/$/, '');
+let isSsr;
+if (variantArg) {
+  isSsr = variantArg === 'app-ssr';
+} else {
+  // Fallback: derive from target path. SSR-specific assertions are skipped
+  // silently when the path does not match either template directory, which
+  // historically masked SSR drift in custom user repos. Warn loudly so the
+  // caller upgrades to the explicit --variant flag.
+  if (normalizedTarget.endsWith('app-ssr')) {
+    isSsr = true;
+  } else if (normalizedTarget.endsWith('app')) {
+    isSsr = false;
+  } else {
+    console.error(
+      'Missing --variant flag and target path does not end with "app" or "app-ssr". Pass --variant app or --variant app-ssr explicitly.',
+    );
+    process.exit(1);
+  }
+  console.warn(
+    `[check-app-constraints] --variant not provided; inferred "${isSsr ? 'app-ssr' : 'app'}" from target path. Prefer passing --variant explicitly to avoid silent SSR drift.`,
+  );
+}
 
 if (isSsr) {
   requiredFiles.push('src/shared/lib/is-browser.ts', 'src/shared/hooks/lifecycle/use-mounted.ts');
@@ -165,11 +189,21 @@ for (const relativePath of forbiddenPaths) {
   expect(!existsSync(resolve(target, relativePath)), `Forbidden scaffold path still exists: ${relativePath}`);
 }
 
-const envValues = parseDotEnv(readFileSync(resolve(target, '.env'), 'utf8'));
-expect(envValues.VITE_PORT === '3000', 'Expected .env VITE_PORT=3000');
-expect(envValues.VITE_API_URL === 'http://localhost', 'Expected .env VITE_API_URL=http://localhost');
-expect(envValues.VITE_API_PORT === '3001', 'Expected .env VITE_API_PORT=3001');
-expect(envValues.VITE_SUFFIX_API_ENDPOINT === 'api', 'Expected .env VITE_SUFFIX_API_ENDPOINT=api');
+// .env baseline assertions are designed for freshly scaffolded fixtures where
+// the template defaults are still in place. Long-running user repositories
+// will replace these values with real backend URLs, so the verifier accepts
+// TRIPHOS_SKIP_ENV_BASELINE=1 to suppress only the .env equality checks while
+// keeping every other constraint active.
+const skipEnvBaseline = ['1', 'true', 'yes', 'on'].includes(
+  String(process.env['TRIPHOS_SKIP_ENV_BASELINE'] ?? '').toLowerCase(),
+);
+if (!skipEnvBaseline) {
+  const envValues = parseDotEnv(readFileSync(resolve(target, '.env'), 'utf8'));
+  expect(envValues.VITE_PORT === '3000', 'Expected .env VITE_PORT=3000');
+  expect(envValues.VITE_API_URL === 'http://localhost', 'Expected .env VITE_API_URL=http://localhost');
+  expect(envValues.VITE_API_PORT === '3001', 'Expected .env VITE_API_PORT=3001');
+  expect(envValues.VITE_SUFFIX_API_ENDPOINT === 'api', 'Expected .env VITE_SUFFIX_API_ENDPOINT=api');
+}
 
 const gitignore = readFileSync(resolve(target, '.gitignore'), 'utf8');
 for (const entry of [

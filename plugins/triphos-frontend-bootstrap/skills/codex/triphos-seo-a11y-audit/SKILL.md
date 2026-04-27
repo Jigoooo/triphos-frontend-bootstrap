@@ -1,6 +1,7 @@
 ---
 name: triphos-seo-a11y-audit
 description: SSR 프로젝트의 SEO와 접근성을 점검·패치한다. SSR 전용.
+model: sonnet
 ---
 
 # triphos-seo-a11y-audit

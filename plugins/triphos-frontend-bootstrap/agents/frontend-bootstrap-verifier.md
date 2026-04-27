@@ -1,7 +1,7 @@
 ---
 name: frontend-bootstrap-verifier
 description: Verify Triphos bootstrap outcomes
-model: sonnet
+model: haiku
 ---
 
 # frontend-bootstrap-verifier

@@ -45,7 +45,11 @@ for (const skillName of allSkillNames) {
     const claudeContent = readNormalized(claudeSkillPath);
     const codexContent = readNormalized(codexSkillPath);
 
-    if (claudeContent !== codexContent) {
+    // Surface-specific frontmatter keys (e.g. `model:`, `allowed-tools:`) may
+    // legitimately diverge between Claude and Codex when one runtime supports
+    // a feature the other does not. Strip those keys before the equality
+    // check; the rest of the SKILL must remain byte-equal.
+    if (stripSurfaceSpecificFrontmatter(claudeContent) !== stripSurfaceSpecificFrontmatter(codexContent)) {
       failures.push(`${skillName}/SKILL.md is not mirrored between Claude and Codex surfaces`);
     }
   }
@@ -80,6 +84,30 @@ function listSkillNames(surfaceRoot) {
 
 function readNormalized(path) {
   return readFileSync(path, 'utf8').replace(/\r\n/g, '\n');
+}
+
+function stripSurfaceSpecificFrontmatter(content) {
+  // Surface-specific keys (Claude `model:`, Claude `allowed-tools:`) may
+  // legitimately differ between claude/ and codex/ mirrors; strip them before
+  // the byte-equal compare so adding `model: sonnet` to Claude alone does not
+  // trip parity.
+  const surfaceSpecific = new Set(['model', 'allowed-tools']);
+  if (!content.startsWith('---\n')) return content;
+  const endIndex = content.indexOf('\n---\n', 4);
+  if (endIndex < 0) return content;
+
+  const body = content.slice(endIndex + 5);
+  const filtered = content
+    .slice(4, endIndex)
+    .split('\n')
+    .filter((line) => {
+      const match = line.match(/^([A-Za-z0-9_-]+):/u);
+      if (!match) return true;
+      return !surfaceSpecific.has(match[1]);
+    })
+    .join('\n');
+
+  return `---\n${filtered}\n---\n${body}`;
 }
 
 function compareBundledResources(skillName, claudeDir, codexDir) {

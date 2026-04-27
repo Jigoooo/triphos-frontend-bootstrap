@@ -2,6 +2,7 @@
 name: triphos-frontend-init
 description: 새 디렉터리에 Triphos 프론트엔드 앱을 생성한다. 템플릿에는 shared/api, auth/token/member baseline, auth-aware api-bootstrap, repo-local Codex/Claude hooks, verifier scripts가 기본 포함된다.
 argument-hint: "[target-directory]"
+model: sonnet
 ---
 
 # triphos-frontend-init
