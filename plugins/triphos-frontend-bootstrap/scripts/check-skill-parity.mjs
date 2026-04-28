@@ -308,18 +308,17 @@ function readFrontmatter(content, label) {
 }
 
 function extractLocalReferences(content) {
+  // Only markdown links count as references. Inline code (`backticks`) is
+  // documentation prose, not a load-this-file directive — treating it as a
+  // ref produced false positives for tokens like `verify-a11y.mjs` that
+  // describe generated-app scripts. The skill-bundles centralisation
+  // (Step 1) further means refs always live in one canonical location;
+  // body inline mentions can describe the file without binding the path.
   const references = new Set();
-  const markdownLinkPattern = /\[[^\]]+\]\(([^)]+)\)/gu;
-  const inlineCodePattern = /`([^`]+)`/gu;
+  const markdownLinkPattern = /\[[^\]]+\]\(([^)\s]+)\)/gu;
 
   for (const match of content.matchAll(markdownLinkPattern)) {
     addReferenceCandidate(references, match[1]);
-  }
-
-  for (const match of content.matchAll(inlineCodePattern)) {
-    for (const token of match[1].split(/\s+/u)) {
-      addReferenceCandidate(references, token);
-    }
   }
 
   return [...references].sort();

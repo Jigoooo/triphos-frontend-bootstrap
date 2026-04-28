@@ -35,10 +35,11 @@ SSR 베이스에서 SEO/a11y는 한두 페이지를 잘 만든다고 끝나지 �
 </Inputs>
 
 <Read_First>
-- [../../../references/shared/seo-policy.md](../../../references/shared/seo-policy.md)
-- [../../../references/shared/a11y-baseline.md](../../../references/shared/a11y-baseline.md)
-- [../../../references/shared/frontend-policy.md](../../../references/shared/frontend-policy.md)
+- [seo-policy.md](../../../references/shared/seo-policy.md) — SEO 메타·sitemap·robots 정책
+- [a11y-baseline.md](../../../references/shared/a11y-baseline.md) — a11y 기본선
 </Read_First>
+
+분기 시점 lazy: inline 스타일·className·shared/theme 정책 재확인 필요 시 `references/shared/frontend-policy.md`.
 
 ## 사전 조건 (SSR 전용)
 

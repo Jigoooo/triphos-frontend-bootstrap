@@ -37,7 +37,7 @@ API 레이어는 매번 같은 한 세트(api + query-keys + query-options + mut
 </Inputs>
 
 <Read_First>
-- baseline 파일이 없거나 오래된 프로젝트라면 [references/default-template.md](references/default-template.md)를 읽고 현재 템플릿의 API 형태를 확인한다.
+- baseline 파일이 없거나 오래된 프로젝트라면 [default-template.md](../../../references/skill-bundles/triphos-api-client-setup/default-template.md)를 읽고 현재 템플릿의 API 형태를 확인한다.
 - 프로젝트에 이미 `src/shared/api/`가 있으면 템플릿보다 현재 코드와 백엔드 계약을 우선한다.
 </Read_First>
 

@@ -40,12 +40,15 @@ handoff: inline
 </Inputs>
 
 <Read_First>
-- [../../../references/shared/stack.md](../../../references/shared/stack.md)
-- [../../../references/shared/init-contract.md](../../../references/shared/init-contract.md)
-- [../../../references/shared/latest-stack.md](../../../references/shared/latest-stack.md)
-- [../../../references/shared/frontend-policy.md](../../../references/shared/frontend-policy.md)
-- [../../../references/internal/frontend-doctor.md](../../../references/internal/frontend-doctor.md)
+- [stack.md](../../../references/shared/stack.md) — 스택 / 패키지 매니저 / 기본 스크립트 baseline
+- [init-contract.md](../../../references/shared/init-contract.md) — 생성 후 검증 계약
 </Read_First>
+
+분기 시점 lazy (`references/shared/`, `references/internal/` 아래):
+
+- 최신 stack 버전 확인 필요 시: `latest-stack.md`
+- inline 스타일·className·shared/theme 정책 재확인 필요 시: `frontend-policy.md`
+- 환경 진단/`doctor.mjs` 실패 분기: `internal/frontend-doctor.md`
 
 <Steps>
 1. **SSR/SEO 결정**: 작업 시작 전 사용자에게 "이 프로젝트가 SSR/SEO가 필요합니까?"를 묻는다. 랜딩/마케팅/제품 소개/공개 페이지가 주이면 → SSR, 내부 도구/대시보드이면 → SPA. 답을 못 들으면 SPA(default)로 진행하되 결정 후 변경 가능함을 알린다.

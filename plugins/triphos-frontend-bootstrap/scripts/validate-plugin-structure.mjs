@@ -23,23 +23,25 @@ const requiredSkillPaths = requiredSkillNames.flatMap((skillName) => [
   resolve(pluginRoot, "skills", "claude", skillName, "SKILL.md"),
   resolve(pluginRoot, "skills", "codex", skillName, "SKILL.md"),
 ]);
+// Skill bundles centralised under plugin root references/skill-bundles/<bundle>/
+// (Step 1 of the token-cost optimisation plan). Skill-local mirrors removed.
+// `audit-ui-components.mjs` remains a per-surface skill-local script because
+// runtimes execute it from the active skill directory.
+const requiredCentralSkillBundles = [
+  resolve(pluginRoot, "references", "skill-bundles", "triphos-api-client-setup", "default-template.md"),
+  resolve(pluginRoot, "references", "skill-bundles", "triphos-fsd-refactor", "anti-patterns.md"),
+  resolve(pluginRoot, "references", "skill-bundles", "triphos-fsd-refactor", "layer-boundaries.md"),
+  resolve(pluginRoot, "references", "skill-bundles", "triphos-fsd-refactor", "rules.md"),
+  resolve(pluginRoot, "references", "skill-bundles", "triphos-fsd-refactor", "segments.md"),
+];
 const requiredMirroredSkillResources = [
-  resolve(pluginRoot, "skills", "claude", "triphos-api-client-setup", "references", "default-template.md"),
-  resolve(pluginRoot, "skills", "codex", "triphos-api-client-setup", "references", "default-template.md"),
-  resolve(pluginRoot, "skills", "claude", "triphos-fsd-refactor", "references", "anti-patterns.md"),
-  resolve(pluginRoot, "skills", "codex", "triphos-fsd-refactor", "references", "anti-patterns.md"),
-  resolve(pluginRoot, "skills", "claude", "triphos-fsd-refactor", "references", "layer-boundaries.md"),
-  resolve(pluginRoot, "skills", "codex", "triphos-fsd-refactor", "references", "layer-boundaries.md"),
-  resolve(pluginRoot, "skills", "claude", "triphos-fsd-refactor", "references", "rules.md"),
-  resolve(pluginRoot, "skills", "codex", "triphos-fsd-refactor", "references", "rules.md"),
-  resolve(pluginRoot, "skills", "claude", "triphos-fsd-refactor", "references", "segments.md"),
-  resolve(pluginRoot, "skills", "codex", "triphos-fsd-refactor", "references", "segments.md"),
   resolve(pluginRoot, "skills", "claude", "triphos-fsd-refactor", "scripts", "audit-ui-components.mjs"),
   resolve(pluginRoot, "skills", "codex", "triphos-fsd-refactor", "scripts", "audit-ui-components.mjs"),
 ];
 
 const requiredPaths = [
   ...requiredSkillPaths,
+  ...requiredCentralSkillBundles,
   ...requiredMirroredSkillResources,
   resolve(repoRoot, "bin", "triphos-frontend-bootstrap"),
   resolve(repoRoot, ".codex", "hooks.json"),

@@ -39,10 +39,13 @@ Theme drift is silent: a hardcoded hex here, a `className` shortcut there, and t
 </Inputs>
 
 <Read_First>
-- [../../../references/shared/stack.md](../../../references/shared/stack.md)
-- [../../../references/shared/init-contract.md](../../../references/shared/init-contract.md)
-- [../../../references/shared/latest-stack.md](../../../references/shared/latest-stack.md)
+- [stack.md](../../../references/shared/stack.md) — 스택 / 패키지 매니저 baseline
 </Read_First>
+
+분기 시점 lazy (`references/shared/` 아래):
+
+- 토큰/테마 변경이 stack 결정과 묶일 때: `init-contract.md`
+- 최신 stack 버전 확인이 필요할 때: `latest-stack.md`
 
 ## Responsibility
 

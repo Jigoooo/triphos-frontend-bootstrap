@@ -79,8 +79,12 @@ tfb delete
 | --- | --- | --- | --- |
 | `frontend-bootstrap-planner` | opus | gpt-5.5 | high |
 | `frontend-bootstrap-executor` | sonnet | gpt-5.4 | medium |
-| `frontend-bootstrap-verifier` | sonnet | gpt-5.4-mini | medium |
+| `frontend-bootstrap-verifier` | haiku | gpt-5.4-mini | low |
 | `frontend-bootstrap-refactor-reviewer` | sonnet | gpt-5.4 | medium |
+
+`check-model-routing.mjs`가 `agents/*.md` frontmatter `model:`과 위 표가
+일치하는지 매 `verify:repo`에서 검증한다. 어느 한쪽이 변경되면 다른
+쪽도 같이 갱신할 것.
 
 ### Skill 별 모델 (단일 호출)
 
