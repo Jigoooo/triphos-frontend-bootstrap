@@ -1,2 +1,14 @@
 [features]
 codex_hooks = true
+
+# Recommended profiles for Triphos frontend work. Codex CLI's
+# `--profile <name>` switches the active model + reasoning_effort, which
+# keeps planning conversations on a higher-reasoning model and routine
+# execution on a cheaper one. See README "Model Routing Strategy".
+[profiles.plan]
+model = "gpt-5.5"
+model_reasoning_effort = "high"
+
+[profiles.exec]
+model = "gpt-5.4-mini"
+model_reasoning_effort = "low"
