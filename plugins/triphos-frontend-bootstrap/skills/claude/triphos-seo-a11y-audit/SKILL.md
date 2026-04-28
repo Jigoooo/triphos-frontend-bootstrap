@@ -1,16 +1,44 @@
 ---
 name: triphos-seo-a11y-audit
 description: SSR 프로젝트의 SEO와 접근성을 점검·패치한다. SSR 전용.
+level: 2
+triggers: ["SEO 점검", "메타 부족", "검색 노출", "OG", "JSON-LD", "구조화 데이터", "sitemap", "robots", "llms.txt", "a11y", "접근성", "스크린 리더", "alt 텍스트", "aria", "Lighthouse", "axe", "verify:seo", "verify:a11y"]
 model: sonnet
 ---
 
 # triphos-seo-a11y-audit
 
-## 먼저 읽기
+<Purpose>
+TanStack Start (SSR + Nitro) 베이스 프로젝트의 SEO와 접근성을 점검·패치한다. head/meta/OG/JSON-LD/sitemap/robots/llms.txt 정적 검증, eslint-plugin-jsx-a11y, @axe-core/playwright runtime, Lighthouse threshold를 한 패스로 다룬다.
+</Purpose>
 
+<Use_When>
+- 사용자가 "SEO 점검", "메타 부족", "검색 노출", "OG/Twitter card", "JSON-LD", "구조화 데이터", "sitemap", "robots", "llms.txt", "a11y", "접근성", "스크린 리더", "alt 텍스트", "aria", "Lighthouse", "axe" 키워드를 언급
+- 새 페이지 추가 직후 `head()`가 비어 있을 때
+- `verify:seo` 또는 `lint(jsx-a11y)` 또는 `verify:a11y` 또는 `verify:lighthouse` 실패 시
+</Use_When>
+
+<Do_Not_Use_When>
+- SPA 베이스 프로젝트 — 이 스킬은 SSR 전용. SPA에서는 새 SSR 프로젝트 재생성을 권장한다.
+- 새 프로젝트 스캐폴드 → `triphos-frontend-init` (`--template app-ssr`)
+- FSD 레이어 정리 → `triphos-fsd-refactor`
+- 훅 lint 정리 → `triphos-react-lint-rules`
+</Do_Not_Use_When>
+
+<Why_This_Exists>
+SSR 베이스에서 SEO/a11y는 한두 페이지를 잘 만든다고 끝나지 않는다. head/meta/OG/JSON-LD/sitemap/llms/robots/a11y/Lighthouse는 묶어서 같은 기준으로 검증해야 회귀가 잡힌다. 이 스킬은 그 7개 검증 surface를 단일 워크플로우로 묶는다.
+</Why_This_Exists>
+
+<Inputs>
+- SSR 베이스 프로젝트 (TanStack Start + Nitro)
+- 점검 대상 페이지/라우트 (선택, 미지정 시 `verify:*` 전부 실행)
+</Inputs>
+
+<Read_First>
 - [../../../references/shared/seo-policy.md](../../../references/shared/seo-policy.md)
 - [../../../references/shared/a11y-baseline.md](../../../references/shared/a11y-baseline.md)
 - [../../../references/shared/frontend-policy.md](../../../references/shared/frontend-policy.md)
+</Read_First>
 
 ## 사전 조건 (SSR 전용)
 
@@ -24,14 +52,7 @@ model: sonnet
 
 > "SPA 베이스 프로젝트는 0.8.0 SEO/a11y 인프라 대상이 아닙니다. SSR/SEO가 필요하면 새 프로젝트로 `triphos-frontend-init --template app-ssr`를 권장합니다."
 
-## 사용 시점
-
-- 사용자가 "SEO 점검", "메타 부족", "검색 노출", "OG/Twitter card", "JSON-LD", "구조화 데이터", "sitemap", "robots", "llms.txt", "a11y", "접근성", "스크린 리더", "alt 텍스트", "aria", "Lighthouse", "axe" 키워드를 언급
-- 새 페이지 추가 직후 head() 비어있을 때
-- `verify:seo` 또는 `lint(jsx-a11y)` 또는 `verify:a11y` 또는 `verify:lighthouse` 실패 시
-
-## 워크플로우 (SSR 확정 후)
-
+<Steps>
 1. 다음을 순차 실행하고 각 결과를 분리해 보고
    - `pnpm verify:seo` (head/meta/OG/JSON-LD 정적 휴리스틱)
    - `pnpm lint` (eslint-plugin-jsx-a11y 포함)
@@ -49,6 +70,31 @@ model: sonnet
 3. 회귀 확인 — 위 4개 명령 모두 다시 통과
 4. 변경된 페이지의 SSR HTML을 `pnpm build && pnpm start && curl http://localhost:3000/<path>`로 OG/JSON-LD가 실제 응답에 포함되는지 한 번 확인. `/sitemap.xml`, `/robots.txt`, `/llms.txt`도 함께 점검.
 5. 새 라우트를 추가했다면 앱 저장소의 `verify-a11y.mjs` (scripts 디렉터리)의 검증 URL 배열에 그 path를 추가한다 (axe runtime 검증 자동 확장이 아님)
+</Steps>
+
+<Tool_Usage>
+- 정적 검증: `pnpm verify:seo`, `pnpm lint`
+- 런타임 검증: `pnpm verify:a11y`, `pnpm verify:lighthouse`
+- 응답 확인: `pnpm build && pnpm start && curl /<path>` (OG/JSON-LD/sitemap/robots/llms 회귀 확인)
+- helper: `buildMeta()`, `jsonLd*()`, `jsonLdScript()`, `buildLlmsTxt()`, `buildLlmsFullTxt()`
+</Tool_Usage>
+
+<Escalation_And_Stop_Conditions>
+- SSR 사전 조건 3개 중 하나라도 미충족이면 즉시 종료. 강행 금지.
+- 4개 verify 모두 통과하기 전에 완료 보고 금지.
+- 새 라우트 추가 시 `verify-a11y.mjs` URL 배열 업데이트 누락 금지.
+- color-contrast는 `shared/theme` 토큰으로 조정. 인라인 hex 하드코딩 금지.
+- Lighthouse 점수가 환경 의존으로 흔들리면 `TRIPHOS_SKIP_LIGHTHOUSE=1`로 일시 skip하되 production deploy 직전 manual run 필수.
+</Escalation_And_Stop_Conditions>
+
+<Final_Checklist>
+- [ ] SSR 사전 조건 3개 모두 만족 확인
+- [ ] `pnpm verify:seo` / `pnpm lint` / `pnpm verify:a11y` / `pnpm verify:lighthouse` 4개 모두 통과
+- [ ] 변경된 페이지의 SSR HTML 응답에 OG/JSON-LD 포함 확인
+- [ ] `/sitemap.xml`, `/robots.txt`, `/llms.txt`, `/llms-full.txt` 응답 확인
+- [ ] 새 라우트가 있으면 `verify-a11y.mjs` URL 배열 업데이트
+- [ ] color-contrast 위반은 `shared/theme` 토큰으로 조정 (인라인 hex 하드코딩 없음)
+</Final_Checklist>
 
 ## buildMeta 옵션
 
@@ -89,8 +135,8 @@ model: sonnet
 
 ## 참고
 
-- TanStack Start SEO docs: https://tanstack.com/start/latest/docs/framework/react/guide/seo
-- jsx-a11y 룰: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y
-- @axe-core/playwright: https://github.com/dequelabs/axe-core-npm
-- Lighthouse CI: https://github.com/GoogleChrome/lighthouse-ci
-- llms.txt 표준 초안: https://llmstxt.org/
+- TanStack Start SEO docs: <https://tanstack.com/start/latest/docs/framework/react/guide/seo>
+- jsx-a11y 룰: <https://github.com/jsx-eslint/eslint-plugin-jsx-a11y>
+- @axe-core/playwright: <https://github.com/dequelabs/axe-core-npm>
+- Lighthouse CI: <https://github.com/GoogleChrome/lighthouse-ci>
+- llms.txt 표준 초안: <https://llmstxt.org/>
