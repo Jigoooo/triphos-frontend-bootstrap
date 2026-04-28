@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { dirname, resolve } from "node:path";
 import test from "node:test";
 
-import { uninstallCodexPlugin } from "../scripts/install-lib.mjs";
+import { migrateLegacyCodexInstall, uninstallCodexPlugin } from "../scripts/install-lib.mjs";
 
 const MARKER_FILE = ".managed-triphos-frontend-bootstrap-skills.json";
 
@@ -17,7 +17,7 @@ test("uninstallCodexPlugin removes managed local plugin state and keeps unrelate
   const cwd = mkdtempSync(resolve(tmpdir(), "tfb-uninstall-local-"));
 
   try {
-    const installRoot = resolve(cwd, ".triphos", "plugins", "triphos-frontend-bootstrap");
+    const installRoot = resolve(cwd, ".codex", "plugins", "triphos-frontend-bootstrap");
     const skillsRoot = resolve(cwd, ".codex", "skills");
     const marketplacePath = resolve(cwd, ".agents", "plugins", "marketplace.json");
     const managedSkills = [
@@ -71,6 +71,37 @@ test("uninstallCodexPlugin removes managed local plugin state and keeps unrelate
 
     const payload = JSON.parse(readFileSync(marketplacePath, "utf8"));
     assert.deepEqual(payload.plugins.map((item) => item.name), ["keep-plugin"]);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("migrateLegacyCodexInstall removes ~/.triphos/plugins/<name> and reports it", () => {
+  const cwd = mkdtempSync(resolve(tmpdir(), "tfb-migrate-"));
+
+  try {
+    const legacyRoot = resolve(cwd, ".triphos", "plugins", "triphos-frontend-bootstrap");
+    mkdirSync(legacyRoot, { recursive: true });
+    writeFileSync(resolve(legacyRoot, "stale.txt"), "x");
+
+    const result = migrateLegacyCodexInstall({ scope: "local", cwd });
+
+    assert.equal(result.removed.length, 1);
+    assert.equal(result.removed[0], legacyRoot);
+    assert.equal(existsSync(legacyRoot), false);
+    // .triphos/plugins/ should be cleaned when it ends up empty.
+    assert.equal(existsSync(resolve(cwd, ".triphos", "plugins")), false);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("migrateLegacyCodexInstall is a no-op when the legacy install does not exist", () => {
+  const cwd = mkdtempSync(resolve(tmpdir(), "tfb-migrate-noop-"));
+
+  try {
+    const result = migrateLegacyCodexInstall({ scope: "local", cwd });
+    assert.deepEqual(result.removed, []);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

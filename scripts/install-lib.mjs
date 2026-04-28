@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, rmdirSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import { dirname, resolve } from "node:path";
 
@@ -177,10 +177,10 @@ function rmIfEmptyDir(path) {
   try {
     const entries = readdirSync(path);
     if (entries.length === 0) {
-      rmSync(path, { recursive: false, force: true });
+      rmdirSync(path);
     }
   } catch {
-    // Best-effort cleanup; ignore if listing fails.
+    // Best-effort cleanup; ignore if listing/removal fails.
   }
 }
 
