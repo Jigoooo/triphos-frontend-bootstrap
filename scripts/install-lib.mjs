@@ -17,6 +17,7 @@ const PUBLIC_CODEX_SKILLS = [
   "triphos-react-lint-rules",
   "triphos-api-client-setup",
   "triphos-theme-setup",
+  "triphos-seo-a11y-audit",
 ];
 const HIDDEN_CODEX_SKILLS = [
   "triphos-frontend-bootstrap",
