@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import { dirname, resolve } from "node:path";
 
@@ -155,10 +155,50 @@ export function resolveCodexSkillsRoot({ scope, cwd = process.cwd(), homeDir = o
 
 export function resolveCodexInstallRoot({ scope, cwd = process.cwd(), homeDir = os.homedir() }) {
   if (scope === "global") {
-    return resolve(homeDir, ".triphos", "plugins", PLUGIN_NAME);
+    return resolve(homeDir, ".codex", "plugins", PLUGIN_NAME);
   }
 
-  return resolve(cwd, ".triphos", "plugins", PLUGIN_NAME);
+  return resolve(cwd, ".codex", "plugins", PLUGIN_NAME);
+}
+
+export function resolveLegacyCodexInstallRoots({ scope, cwd = process.cwd(), homeDir = os.homedir() }) {
+  // Pre-0.11.0 plugin bundle was installed under ~/.triphos/plugins/<name>.
+  // We migrate it into ~/.codex/plugins/<name> so the entire Codex surface
+  // lives under .codex/. Returns every legacy location we should clean up.
+  if (scope === "global") {
+    return [resolve(homeDir, ".triphos", "plugins", PLUGIN_NAME)];
+  }
+
+  return [resolve(cwd, ".triphos", "plugins", PLUGIN_NAME)];
+}
+
+function rmIfEmptyDir(path) {
+  if (!existsSync(path)) return;
+  try {
+    const entries = readdirSync(path);
+    if (entries.length === 0) {
+      rmSync(path, { recursive: false, force: true });
+    }
+  } catch {
+    // Best-effort cleanup; ignore if listing fails.
+  }
+}
+
+export function migrateLegacyCodexInstall({ scope, cwd = process.cwd(), homeDir = os.homedir() }) {
+  const legacyRoots = resolveLegacyCodexInstallRoots({ scope, cwd, homeDir });
+  const removed = [];
+
+  for (const legacyRoot of legacyRoots) {
+    if (!existsSync(legacyRoot)) continue;
+    rmSync(legacyRoot, { recursive: true, force: true });
+    removed.push(legacyRoot);
+
+    // Clean up the now-empty parents but stop at .triphos/ — it may host other
+    // unrelated state (e.g. .triphos/traces/) that we must not touch.
+    rmIfEmptyDir(dirname(legacyRoot));
+  }
+
+  return { removed };
 }
 
 export function resolveCodexMarketplacePath({ scope, cwd = process.cwd(), homeDir = os.homedir() }) {
@@ -230,6 +270,8 @@ export function installCodexPlugin({ packageRoot, scope, cwd = process.cwd(), ho
   const marketplacePath = resolveCodexMarketplacePath({ scope, cwd, homeDir });
   const skillsRoot = resolveCodexSkillsRoot({ scope, cwd, homeDir });
 
+  const migration = migrateLegacyCodexInstall({ scope, cwd, homeDir });
+
   syncCodexPluginBundle({ sourceRoot, installRoot });
   upsertCodexMarketplaceEntry({
     marketplacePath,
@@ -244,6 +286,7 @@ export function installCodexPlugin({ packageRoot, scope, cwd = process.cwd(), ho
     installRoot,
     marketplacePath,
     skillsRoot,
+    migratedFrom: migration.removed,
   };
 }
 
@@ -309,21 +352,40 @@ export function uninstallCodexPlugin({ scope, cwd = process.cwd(), homeDir = os.
   };
 }
 
+const PLUGIN_RELATIVE_DIRS = ["references", "scripts", "templates", "agents", "assets"];
+
 function rewriteInstalledSkillMarkdown(rawContent, pluginInstallRoot) {
-  return rawContent
-    .replaceAll("../../../references/shared/", "references/shared/")
-    .replaceAll(
-      "node ../../../scripts/scaffold-app.mjs",
-      `node ${resolve(pluginInstallRoot, "scripts", "scaffold-app.mjs")}`,
-    )
-    .replaceAll(
-      "node ../../../scripts/validate-plugin-structure.mjs",
-      `node ${resolve(pluginInstallRoot, "scripts", "validate-plugin-structure.mjs")}`,
-    )
-    .replaceAll(
-      "node ../../../scripts/doctor.mjs",
-      `node ${resolve(pluginInstallRoot, "scripts", "doctor.mjs")}`,
-    );
+  let content = rawContent;
+
+  // Markdown links: [label](../../../<dir>/<rest>) → [label](/abs/path/<dir>/<rest>)
+  // Skill-local references (no leading ../../../) are left alone — they get
+  // copied alongside SKILL.md by `cpSync` in syncCodexSkills.
+  const dirsAlt = PLUGIN_RELATIVE_DIRS.join("|");
+  const linkPattern = new RegExp(
+    `\\[([^\\]]*)\\]\\(\\.\\./\\.\\./\\.\\./(${dirsAlt})/([^)]+)\\)`,
+    "g",
+  );
+  content = content.replace(linkPattern, (_, label, dir, rest) => {
+    const absolutePath = resolve(pluginInstallRoot, dir, rest);
+    return `[${label}](${absolutePath})`;
+  });
+
+  // Bare-script invocations executed via `node ../../../scripts/<x>.mjs`.
+  // Keep an explicit list to avoid accidentally rewriting unrelated commands.
+  const PLUGIN_NODE_SCRIPTS = [
+    "scaffold-app.mjs",
+    "validate-plugin-structure.mjs",
+    "doctor.mjs",
+    "finalize-init.mjs",
+    "sync-hooks.mjs",
+  ];
+  for (const scriptName of PLUGIN_NODE_SCRIPTS) {
+    const before = `node ../../../scripts/${scriptName}`;
+    const after = `node ${resolve(pluginInstallRoot, "scripts", scriptName)}`;
+    content = content.replaceAll(before, after);
+  }
+
+  return content;
 }
 
 export function syncCodexSkills({
