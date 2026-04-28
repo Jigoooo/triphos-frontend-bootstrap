@@ -1,6 +1,6 @@
 {
   "name": "triphos-frontend-bootstrap",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "description": "Triphos frontend bootstrap plugin with init-generated frontend harness defaults, explicit adopt migrations, bundled frontend policy skills, and internal validation helpers.",
   "author": {
     "name": "Jigoooo",
