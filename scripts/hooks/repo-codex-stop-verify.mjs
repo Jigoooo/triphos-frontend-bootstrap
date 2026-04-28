@@ -55,8 +55,9 @@ if (result.status === 0) {
   process.exit(0);
 }
 
+let traceLogPath = null;
 try {
-  recordFailureTrace(
+  traceLogPath = recordFailureTrace(
     process.cwd(),
     buildTraceEntry({
       surface: 'codex',
@@ -72,7 +73,7 @@ try {
   // Trace recording must never break the verifier exit flow.
 }
 
-const reason = formatVerificationFailureMessage('repository', 'pnpm verify:repo', result);
+const reason = formatVerificationFailureMessage('repository', 'pnpm verify:repo', result, traceLogPath);
 
 process.stdout.write(
   JSON.stringify({

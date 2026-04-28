@@ -76,7 +76,7 @@ test("extractFailureSignature returns 'unparsed' when no detail line", () => {
   assert.equal(extractFailureSignature("ELIFECYCLE Command failed.", ""), "unparsed");
 });
 
-test("buildTraceEntry produces a deterministic shape", () => {
+test("buildTraceEntry produces a deterministic shape with full output preserved", () => {
   const entry = buildTraceEntry({
     surface: "claude",
     exitStatus: 1,
@@ -92,6 +92,8 @@ test("buildTraceEntry produces a deterministic shape", () => {
     exitStatus: 1,
     verifyCommand: "pnpm verify:repo",
     changedFiles: ["AGENTS.md"],
+    fullStdout: "",
+    fullStderr: "Skill parity check failed:\n- foo: bar",
     failureSignature: "Skill parity check failed: foo: bar",
   });
 });
@@ -158,7 +160,10 @@ test("summarizeRecentFailures groups duplicates and preserves first-seen order",
     assert.equal(lines[1], "- Skill parity check failed: a: b  ×3");
     assert.equal(lines[2], "- Triphos plugin structure check failed: missing: AGENTS.md  ×1");
     assert.equal(lines[3], "- Disallowed className usage detected: foo.tsx  ×1");
-    assert.equal(lines.at(-1), "Avoid repeating the same failure. Run pnpm verify:repo before declaring done.");
+    // Footer line removed (Step 3 of token-cost optimisation): the static
+    // reminder was dead weight after the first session.
+    assert.equal(lines.length, 4);
+    assert.equal(lines.at(-1), "- Disallowed className usage detected: foo.tsx  ×1");
   } finally {
     cleanup();
   }

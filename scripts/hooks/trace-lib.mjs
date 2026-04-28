@@ -26,7 +26,10 @@ export function extractFailureSignature(stderr, stdout) {
   const detailIndex = lines.findIndex((line) => /^-\s+\S/.test(line.trim()));
   if (detailIndex <= 0) return "unparsed";
 
-  const detail = lines[detailIndex].trim().replace(/^-\s+/, "").slice(0, 200);
+  // Signature length cap reduced from 200 → 120 chars: the SessionStart
+  // additionalContext that surfaces these signatures is already short,
+  // and 200-char signatures sometimes pulled in irrelevant stack frames.
+  const detail = lines[detailIndex].trim().replace(/^-\s+/, "").slice(0, 120);
 
   let header = "";
   for (let i = detailIndex - 1; i >= 0; i -= 1) {
@@ -43,6 +46,8 @@ export function extractFailureSignature(stderr, stdout) {
 }
 
 export function buildTraceEntry({ surface, exitStatus, verifyCommand, changedFiles, stderr, stdout, now = new Date() }) {
+  // Persist full stdout/stderr so the truncated transcript message can
+  // always point back to the complete log via the trace file path.
   return {
     ts: now.toISOString(),
     surface,
@@ -50,6 +55,8 @@ export function buildTraceEntry({ surface, exitStatus, verifyCommand, changedFil
     verifyCommand,
     changedFiles: Array.isArray(changedFiles) ? changedFiles : [],
     failureSignature: extractFailureSignature(stderr, stdout),
+    fullStdout: typeof stdout === "string" ? stdout : "",
+    fullStderr: typeof stderr === "string" ? stderr : "",
   };
 }
 
@@ -131,8 +138,10 @@ export function summarizeRecentFailures(cwd, limit = 5) {
     counts.set(sig, (counts.get(sig) ?? 0) + 1);
   }
 
+  // Footer removed: SessionStart additionalContext is read every session,
+  // so a static reminder is dead weight after the first time the agent
+  // sees it. The header + bullet lines are enough to flag repetition.
   const header = `Recent verifier failures (last ${entries.length}):`;
   const lines = order.map((sig) => `- ${sig}  ×${counts.get(sig)}`);
-  const footer = "Avoid repeating the same failure. Run pnpm verify:repo before declaring done.";
-  return [header, ...lines, footer].join("\n");
+  return [header, ...lines].join("\n");
 }
