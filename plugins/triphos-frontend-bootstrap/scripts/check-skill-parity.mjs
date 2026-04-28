@@ -222,7 +222,7 @@ function validateLevel(surface, skillName, frontmatter) {
   if (raw === undefined) return;
   const level = Number.parseInt(raw, 10);
   if (!Number.isInteger(level) || !VALID_LEVELS.has(level)) {
-    failures.push(`${surface}/${skillName} frontmatter level must be one of 1|2|3|4 (got: ${raw})`);
+    failures.push(`${surface}/${skillName} frontmatter level must be an integer in {1, 2, 3, 4} (got: ${raw})`);
   }
 }
 

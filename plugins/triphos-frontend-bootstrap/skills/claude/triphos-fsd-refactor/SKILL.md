@@ -5,7 +5,7 @@ argument-hint: "[file-or-directory]"
 level: 3
 effort: high
 triggers: ["FSD 리팩토링", "fsd refactor", "FSD 위반", "레이어 정리", "슈퍼 컴포넌트 분리", "200줄 초과", "세그먼트 오분류"]
-pipeline: ["triphos-fsd-refactor", "triphos-react-lint-rules"]
+pipeline: ["triphos-react-lint-rules"]
 next-skill: triphos-react-lint-rules
 handoff: inline
 allowed-tools: Read Edit Write Grep Glob Bash(git status) Bash(git diff *) Bash(git log *) Bash(git show *) Bash(pnpm check) Bash(pnpm lint *) Bash(pnpm tsc *) Bash(find *) Bash(ls *) Bash(node *)
@@ -44,6 +44,13 @@ FSD 위반은 변경 영향 예측 가능성을 깎는다. 레이어 역류, 슈
 - 또는 프로젝트 전체 진단 모드
 - 또는 신규 코드 가이드 모드 ("이 새 feature 어디에 넣어야 해?")
 </Inputs>
+
+<Read_First>
+- [references/rules.md](references/rules.md) — 진실 소스. 모든 리팩토링 결정의 기준
+- [references/segments.md](references/segments.md) — 세그먼트 분류 결정표
+- [references/layer-boundaries.md](references/layer-boundaries.md) — import 방향과 cross-import 규칙
+- [references/anti-patterns.md](references/anti-patterns.md) — 슈퍼 컴포넌트/훅/함수 분리 전략 카탈로그
+</Read_First>
 
 ## 사전 요구사항
 

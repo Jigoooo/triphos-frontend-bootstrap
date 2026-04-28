@@ -3,7 +3,7 @@ name: triphos-frontend-adopt
 description: 기존 프론트엔드 프로젝트를 Triphos 템플릿 baseline에 강하게 정렬한다. repo-local hooks, verifier scripts, tsconfig/eslint, shared/api, auth/token/member baseline, api-bootstrap, AGENTS/CLAUDE를 audit 후 적용할 때 사용한다.
 level: 3
 triggers: ["frontend adopt", "triphos 마이그레이션", "baseline 정렬", "기존 프로젝트 adopt", "triphos 하네스 적용"]
-pipeline: ["triphos-frontend-adopt", "triphos-fsd-refactor", "triphos-api-client-setup"]
+pipeline: ["triphos-fsd-refactor", "triphos-api-client-setup"]
 next-skill: triphos-fsd-refactor
 handoff: inline
 model: sonnet

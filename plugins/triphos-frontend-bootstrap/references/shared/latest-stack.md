@@ -62,26 +62,28 @@ This file captures the approved official reference set for the bootstrap.
 
 - `argument-hint`: invocation hint string
 - `level`: `1` (lookup/lint) | `2` (single-task) | `3` (multi-step) | `4` (orchestrated)
-- `triggers`: flow-style 배열, 예: `["프론트엔드 init", "frontend init", "새 앱 생성"]`
-- `pipeline`: 체인 스킬 배열 (source 스킬 한정), 예: `["triphos-frontend-init", "triphos-seo-a11y-audit"]`
+- `triggers`: flow-style 배열, 예: `["프론트엔드 init", "frontend init", "새 앱 생성"]`. 한국어/영어 키워드 혼용 허용.
+- `pipeline`: 다음 스킬 체인 배열 (source 스킬 한정). **자기 자신 포함하지 않음.** 예: `triphos-frontend-init`은 `["triphos-seo-a11y-audit", "triphos-api-client-setup"]`.
 - `next-skill`: 가장 빈번한 다음 스킬 이름 (source 스킬 한정)
 - `next-skill-args`: next-skill 호출 인자 (선택)
 - `handoff`: 산물 경로 또는 `inline` (선택)
 - `effort`: `low` | `medium` | `high` (선택, level 보강용)
 
-### Body XML 골격 (순서 강제)
+### Body XML 골격 (권장 순서)
 
-1. `<Purpose>` — 1~2문장 정의
-2. `<Use_When>` — 자동/수동 트리거 시나리오
-3. `<Do_Not_Use_When>` — 다른 스킬로 위임해야 하는 케이스
-4. `<Why_This_Exists>` — 존재 이유 / 어떤 누락·사고를 막는지
-5. `<Inputs>` — 사용자 인자, 사전 조건
-6. `<Read_First>` — 먼저 읽어야 하는 references 링크
-7. `<Steps>` — 워크플로우 단계
-8. `<Tool_Usage>` — 호출하는 스크립트/도구
-9. `<Escalation_And_Stop_Conditions>` — 중단/에스컬레이션 조건
-10. `<Final_Checklist>` — 완료 체크리스트
-11. `<Handoff>` — 다음 스킬 분기 (source 스킬 필수, terminal 스킬 생략)
+순서는 LLM 가독성을 위한 컨벤션이며 parity 스크립트는 순서를 강제하지 않는다. 적용해야 할 태그가 있으면 아래 순서대로 배치한다.
+
+1. `<Purpose>` — 1~2문장 정의 (모든 스킬 필수)
+2. `<Use_When>` — 자동/수동 트리거 시나리오 (필수)
+3. `<Do_Not_Use_When>` — 다른 스킬로 위임해야 하는 케이스 (필수)
+4. `<Why_This_Exists>` — 존재 이유 / 어떤 누락·사고를 막는지 (필수)
+5. `<Inputs>` — 사용자 인자, 사전 조건 (필수)
+6. `<Read_First>` — 먼저 읽어야 하는 references 링크 — **외부 references 파일이 있을 때만 필수**. 자체 완결적인 lint/rule 스킬은 생략 가능.
+7. `<Steps>` — 워크플로우 단계 (필수)
+8. `<Tool_Usage>` — 호출하는 스크립트/도구 (필수)
+9. `<Escalation_And_Stop_Conditions>` — 중단/에스컬레이션 조건 (필수)
+10. `<Final_Checklist>` — 완료 체크리스트 (필수)
+11. `<Handoff>` — 다음 스킬 분기 (**source 스킬 필수, terminal 스킬 생략 가능**)
 
 ### Surface parity 정책 (옵션 A 채택, 2026-04-28)
 
