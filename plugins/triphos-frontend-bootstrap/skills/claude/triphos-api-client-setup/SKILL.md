@@ -30,6 +30,13 @@ triggers: ["api 셋업", "apiWithAdapter", "entity api", "새 entity API", "raw 
 API 레이어는 매번 같은 한 세트(api + query-keys + query-options + mutation-options + public export)가 함께 가야 verifier와 query-key-factory의 가정이 깨지지 않는다. 사용자가 한 파일만 추가하고 멈추면 query 미스가 생기고 retry/transform 같은 advanced 기능이 우회된다. 이 스킬은 그 세트를 강제한다.
 </Why_This_Exists>
 
+<Language_Policy>
+- 사용자에게 보이는 설명, 질문, 진행 상황, 오류 요약, 최종 보고는 사용자의 마지막 실질 요청 언어를 따른다.
+- 한국어가 포함되었거나 언어 판단이 애매하면 한국어로 답한다.
+- 기술 토큰(`SSR`, `SPA`, `app`, `app-ssr`, 명령어, 경로, 패키지명, API 이름, 코드 식별자)은 원문을 유지한다.
+- 세부 기준은 [language-policy.md](../../../references/shared/language-policy.md)를 따른다.
+</Language_Policy>
+
 <Inputs>
 - 작업 모드: `add` | `migrate` | `customize`
 - 대상 entity 또는 module 경로 (선택)

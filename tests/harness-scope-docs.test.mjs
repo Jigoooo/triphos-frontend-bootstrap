@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import test from "node:test";
 
@@ -7,6 +7,15 @@ const repoRoot = resolve(import.meta.dirname, "..");
 
 function read(relativePath) {
   return readFileSync(resolve(repoRoot, relativePath), "utf8");
+}
+
+function listSkillFiles() {
+  const skillRoot = resolve(repoRoot, "plugins/triphos-frontend-bootstrap/skills");
+  return ["codex", "claude"].flatMap((surface) =>
+    readdirSync(resolve(skillRoot, surface), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => `plugins/triphos-frontend-bootstrap/skills/${surface}/${entry.name}/SKILL.md`),
+  );
 }
 
 test("README and plugin prompts keep init as the default harness target", () => {
@@ -42,10 +51,28 @@ test("init/adopt skills keep generated-project default and explicit adopt migrat
 
 test("init skill gates target and SSR decisions before scaffolding", () => {
   const initSkill = read("plugins/triphos-frontend-bootstrap/skills/codex/triphos-frontend-init/SKILL.md");
+  const claudeInitSkill = read("plugins/triphos-frontend-bootstrap/skills/claude/triphos-frontend-init/SKILL.md");
 
   assert.match(initSkill, /현재 작업 디렉터리를 대상 디렉터리로 사용/u);
   assert.match(initSkill, /패키지명만 따로 묻지 않는다/u);
   assert.match(initSkill, /자동 기본값으로 선택하지 않는다/u);
   assert.match(initSkill, /request_user_input.*일반 메시지로 질문하고/u);
   assert.match(initSkill, /"답을 못 들으면 SPA"로 자동 진행하지 않는다/u);
+  assert.match(initSkill, /사용자의 마지막 실질 요청 언어를 따른다/u);
+  assert.match(initSkill, /언어 판단이 애매하면 한국어/u);
+  assert.match(initSkill, /SSR 또는 SPA로 답해주세요/u);
+  assert.match(claudeInitSkill, /사용자의 마지막 실질 요청 언어를 따른다/u);
+  assert.match(claudeInitSkill, /언어 판단이 애매하면 한국어/u);
+  assert.match(claudeInitSkill, /SSR 또는 SPA로 답해주세요/u);
+});
+
+test("all Triphos skills declare adaptive user-language policy", () => {
+  for (const skillPath of listSkillFiles()) {
+    const skill = read(skillPath);
+
+    assert.match(skill, /<Language_Policy>/u, skillPath);
+    assert.match(skill, /사용자의 마지막 실질 요청 언어를 따른다/u, skillPath);
+    assert.match(skill, /언어 판단이 애매하면 한국어/u, skillPath);
+    assert.match(skill, /references\/shared\/language-policy\.md/u, skillPath);
+  }
 });

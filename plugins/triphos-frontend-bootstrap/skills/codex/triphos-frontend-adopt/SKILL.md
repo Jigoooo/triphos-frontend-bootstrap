@@ -30,6 +30,13 @@ handoff: inline
 strong alignment가 default가 아니면 시간이 갈수록 verifier가 작동하지 않는 변종이 누적된다. adopt는 명시적 호출 시에만 같은 강제성을 적용해 baseline drift를 차단한다.
 </Why_This_Exists>
 
+<Language_Policy>
+- 사용자에게 보이는 설명, 질문, 진행 상황, 오류 요약, 최종 보고는 사용자의 마지막 실질 요청 언어를 따른다.
+- 한국어가 포함되었거나 언어 판단이 애매하면 한국어로 답한다.
+- 기술 토큰(`SSR`, `SPA`, `app`, `app-ssr`, 명령어, 경로, 패키지명, API 이름, 코드 식별자)은 원문을 유지한다.
+- 세부 기준은 [language-policy.md](../../../references/shared/language-policy.md)를 따른다.
+</Language_Policy>
+
 <Inputs>
 - 대상 프로젝트 디렉터리 (현재 working tree)
 - 템플릿 variant — `package.json` deps에서 자동 감지 (`@tanstack/react-start`가 있으면 `app-ssr`, 없으면 `app`)

@@ -32,6 +32,13 @@ handoff: inline
 프론트엔드 프로젝트는 시작 첫날의 baseline이 끝까지 따라간다. shared/api, auth/token/member, query-key-factory 같은 baseline을 직접 손으로 짜면 변종이 생기고 관리되는 verifier가 작동하지 않게 된다. 이 스킬은 모든 baseline을 단일 스캐폴드 명령으로 설치해 변종을 차단한다.
 </Why_This_Exists>
 
+<Language_Policy>
+- 사용자에게 보이는 설명, 질문, 진행 상황, 오류 요약, 최종 보고는 사용자의 마지막 실질 요청 언어를 따른다.
+- 한국어가 포함되었거나 언어 판단이 애매하면 한국어로 답한다.
+- 기술 토큰(`SSR`, `SPA`, `app`, `app-ssr`, 명령어, 경로, 패키지명, API 이름, 코드 식별자)은 원문을 유지한다.
+- 세부 기준은 [language-policy.md](../../../references/shared/language-policy.md)를 따른다.
+</Language_Policy>
+
 <Inputs>
 - 대상 디렉터리 경로 (target-directory) — 선택 입력. 사용자가 명시하지 않으면 현재 작업 디렉터리를 대상 디렉터리로 사용한다. 대상은 비어 있거나 런타임 상태물만 포함해야 한다.
 - 패키지 이름 (`--name`) — 선택 입력. 사용자가 명시하지 않으면 대상 디렉터리명에서 npm-safe 기본값을 파생한다. 패키지명만 따로 묻지 않는다.
@@ -51,7 +58,7 @@ handoff: inline
 - 환경 진단/`doctor.mjs` 실패 분기: `internal/frontend-doctor.md`
 
 <Steps>
-1. **대상/SSR 결정 게이트**: 스캐폴드 실행 전에 SSR/SPA 선택이 명시됐는지 확인한다. 대상 디렉터리가 없으면 현재 작업 디렉터리를 대상 디렉터리로 사용하며 따로 묻지 않는다. 패키지 이름이 없으면 대상 디렉터리명 기준 기본값을 사용하며 따로 묻지 않는다. SSR/SPA 선택이 없으면 "이 프로젝트가 SSR/SEO가 필요합니까? 랜딩/마케팅/제품 소개/공개 페이지가 주이면 SSR, 내부 도구/대시보드이면 SPA입니다."를 묻고 답변을 기다린다. Codex Default mode에서 `request_user_input`을 사용할 수 없어도 일반 메시지로 질문하고 이 턴의 스캐폴드 실행은 중단한다.
+1. **대상/SSR 결정 게이트**: 스캐폴드 실행 전에 SSR/SPA 선택이 명시됐는지 확인한다. 대상 디렉터리가 없으면 현재 작업 디렉터리를 대상 디렉터리로 사용하며 따로 묻지 않는다. 패키지 이름이 없으면 대상 디렉터리명 기준 기본값을 사용하며 따로 묻지 않는다. SSR/SPA 선택이 없으면 "이 프로젝트에 SSR/SEO가 필요합니까? 랜딩/마케팅/제품 소개/공개 페이지가 주이면 SSR, 내부 도구/대시보드이면 SPA입니다. SSR 또는 SPA로 답해주세요."를 묻고 답변을 기다린다. Codex Default mode에서 `request_user_input`을 사용할 수 없어도 일반 메시지로 질문하고 이 턴의 스캐폴드 실행은 중단한다.
 2. 환경이 불명확하면 `validate-plugin-structure.mjs`와 `doctor.mjs`를 먼저 실행한다.
 3. 대상 디렉터리가 새 디렉터리이거나 허용된 런타임 상태물만 포함하는지 확인한다.
 4. SSR이면 `node ../../../scripts/scaffold-app.mjs --target <directory> --template app-ssr --install`, SPA이면 `--template app`(생략 가능)로 실행한다. 현재 작업 디렉터리가 대상이면 `--target`은 생략해도 된다. 사용자가 패키지 이름을 명시한 경우에만 `--name <package-name>`을 추가한다.

@@ -32,6 +32,13 @@ Maintain and extend the Triphos `src/shared/theme` baseline — color primitives
 Theme drift is silent: a hardcoded hex here, a `className` shortcut there, and the design system stops serving as a single source of truth. This skill enforces the rule that color/semantic decisions flow through `src/shared/theme` and `useColors()`, and that the starter showcase keeps reflecting the current contract.
 </Why_This_Exists>
 
+<Language_Policy>
+- 사용자에게 보이는 설명, 질문, 진행 상황, 오류 요약, 최종 보고는 사용자의 마지막 실질 요청 언어를 따른다.
+- 한국어가 포함되었거나 언어 판단이 애매하면 한국어로 답한다.
+- 기술 토큰(`SSR`, `SPA`, `app`, `app-ssr`, 명령어, 경로, 패키지명, API 이름, 코드 식별자)은 원문을 유지한다.
+- 세부 기준은 [language-policy.md](../../../references/shared/language-policy.md)를 따른다.
+</Language_Policy>
+
 <Inputs>
 - Optional task hint, e.g. `add-token`, `rename-semantic`, `migrate-className`
 - Working tree of a Triphos-style frontend project with `src/shared/theme/`

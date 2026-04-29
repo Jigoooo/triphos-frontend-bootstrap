@@ -31,6 +31,13 @@ React 19 + React Compiler 환경의 훅/스타일링 규칙을 적용한다. 훅
 React Compiler 환경에서 수동 `useMemo`/`useCallback`은 노이즈가 되고, `useEffect` 안의 동기 `setState`는 렌더 cascade를 일으킨다. 이 규칙들은 lint만 통과하는 방식으로 적당히 끄면 다시 자라난다. 이 스킬은 변경마다 같은 단일 패스를 적용해 변종을 막는다.
 </Why_This_Exists>
 
+<Language_Policy>
+- 사용자에게 보이는 설명, 질문, 진행 상황, 오류 요약, 최종 보고는 사용자의 마지막 실질 요청 언어를 따른다.
+- 한국어가 포함되었거나 언어 판단이 애매하면 한국어로 답한다.
+- 기술 토큰(`SSR`, `SPA`, `app`, `app-ssr`, 명령어, 경로, 패키지명, API 이름, 코드 식별자)은 원문을 유지한다.
+- 세부 기준은 [language-policy.md](../../../references/shared/language-policy.md)를 따른다.
+</Language_Policy>
+
 <Inputs>
 - 대상 파일/디렉터리 (선택, 미지정 시 `src/` 전체 스캔)
 - `verify:react-rules`가 있는 프로젝트라면 그 결과를 우선 사용
