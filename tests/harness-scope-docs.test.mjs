@@ -39,3 +39,12 @@ test("init/adopt skills keep generated-project default and explicit adopt migrat
   assert.match(adoptSkill, /opt-in migration surface/u);
   assert.match(adoptSkill, /명시적으로 호출한 경우에만/u);
 });
+
+test("init skill gates target and SSR decisions before scaffolding", () => {
+  const initSkill = read("plugins/triphos-frontend-bootstrap/skills/codex/triphos-frontend-init/SKILL.md");
+
+  assert.match(initSkill, /현재 디렉터리로 추정하지 말고/u);
+  assert.match(initSkill, /자동 기본값으로 선택하지 않는다/u);
+  assert.match(initSkill, /request_user_input.*일반 메시지로 질문하고/u);
+  assert.match(initSkill, /"답을 못 들으면 SPA".*자동 진행하지 않는다/u);
+});

@@ -34,10 +34,10 @@ model: sonnet
 </Why_This_Exists>
 
 <Inputs>
-- 대상 디렉터리 경로 (target-directory) — 비어 있거나 런타임 상태물만 포함
+- 대상 디렉터리 경로 (target-directory) — 비어 있거나 런타임 상태물만 포함. 사용자가 명시하지 않았으면 현재 디렉터리로 추정하지 말고 먼저 확인한다.
 - 패키지 이름 (`--name`) — `package.json` 기본값
-- 템플릿 종류 — `app` (SPA, default) 또는 `app-ssr` (TanStack Start + Nitro)
-- SSR/SEO 필요 여부 — 시작 전 1회 사용자 확인 (랜딩/마케팅/공개 페이지 → SSR, 내부 도구/대시보드 → SPA)
+- 템플릿 종류 — `app` (SPA) 또는 `app-ssr` (TanStack Start + Nitro). 명시 입력이 없으면 자동 기본값으로 선택하지 않는다.
+- SSR/SEO 필요 여부 — 시작 전 1회 사용자 확인 (랜딩/마케팅/공개 페이지 → SSR, 내부 도구/대시보드 → SPA). 사용자가 `--template app`/`--template app-ssr` 또는 동등한 자연어로 이미 선택한 경우만 생략한다.
 </Inputs>
 
 <Read_First>
@@ -52,7 +52,7 @@ model: sonnet
 - 환경 진단/`doctor.mjs` 실패 분기: `internal/frontend-doctor.md`
 
 <Steps>
-1. **SSR/SEO 결정**: 작업 시작 전 사용자에게 "이 프로젝트가 SSR/SEO가 필요합니까?"를 묻는다. 랜딩/마케팅/제품 소개/공개 페이지가 주이면 → SSR, 내부 도구/대시보드이면 → SPA. 답을 못 들으면 SPA(default)로 진행하되 결정 후 변경 가능함을 알린다.
+1. **대상/SSR 결정 게이트**: 스캐폴드 실행 전에 대상 디렉터리와 SSR/SPA 선택이 모두 명시됐는지 확인한다. 대상이 없으면 현재 디렉터리로 추정하지 말고 "어느 디렉터리에 생성할까요?"를 묻는다. SSR/SPA 선택이 없으면 "이 프로젝트가 SSR/SEO가 필요합니까? 랜딩/마케팅/제품 소개/공개 페이지가 주이면 SSR, 내부 도구/대시보드이면 SPA입니다."를 묻고 답변을 기다린다. Codex Default mode에서 `request_user_input`을 사용할 수 없어도 일반 메시지로 질문하고 이 턴의 스캐폴드 실행은 중단한다.
 2. 환경이 불명확하면 `validate-plugin-structure.mjs`와 `doctor.mjs`를 먼저 실행한다.
 3. 대상 디렉터리가 새 디렉터리이거나 허용된 런타임 상태물만 포함하는지 확인한다.
 4. SSR이면 `node ../../../scripts/scaffold-app.mjs --target <directory> --name <package-name> --template app-ssr --install`, SPA이면 `--template app`(생략 가능)로 실행한다.
@@ -70,7 +70,7 @@ model: sonnet
 <Escalation_And_Stop_Conditions>
 - `<Read_First>`의 모든 파일을 읽고 템플릿/정책 계약을 기억한 뒤 스캐폴드 실행. 미읽음 상태로 진행 금지.
 - 생성 후 누락된 파일이나 실패한 검증이 있으면 완료로 보고하지 말고, 누락 항목과 수정 계획을 먼저 처리한다.
-- SSR/SPA 결정이 모호하면 사용자에게 1회 질의 후 default(SPA)로 진행하되 변경 가능함을 알린다.
+- 대상 디렉터리 또는 SSR/SPA 결정이 모호하면 사용자에게 1회 질의하고 스캐폴드 실행을 중단한다. "답을 못 들으면 SPA" 또는 "대상이 없으면 현재 디렉터리"로 자동 진행하지 않는다.
 - 스캐폴드 실패 시 실패 원인을 고친 뒤 재실행 — 부분 복사로 우회하지 않는다.
 </Escalation_And_Stop_Conditions>
 
