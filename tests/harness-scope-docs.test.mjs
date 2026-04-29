@@ -43,8 +43,9 @@ test("init/adopt skills keep generated-project default and explicit adopt migrat
 test("init skill gates target and SSR decisions before scaffolding", () => {
   const initSkill = read("plugins/triphos-frontend-bootstrap/skills/codex/triphos-frontend-init/SKILL.md");
 
-  assert.match(initSkill, /현재 디렉터리로 추정하지 말고/u);
+  assert.match(initSkill, /현재 작업 디렉터리를 대상 디렉터리로 사용/u);
+  assert.match(initSkill, /패키지명만 따로 묻지 않는다/u);
   assert.match(initSkill, /자동 기본값으로 선택하지 않는다/u);
   assert.match(initSkill, /request_user_input.*일반 메시지로 질문하고/u);
-  assert.match(initSkill, /"답을 못 들으면 SPA".*자동 진행하지 않는다/u);
+  assert.match(initSkill, /"답을 못 들으면 SPA"로 자동 진행하지 않는다/u);
 });

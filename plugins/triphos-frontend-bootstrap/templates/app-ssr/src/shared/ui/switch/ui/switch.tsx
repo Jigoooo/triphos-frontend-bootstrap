@@ -3,7 +3,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import type { SwitchProps } from '../model/types';
 import { useColors } from '@/shared/theme';
 
-export function Switch({ checked, onChange, disabled }: SwitchProps) {
+export function Switch({ checked, onChange, ariaLabel = 'Toggle switch', disabled }: SwitchProps) {
   const colors = useColors();
   const shouldReduceMotion = useReducedMotion();
 
@@ -11,6 +11,7 @@ export function Switch({ checked, onChange, disabled }: SwitchProps) {
     <button
       type='button'
       role='switch'
+      aria-label={ariaLabel}
       aria-checked={checked}
       disabled={disabled}
       onClick={() => onChange(!checked)}

@@ -33,8 +33,8 @@ handoff: inline
 </Why_This_Exists>
 
 <Inputs>
-- 대상 디렉터리 경로 (target-directory) — 비어 있거나 런타임 상태물만 포함. 사용자가 명시하지 않았으면 현재 디렉터리로 추정하지 말고 먼저 확인한다.
-- 패키지 이름 (`--name`) — `package.json` 기본값
+- 대상 디렉터리 경로 (target-directory) — 선택 입력. 사용자가 명시하지 않으면 현재 작업 디렉터리를 대상 디렉터리로 사용한다. 대상은 비어 있거나 런타임 상태물만 포함해야 한다.
+- 패키지 이름 (`--name`) — 선택 입력. 사용자가 명시하지 않으면 대상 디렉터리명에서 npm-safe 기본값을 파생한다. 패키지명만 따로 묻지 않는다.
 - 템플릿 종류 — `app` (SPA) 또는 `app-ssr` (TanStack Start + Nitro). 명시 입력이 없으면 자동 기본값으로 선택하지 않는다.
 - SSR/SEO 필요 여부 — 시작 전 1회 사용자 확인 (랜딩/마케팅/공개 페이지 → SSR, 내부 도구/대시보드 → SPA). 사용자가 `--template app`/`--template app-ssr` 또는 동등한 자연어로 이미 선택한 경우만 생략한다.
 </Inputs>
@@ -51,10 +51,10 @@ handoff: inline
 - 환경 진단/`doctor.mjs` 실패 분기: `internal/frontend-doctor.md`
 
 <Steps>
-1. **대상/SSR 결정 게이트**: 스캐폴드 실행 전에 대상 디렉터리와 SSR/SPA 선택이 모두 명시됐는지 확인한다. 대상이 없으면 현재 디렉터리로 추정하지 말고 "어느 디렉터리에 생성할까요?"를 묻는다. SSR/SPA 선택이 없으면 "이 프로젝트가 SSR/SEO가 필요합니까? 랜딩/마케팅/제품 소개/공개 페이지가 주이면 SSR, 내부 도구/대시보드이면 SPA입니다."를 묻고 답변을 기다린다. Codex Default mode에서 `request_user_input`을 사용할 수 없어도 일반 메시지로 질문하고 이 턴의 스캐폴드 실행은 중단한다.
+1. **대상/SSR 결정 게이트**: 스캐폴드 실행 전에 SSR/SPA 선택이 명시됐는지 확인한다. 대상 디렉터리가 없으면 현재 작업 디렉터리를 대상 디렉터리로 사용하며 따로 묻지 않는다. 패키지 이름이 없으면 대상 디렉터리명 기준 기본값을 사용하며 따로 묻지 않는다. SSR/SPA 선택이 없으면 "이 프로젝트가 SSR/SEO가 필요합니까? 랜딩/마케팅/제품 소개/공개 페이지가 주이면 SSR, 내부 도구/대시보드이면 SPA입니다."를 묻고 답변을 기다린다. Codex Default mode에서 `request_user_input`을 사용할 수 없어도 일반 메시지로 질문하고 이 턴의 스캐폴드 실행은 중단한다.
 2. 환경이 불명확하면 `validate-plugin-structure.mjs`와 `doctor.mjs`를 먼저 실행한다.
 3. 대상 디렉터리가 새 디렉터리이거나 허용된 런타임 상태물만 포함하는지 확인한다.
-4. SSR이면 `node ../../../scripts/scaffold-app.mjs --target <directory> --name <package-name> --template app-ssr --install`, SPA이면 `--template app`(생략 가능)로 실행한다.
+4. SSR이면 `node ../../../scripts/scaffold-app.mjs --target <directory> --template app-ssr --install`, SPA이면 `--template app`(생략 가능)로 실행한다. 현재 작업 디렉터리가 대상이면 `--target`은 생략해도 된다. 사용자가 패키지 이름을 명시한 경우에만 `--name <package-name>`을 추가한다.
 5. 생성 직후 `pnpm verify:frontend`와 `pnpm build` 또는 `pnpm typecheck`로 검증한다.
 6. standalone 저장소면 `node ../../../scripts/finalize-init.mjs --target <directory>`로 `git init`과 initial commit을 수행한다. 상위 git 저장소가 있으면 skip한다.
 </Steps>
@@ -69,7 +69,7 @@ handoff: inline
 <Escalation_And_Stop_Conditions>
 - `<Read_First>`의 모든 파일을 읽고 템플릿/정책 계약을 기억한 뒤 스캐폴드 실행. 미읽음 상태로 진행 금지.
 - 생성 후 누락된 파일이나 실패한 검증이 있으면 완료로 보고하지 말고, 누락 항목과 수정 계획을 먼저 처리한다.
-- 대상 디렉터리 또는 SSR/SPA 결정이 모호하면 사용자에게 1회 질의하고 스캐폴드 실행을 중단한다. "답을 못 들으면 SPA" 또는 "대상이 없으면 현재 디렉터리"로 자동 진행하지 않는다.
+- SSR/SPA 결정이 모호하면 사용자에게 1회 질의하고 스캐폴드 실행을 중단한다. "답을 못 들으면 SPA"로 자동 진행하지 않는다. 대상 디렉터리 생략은 모호함이 아니며 현재 작업 디렉터리를 사용한다.
 - 스캐폴드 실패 시 실패 원인을 고친 뒤 재실행 — 부분 복사로 우회하지 않는다.
 </Escalation_And_Stop_Conditions>
 

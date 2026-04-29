@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, CSSProperties, ReactNode } from 'react';
 
 export type ExtendedValue = string | number;
 export type SelectSize = 'sm' | 'md' | 'lg';
@@ -36,7 +36,7 @@ export type MultiSelectRootProps<ValueType extends ExtendedValue = string> = {
   maxVisibleValues?: number | undefined;
 };
 
-export type SelectTriggerProps = {
+export type SelectTriggerProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   children?: ReactNode;
   style?: CSSProperties | undefined;
 };

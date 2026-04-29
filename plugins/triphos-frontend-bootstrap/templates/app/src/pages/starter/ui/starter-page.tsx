@@ -158,11 +158,15 @@ export function StarterPage() {
           <section style={cardStyle}>
             <strong style={{ fontSize: '1.8rem', color: colors.text.primary }}>Form controls</strong>
             <FormField label='Project name' description='useFormState + animated focus baseline'>
-              <Input value={formState.name} onChange={(event) => onFormChange('name', event.target.value)} />
+              <Input
+                aria-label='Project name'
+                value={formState.name}
+                onChange={(event) => onFormChange('name', event.target.value)}
+              />
             </FormField>
             <FormField label='Workspace' description={`Current workspace: ${selectValue}`}>
               <Select.Root value={selectValue} onValueChange={setSelectValue}>
-                <Select.Trigger>
+                <Select.Trigger aria-label='Workspace'>
                   <Select.Value placeholder='Select a workspace' />
                 </Select.Trigger>
                 <Select.Content>
@@ -174,7 +178,7 @@ export function StarterPage() {
             </FormField>
             <FormField label='Shared surfaces' description='Multi-select chips remove inline'>
               <MultiSelect.Root values={selectedSurfaces} onValuesChange={setSelectedSurfaces}>
-                <MultiSelect.Trigger>
+                <MultiSelect.Trigger aria-label='Shared surfaces'>
                   <MultiSelect.Value placeholder='Select shared surfaces' />
                 </MultiSelect.Trigger>
                 <MultiSelect.Content>
@@ -205,7 +209,7 @@ export function StarterPage() {
               <DatePicker value={date} onChange={setDate} />
             </FormField>
             <FormField label='Textarea'>
-              <Textarea value={text} onChange={(event) => setText(event.target.value)} autoResize />
+              <Textarea aria-label='Textarea' value={text} onChange={(event) => setText(event.target.value)} autoResize />
             </FormField>
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
               <Checkbox.Root checked={checked} onCheckedChange={setChecked}>
@@ -214,7 +218,7 @@ export function StarterPage() {
               </Checkbox.Root>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                 <span style={{ fontSize: '1.4rem', color: colors.text.primary }}>Switch</span>
-                <Switch checked={switchOn} onChange={setSwitchOn} />
+                <Switch ariaLabel='Switch starter' checked={switchOn} onChange={setSwitchOn} />
               </div>
               <ToggleButton selected={selected} onClick={() => setSelected((current) => !current)}>
                 Toggle button
@@ -321,7 +325,7 @@ export function StarterPage() {
                 </span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                <Progress value={progressValue} />
+                <Progress ariaLabel='Countdown progress' value={progressValue} />
                 <div
                   style={{
                     display: 'flex',
@@ -390,6 +394,9 @@ export function StarterPage() {
             <div
               ref={containerRef}
               data-overlay-scroll-panel='true'
+              role='region'
+              aria-label='Scroll utility rows'
+              tabIndex={0}
               style={{
                 position: 'relative',
                 height: '18rem',

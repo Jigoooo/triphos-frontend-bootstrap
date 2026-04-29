@@ -65,26 +65,12 @@ function callsBuildMetaWithRequiredArgs(content) {
   return false;
 }
 
-function hasMetaTitle(content) {
-  return /\btitle\b\s*:/.test(content) || callsBuildMetaWithRequiredArgs(content);
-}
-
-function hasMetaDescription(content) {
-  return /name\s*:\s*['"]description['"]/.test(content) || callsBuildMetaWithRequiredArgs(content);
-}
-
-function rootHasOgTags(content) {
-  const ogProps = ['og:title', 'og:description', 'og:type', 'og:image', 'og:url'];
-  const matched = ogProps.filter((prop) => content.includes(prop));
-  return matched.length >= 3 || callsBuildMetaWithRequiredArgs(content);
-}
-
-function rootHasTwitterCard(content) {
-  return /twitter:card/.test(content) || callsBuildMetaWithRequiredArgs(content);
-}
-
 function rootHasJsonLd(content) {
   return /application\/ld\+json/.test(content) || /jsonLdScript\s*\(/.test(content);
+}
+
+function rootMustNotCallBuildMeta(content) {
+  return !/buildMeta\s*\(/.test(content);
 }
 
 const allRouteFiles = listRouteFiles(routesRoot);
@@ -95,8 +81,7 @@ if (!rootFile) {
 } else {
   const rootContent = readFileSync(rootFile, 'utf8');
   expect(hasHeadDefinition(rootContent), '__root.tsx must define head()');
-  expect(rootHasOgTags(rootContent), '__root.tsx must include 3+ OG tags (or call buildMeta with title/description/path)');
-  expect(rootHasTwitterCard(rootContent), '__root.tsx must include twitter:card (or call buildMeta with title/description/path)');
+  expect(rootMustNotCallBuildMeta(rootContent), '__root.tsx must not call buildMeta; canonical links are route-owned');
   expect(rootHasJsonLd(rootContent), '__root.tsx must include JSON-LD (jsonLdScript or application/ld+json)');
 }
 
@@ -107,12 +92,8 @@ for (const file of allRouteFiles) {
   if (!/createFileRoute\s*\(/.test(content)) continue;
   expect(hasHeadDefinition(content), `${rel}: page route must define head()`);
   expect(
-    hasMetaTitle(content),
-    `${rel}: page head must include title (or call buildMeta with title/description/path)`,
-  );
-  expect(
-    hasMetaDescription(content),
-    `${rel}: page head must include description (or call buildMeta with title/description/path)`,
+    callsBuildMetaWithRequiredArgs(content),
+    `${rel}: page head must call buildMeta with title/description/path so title, description, OG, Twitter, and canonical stay route-owned`,
   );
 }
 

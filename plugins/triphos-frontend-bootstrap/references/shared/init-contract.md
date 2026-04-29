@@ -15,6 +15,7 @@
 - Copy `.codex/hooks.json`, `.claude/settings.json`, and the `scripts/verify-*.mjs` verification scripts into the generated app.
 - Copy `.codex/config.toml` with `codex_hooks = true` into the generated app.
 - Copy the browser-backed harness scripts (`capture:dom`, `capture:screenshot`, `verify:e2e`, `verify:visual`, `verify:uat`) into the generated app.
+- Keep Lighthouse CI uploads local with `lighthouserc.json` `upload.target = filesystem` and `outputDir = .lighthouseci`; generated app verification must not depend on temporary public storage.
 - Default new UI code to inline `style` props unless the style is truly global.
 - Treat `className` as banned by default. Only allow it for hard-to-express global utility hooks such as scrollbar handling.
 - After generation, prefer `pnpm install` then `pnpm verify:frontend` and `pnpm build`.

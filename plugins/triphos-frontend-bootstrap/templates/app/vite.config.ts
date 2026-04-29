@@ -4,7 +4,6 @@ import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import { loadEnv } from 'vite';
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
 import svgr from 'vite-plugin-svgr';
-import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig(({ mode }) => {
@@ -27,6 +26,9 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+    resolve: {
+      tsconfigPaths: true,
+    },
     plugins: [
       tanstackRouter({
         target: 'react',
@@ -40,7 +42,6 @@ export default defineConfig(({ mode }) => {
       }),
       react(),
       babel({ presets: [reactCompilerPreset()] }),
-      tsconfigPaths(),
       ViteImageOptimizer({
         test: /\.(jpe?g|png|gif|tiff|webp|svg|avif)$/i,
         includePublic: true,

@@ -20,7 +20,7 @@ const outputPath = resolveRequestedOutput(appRoot, args.output, defaultDomOutput
 await withHarnessServer(
   appRoot,
   async ({ origin }) => {
-    const html = dumpHarnessDom(origin, route);
+    const html = await dumpHarnessDom(origin, route);
 
     mkdirSync(dirname(outputPath), { recursive: true });
     writeFileSync(outputPath, html);

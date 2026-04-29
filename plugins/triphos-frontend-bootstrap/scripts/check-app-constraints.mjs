@@ -207,6 +207,10 @@ if (!skipEnvBaseline) {
 
 const gitignore = readFileSync(resolve(target, '.gitignore'), 'utf8');
 for (const entry of [
+  'node_modules',
+  'dist',
+  '.tanstack',
+  'src/routeTree.gen.ts',
   '.omx',
   '.omc',
   '.triphos',
@@ -263,13 +267,14 @@ expect(packageJson.scripts?.['verify:uat'] === 'node ./scripts/verify-uat.mjs', 
 expect(packageJson.scripts?.['routes:generate'] === 'tsr generate', 'Expected package.json scripts.routes:generate to be "tsr generate"');
 expect(packageJson.devDependencies?.['@tanstack/router-cli'], 'Expected package.json to include @tanstack/router-cli devDep');
 expect(packageJson.devDependencies?.['@tanstack/router-plugin'], 'Expected package.json to include @tanstack/router-plugin devDep');
+expect(packageJson.devDependencies?.['playwright'], 'Expected package.json to include playwright devDep for DOM harness capture');
+expect(!packageJson.devDependencies?.['vite-tsconfig-paths'], 'package.json must use Vite native resolve.tsconfigPaths instead of vite-tsconfig-paths');
 
 if (isSsr) {
   expect(packageJson.scripts?.start === 'node .output/server/index.mjs', 'SSR package.json scripts.start must be "node .output/server/index.mjs" (Nitro Node output)');
   expect(packageJson.dependencies?.['@tanstack/react-start'], 'SSR package.json must include @tanstack/react-start dep');
   expect(packageJson.dependencies?.['@tanstack/react-router-ssr-query'], 'SSR package.json must include @tanstack/react-router-ssr-query dep');
   expect(packageJson.dependencies?.['nitro'], 'SSR package.json must include nitro dep');
-  expect(packageJson.devDependencies?.['vite-tsconfig-paths'], 'SSR package.json must include vite-tsconfig-paths devDep');
 }
 expect(packageJson.scripts?.['verify:frontend']?.startsWith('pnpm routes:generate'), 'Expected verify:frontend to begin with pnpm routes:generate');
 expect(packageJson.scripts?.['verify:frontend']?.includes('pnpm verify:fsd'), 'Expected package.json scripts.verify:frontend');
@@ -278,6 +283,26 @@ expect(packageJson.scripts?.['verify:frontend']?.includes('pnpm verify:e2e'), 'E
 expect(packageJson.scripts?.['verify:frontend']?.includes('pnpm verify:visual'), 'Expected package.json scripts.verify:frontend to include verify:visual');
 expect(packageJson.scripts?.['verify:frontend']?.includes('pnpm verify:uat'), 'Expected package.json scripts.verify:frontend to include verify:uat');
 expect(!packageJson.scripts?.prd?.includes('--mode'), 'Expected package.json scripts.prd to avoid custom Vite modes');
+
+const harnessLib = readFileSync(resolve(target, 'scripts/harness/harness-lib.mjs'), 'utf8');
+expectTextIncludes(harnessLib, "await import('playwright')", 'Expected DOM harness capture to use Playwright');
+expect(!harnessLib.includes('--dump-dom'), 'DOM harness must not use Chrome CLI --dump-dom because it can leave stuck browser processes');
+expectTextIncludes(harnessLib, "waitUntil: 'domcontentloaded'", 'Expected DOM harness navigation to avoid Vite/HMR networkidle hangs');
+expectTextIncludes(harnessLib, 'timeout: 60_000', 'Expected DOM harness navigation timeout to allow slow SSR route compilation');
+
+const selectTrigger = readFileSync(resolve(target, 'src/shared/ui/select/ui/select-trigger.tsx'), 'utf8');
+expectTextIncludes(selectTrigger, 'height: HEIGHT_MAP[size]', 'SelectTrigger must keep a fixed height so MultiSelect chips cannot resize the control');
+expectTextIncludes(selectTrigger, "boxSizing: 'border-box'", 'SelectTrigger fixed height must include padding and border');
+expectTextIncludes(selectTrigger, "overflow: 'hidden'", 'SelectTrigger value slot must clip chip overflow instead of growing');
+
+const selectRoot = readFileSync(resolve(target, 'src/shared/ui/select/ui/select-root.tsx'), 'utf8');
+expect(!selectRoot.includes('maxVisibleValues = 2'), 'MultiSelectRoot must not hide chips by a hardcoded default count');
+
+const selectValue = readFileSync(resolve(target, 'src/shared/ui/select/ui/select-value.tsx'), 'utf8');
+expectTextIncludes(selectValue, "COUNTER_RESERVE_LABEL = '+999'", 'MultiSelect counter must reserve room for a three-digit + count');
+expectTextIncludes(selectValue, 'ResizeObserver', 'MultiSelect chip display must recompute from the actual trigger width');
+expectTextIncludes(selectValue, 'data-select-value-chip-measure', 'MultiSelect must measure chip widths before deciding overflow');
+expectTextIncludes(selectValue, "flexWrap: 'nowrap'", 'MultiSelect chips must stay on one row so control height is stable');
 
 const viteConfig = readFileSync(resolve(target, 'vite.config.ts'), 'utf8');
 expectTextIncludes(viteConfig, "loadEnv(mode, process.cwd(), 'VITE_')", 'Expected vite.config.ts to load env via loadEnv(mode, process.cwd(), "VITE_")');
@@ -288,6 +313,9 @@ expectTextIncludes(viteConfig, "port: Number(env['VITE_PORT'] || 3000)", 'Expect
 expectTextIncludes(viteConfig, '[apiPrefix]: {', 'Expected vite.config.ts server.proxy to key off apiPrefix');
 expectTextIncludes(viteConfig, 'target: apiOrigin', 'Expected vite.config.ts server.proxy target to use apiOrigin');
 expectTextIncludes(viteConfig, 'changeOrigin: true', 'Expected vite.config.ts server.proxy to enable changeOrigin');
+expectTextIncludes(viteConfig, 'tsconfigPaths: true', 'Expected vite.config.ts to use Vite native resolve.tsconfigPaths');
+expect(!viteConfig.includes("from 'vite-tsconfig-paths'"), 'vite.config.ts must not import vite-tsconfig-paths');
+expect(!viteConfig.includes('tsconfigPaths()'), 'vite.config.ts must not register vite-tsconfig-paths plugin');
 expect(!viteConfig.includes('global: \'globalThis\''), 'Expected vite.config.ts to remove the global define shim');
 
 if (isSsr) {
@@ -339,6 +367,7 @@ if (isSsr) {
   const eslintConfig = readFileSync(resolve(target, 'eslint.config.js'), 'utf8');
   expectTextIncludes(eslintConfig, "from 'eslint-plugin-jsx-a11y'", 'SSR eslint.config.js must import eslint-plugin-jsx-a11y');
   expectTextIncludes(eslintConfig, 'jsxA11y.flatConfigs.recommended', 'SSR eslint.config.js must register jsxA11y.flatConfigs.recommended');
+  expectTextIncludes(eslintConfig, "'jsx-a11y/no-noninteractive-tabindex': 'off'", 'SSR starter/shared-ui lint override must allow focusable scroll regions required by axe');
 
   const robotsRoute = readFileSync(resolve(target, 'src/routes/robots[.]txt.ts'), 'utf8');
   expectTextIncludes(robotsRoute, 'getBaseUrl', 'src/routes/robots[.]txt.ts must build absolute Sitemap URL via getBaseUrl helper');
@@ -347,7 +376,10 @@ if (isSsr) {
 
   const rootRoute = readFileSync(resolve(target, 'src/routes/__root.tsx'), 'utf8');
   expectTextIncludes(rootRoute, 'jsonLdScript', '__root.tsx must inject JSON-LD via jsonLdScript helper');
-  expectTextIncludes(rootRoute, 'buildMeta', '__root.tsx must build OG/Twitter meta via buildMeta helper');
+  expect(!rootRoute.includes('buildMeta'), '__root.tsx must not call buildMeta; canonical links are route-owned to avoid Lighthouse duplicate-canonical failures');
+  for (const entry of ['.output', '.lighthouseci', '.lighthouserc.runtime.json']) {
+    expectTextIncludes(gitignore, entry, `Expected SSR .gitignore to include ${entry}`);
+  }
 
   expect(packageJson.scripts?.['verify:seo'] === 'node ./scripts/verify-seo.mjs', 'SSR package.json scripts.verify:seo must be "node ./scripts/verify-seo.mjs"');
   expect(packageJson.scripts?.['verify:a11y'] === 'node ./scripts/verify-a11y.mjs', 'SSR package.json scripts.verify:a11y must be "node ./scripts/verify-a11y.mjs"');
@@ -367,12 +399,15 @@ if (isSsr) {
   expect(packageJson.devDependencies?.['playwright'], 'SSR package.json must include playwright devDep');
 
   const lighthouseRc = JSON.parse(readFileSync(resolve(target, 'lighthouserc.json'), 'utf8'));
+  expect(lighthouseRc.ci?.collect?.startServerReadyTimeout >= 120000, 'lighthouserc.json collect.startServerReadyTimeout must allow SSR build + Nitro start before LHCI audits');
   const a11yAssertion = lighthouseRc.ci?.assert?.assertions?.['categories:accessibility'];
   const a11yMinScore = Array.isArray(a11yAssertion) ? a11yAssertion[1]?.minScore : undefined;
   expect(a11yMinScore === 0.95, 'lighthouserc.json categories:accessibility minScore must be 0.95 to match the SEO threshold and the documented 0.8.0 plan');
   const seoAssertion = lighthouseRc.ci?.assert?.assertions?.['categories:seo'];
   const seoMinScore = Array.isArray(seoAssertion) ? seoAssertion[1]?.minScore : undefined;
   expect(seoMinScore === 0.95, 'lighthouserc.json categories:seo minScore must be 0.95');
+  expect(lighthouseRc.ci?.upload?.target === 'filesystem', 'lighthouserc.json upload.target must be filesystem so verification never uploads results externally');
+  expect(lighthouseRc.ci?.upload?.outputDir === '.lighthouseci', 'lighthouserc.json upload.outputDir must be .lighthouseci for local Lighthouse CI artifacts');
 
   expect(existsSync(resolve(target, 'public/og-default.png')), 'SSR template must ship public/og-default.png as the default OG image (replace before launch)');
 
@@ -388,6 +423,11 @@ if (isSsr) {
 
   const verifySeo = readFileSync(resolve(target, 'scripts/verify-seo.mjs'), 'utf8');
   expectTextIncludes(verifySeo, 'callsBuildMetaWithRequiredArgs', 'verify-seo.mjs must validate that buildMeta() is called with title/description/path so empty calls fail the heuristic');
+  expectTextIncludes(verifySeo, 'rootMustNotCallBuildMeta', 'verify-seo.mjs must prevent root-owned canonical fallback meta');
+
+  const starterPage = readFileSync(resolve(target, 'src/pages/starter/ui/starter-page.tsx'), 'utf8');
+  expectTextIncludes(starterPage, "role='region'", 'starter scroll utility panel must expose a region landmark when it is keyboard focusable');
+  expectTextIncludes(starterPage, "aria-label='Scroll utility rows'", 'starter scroll utility panel must keep an accessible name');
 }
 
 const sharedApi = readFileSync(resolve(target, 'src/shared/api/index.ts'), 'utf8');

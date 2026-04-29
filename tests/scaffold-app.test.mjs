@@ -55,6 +55,49 @@ test("scaffold-app allows known runtime state directories in the target", () => 
   }
 });
 
+test("scaffold-app defaults to the current directory and derives the package name", () => {
+  const tempRoot = mkdtempSync(resolve(tmpdir(), "tfb-scaffold-cwd-"));
+  const target = resolve(tempRoot, "Team Console");
+
+  try {
+    mkdirSync(target, { recursive: true });
+
+    const result = spawnSync("node", [scriptPath], {
+      cwd: target,
+      encoding: "utf8",
+      stdio: "pipe",
+    });
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    assert.equal(existsSync(resolve(target, "package.json")), true);
+
+    const packageJson = JSON.parse(readFileSync(resolve(target, "package.json"), "utf8"));
+    assert.equal(packageJson.name, "team-console");
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("scaffold-app derives the default package name from an explicit target", () => {
+  const tempRoot = mkdtempSync(resolve(tmpdir(), "tfb-scaffold-name-"));
+  const target = resolve(tempRoot, "ops-dashboard");
+
+  try {
+    const result = spawnSync("node", [scriptPath, "--target", target], {
+      cwd: repoRoot,
+      encoding: "utf8",
+      stdio: "pipe",
+    });
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+
+    const packageJson = JSON.parse(readFileSync(resolve(target, "package.json"), "utf8"));
+    assert.equal(packageJson.name, "ops-dashboard");
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
 test("scaffold-app still rejects user-managed files in the target", () => {
   const target = mkdtempSync(resolve(tmpdir(), "tfb-scaffold-block-"));
 

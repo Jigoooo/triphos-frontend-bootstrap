@@ -9,12 +9,7 @@ import {
 import { useEffect, useRef } from 'react';
 
 import { bootstrapApi } from '@/app/providers/api-bootstrap';
-import {
-  buildMeta,
-  jsonLdOrganization,
-  jsonLdScript,
-  jsonLdWebSite,
-} from '@/shared/lib/seo';
+import { jsonLdOrganization, jsonLdScript, jsonLdWebSite } from '@/shared/lib/seo';
 import { initSystemThemeListener } from '@/shared/theme';
 import { AlertDialogRenderer } from '@/shared/ui/alert-dialog';
 import { BottomSheetRenderer } from '@/shared/ui/bottom-sheet';
@@ -29,24 +24,15 @@ export interface RouterContext {
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
-  // Root head supplies charset/viewport, the global stylesheet, the site-wide
-  // Organization + WebSite JSON-LD, and a safety-net `buildMeta` so a route
-  // shipping without head() still gets a usable OG/canonical block. Page
-  // routes override og:title/og:description/canonical through their own
-  // `buildMeta` call; TanStack Start keeps the last value per meta key.
+  // Root head owns only document-wide resources. Canonical links and page
+  // meta belong to file routes so Lighthouse never sees duplicate canonicals.
   head: () => {
-    const fallback = buildMeta({
-      title: 'Triphos Frontend App',
-      description: 'Triphos frontend bootstrap baseline application.',
-      path: '/',
-    });
     return {
       meta: [
         { charSet: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        ...fallback.meta,
       ],
-      links: [{ rel: 'stylesheet', href: indexCssUrl }, ...fallback.links],
+      links: [{ rel: 'stylesheet', href: indexCssUrl }],
       scripts: [
         jsonLdScript(jsonLdOrganization()),
         jsonLdScript(jsonLdWebSite()),

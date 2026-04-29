@@ -10,6 +10,7 @@ import {
   MOBILE_VIEWPORT,
   assertTriphos,
   captureHarnessScreenshot,
+  dumpHarnessDom,
   ensureArtifactsDir,
   withHarnessServer,
   writeHarnessJson,
@@ -67,10 +68,15 @@ async function compareImages(baselinePath, outputPath) {
   };
 }
 
-await withHarnessServer(
-  appRoot,
-  async ({ origin }) => {
-    for (const item of cases) {
+for (const item of cases) {
+  await withHarnessServer(
+    appRoot,
+    async ({ origin }) => {
+      const html = await dumpHarnessDom(origin, route, { viewport: item.viewport });
+      assertTriphos(
+        html.includes('Triphos UI starter'),
+        `Visual verification did not load the starter route for ${item.name}.`,
+      );
       captureHarnessScreenshot(origin, route, item.outputPath, { viewport: item.viewport });
       const diff = await compareImages(item.baselinePath, item.outputPath);
 
@@ -81,9 +87,9 @@ await withHarnessServer(
 
       writeHarnessJson(resolve(artifactDir, `${item.name}.json`), diff);
       console.log(`${item.name}: changedRatio=${diff.changedRatio.toFixed(4)}`);
-    }
-  },
-  { port: DEFAULT_PORT },
-);
+    },
+    { port: DEFAULT_PORT },
+  );
+}
 
 console.log('Triphos visual verification passed.');

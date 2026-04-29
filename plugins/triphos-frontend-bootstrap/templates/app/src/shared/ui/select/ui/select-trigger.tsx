@@ -18,7 +18,7 @@ const FONT_SIZE_MAP = {
   lg: '1.7rem',
 } as const;
 
-export function SelectTrigger({ children, style }: SelectTriggerProps) {
+export function SelectTrigger({ children, style, ...props }: SelectTriggerProps) {
   const colors = useColors();
   const [isFocused, setIsFocused] = useState(false);
   const {
@@ -44,9 +44,11 @@ export function SelectTrigger({ children, style }: SelectTriggerProps) {
       type='button'
       disabled={disabled}
       {...referenceProps}
+      {...props}
       style={{
         width: '100%',
-        minHeight: HEIGHT_MAP[size],
+        height: HEIGHT_MAP[size],
+        boxSizing: 'border-box',
         padding: '0.85rem 1.2rem',
         borderRadius: '1.1rem',
         border: `1px solid ${isActive ? colors.border.focus : colors.border.default}`,
@@ -71,6 +73,8 @@ export function SelectTrigger({ children, style }: SelectTriggerProps) {
           flex: 1,
           display: 'flex',
           alignItems: 'center',
+          height: '100%',
+          overflow: 'hidden',
         }}
       >
         {children ?? <SelectValue />}

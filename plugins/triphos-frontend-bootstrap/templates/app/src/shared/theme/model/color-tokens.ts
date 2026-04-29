@@ -59,7 +59,7 @@ export const lightColors: SemanticColors = {
   text: {
     primary: '#0f172a',
     secondary: '#64748b',
-    tertiary: p.neutral[700],
+    tertiary: '#4b5563',
     onBrand: p.neutral[1300],
     inverse: p.neutral[1200],
     disabled: p.neutral[800],
@@ -71,8 +71,8 @@ export const lightColors: SemanticColors = {
     inverse: p.whiteAlpha[10],
   },
   interactive: {
-    primary: p.brand[600],
-    primaryHover: p.brand[700],
+    primary: p.brand[700],
+    primaryHover: p.brand[800],
     primaryActive: p.brand[800],
     primarySurface: p.brand[50],
   },

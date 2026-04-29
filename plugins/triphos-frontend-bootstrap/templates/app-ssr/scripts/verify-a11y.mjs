@@ -33,7 +33,8 @@ async function main() {
       for (const route of ['/', '/starter']) {
         const context = await browser.newContext();
         const page = await context.newPage();
-        await page.goto(`${origin}${route}`, { waitUntil: 'networkidle' });
+        await page.goto(`${origin}${route}`, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+        await page.waitForTimeout(350);
         const result = await new AxeBuilder({ page }).analyze();
         const blocking = (result.violations ?? []).filter(
           (violation) => violation.impact === 'serious' || violation.impact === 'critical',

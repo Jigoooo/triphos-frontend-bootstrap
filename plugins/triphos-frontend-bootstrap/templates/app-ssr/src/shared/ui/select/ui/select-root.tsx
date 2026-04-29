@@ -301,7 +301,7 @@ export function MultiSelectRoot<ValueType extends ExtendedValue>({
   disabled = false,
   size = 'md',
   placeholder = '옵션을 선택하세요',
-  maxVisibleValues = 2,
+  maxVisibleValues,
 }: MultiSelectRootProps<ValueType>) {
   const [internalValues, setInternalValues] = useState<ValueType[]>(defaultValues ?? []);
   const isControlled = values !== undefined;

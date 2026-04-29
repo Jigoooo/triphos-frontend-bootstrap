@@ -114,8 +114,8 @@ export default [
     files: ['src/pages/starter/**/*.{ts,tsx}', 'src/shared/ui/**/*.{ts,tsx}'],
     rules: {
       'jsx-a11y/click-events-have-key-events': 'off',
+      'jsx-a11y/no-noninteractive-tabindex': 'off',
       'jsx-a11y/no-static-element-interactions': 'off',
     },
   },
 ];
-

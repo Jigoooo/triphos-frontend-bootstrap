@@ -3,7 +3,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import type { ProgressProps } from '../model/types';
 import { useColors } from '@/shared/theme';
 
-export function Progress({ value, max = 100, style }: ProgressProps) {
+export function Progress({ value, max = 100, ariaLabel = 'Progress', style }: ProgressProps) {
   const colors = useColors();
   const shouldReduceMotion = useReducedMotion();
   const safeMax = max > 0 ? max : 100;
@@ -13,6 +13,7 @@ export function Progress({ value, max = 100, style }: ProgressProps) {
   return (
     <div
       role='progressbar'
+      aria-label={ariaLabel}
       aria-valuemin={0}
       aria-valuemax={safeMax}
       aria-valuenow={Math.round(clampedValue)}

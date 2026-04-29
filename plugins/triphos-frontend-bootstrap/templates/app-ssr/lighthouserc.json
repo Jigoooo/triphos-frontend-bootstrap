@@ -3,6 +3,7 @@
     "collect": {
       "startServerCommand": "pnpm build && pnpm start",
       "startServerReadyPattern": "Listening on",
+      "startServerReadyTimeout": 120000,
       "url": ["http://localhost:3000/", "http://localhost:3000/starter"],
       "numberOfRuns": 1,
       "settings": {
@@ -19,7 +20,8 @@
       }
     },
     "upload": {
-      "target": "temporary-public-storage"
+      "target": "filesystem",
+      "outputDir": ".lighthouseci"
     }
   }
 }

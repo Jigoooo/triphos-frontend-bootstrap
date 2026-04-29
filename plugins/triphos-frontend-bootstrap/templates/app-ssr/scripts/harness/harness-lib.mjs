@@ -115,14 +115,6 @@ async function waitForServer(origin, serverProcess, logsRef) {
       throw new Error(`Triphos harness dev server exited early.\n${logsRef.value}`);
     }
 
-    if (
-      logsRef.value.includes(origin) ||
-      (logsRef.value.includes("ready in") && logsRef.value.includes("Local:"))
-    ) {
-      await delay(150);
-      return;
-    }
-
     try {
       const response = await fetch(origin);
       if (response.ok) {
@@ -217,7 +209,7 @@ export async function withHarnessServer(appRoot, runner, options = {}) {
   }
 }
 
-function runChrome(url, { viewport = DESKTOP_VIEWPORT, screenshotPath = null, dumpDom = false } = {}) {
+function runChrome(url, { viewport = DESKTOP_VIEWPORT, screenshotPath = null } = {}) {
   const chrome = resolveChromeExecutable();
   const args = [
     '--headless=new',
@@ -231,10 +223,6 @@ function runChrome(url, { viewport = DESKTOP_VIEWPORT, screenshotPath = null, du
     '--virtual-time-budget=6000',
     '--run-all-compositor-stages-before-draw',
   ];
-
-  if (dumpDom) {
-    args.push('--dump-dom');
-  }
 
   if (screenshotPath) {
     args.push(`--screenshot=${screenshotPath}`);
@@ -264,9 +252,24 @@ export function buildHarnessUrl(origin, route) {
   return `${origin}${route.startsWith('/') ? route : `/${route}`}`;
 }
 
-export function dumpHarnessDom(origin, route, options = {}) {
+export async function dumpHarnessDom(origin, route, { viewport = DESKTOP_VIEWPORT } = {}) {
   const url = buildHarnessUrl(origin, route);
-  return runChrome(url, { ...options, dumpDom: true }).stdout;
+  const { chromium } = await import('playwright');
+  const browser = await chromium.launch({
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  });
+
+  try {
+    const context = await browser.newContext({ viewport });
+    const page = await context.newPage();
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    await delay(350);
+    const html = await page.content();
+    await context.close();
+    return html;
+  } finally {
+    await browser.close();
+  }
 }
 
 export function captureHarnessScreenshot(origin, route, screenshotPath, options = {}) {
@@ -285,7 +288,7 @@ export async function readStableHarnessRoute(origin, route, predicate, attempts 
   let lastSnapshot = null;
 
   for (let attempt = 0; attempt < attempts; attempt += 1) {
-    const html = dumpHarnessDom(origin, route);
+    const html = await dumpHarnessDom(origin, route);
     const snapshot = parseHarnessHtml(html);
     lastSnapshot = snapshot;
 

@@ -2,7 +2,7 @@
 
 import { spawnSync } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { basename, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
@@ -85,18 +85,21 @@ function replacePackageName(targetDir, packageName) {
   writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + "\n");
 }
 
+function derivePackageName(targetDir) {
+  const directoryName = basename(resolve(targetDir));
+  const packageName = directoryName
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/gu, "-")
+    .replace(/^[._-]+|[._-]+$/gu, "");
+
+  return packageName || "triphos-frontend-app";
+}
+
 const args = parseArgs(process.argv.slice(2));
-const target = args.target ? resolve(process.cwd(), args.target) : null;
-const name = args.name || "triphos-frontend-app";
+const target = args.target ? resolve(process.cwd(), args.target) : process.cwd();
+const name = typeof args.name === "string" && args.name.trim() ? args.name : derivePackageName(target);
 const install = Boolean(args.install);
 const templateVariant = typeof args.template === "string" ? args.template : "app";
-
-if (!target) {
-  console.error(
-    "Usage: node scaffold-app.mjs --target <dir> [--name <package-name>] [--template app|app-ssr] [--install]",
-  );
-  process.exit(1);
-}
 
 if (!TEMPLATE_VARIANTS.has(templateVariant)) {
   console.error(
