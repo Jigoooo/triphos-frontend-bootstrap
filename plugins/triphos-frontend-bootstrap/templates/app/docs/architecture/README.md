@@ -18,3 +18,9 @@
 - FSD rules, React rules, and API baseline rules still apply.
 - `docs/` should explain intent and current truth; it should not duplicate every code detail.
 - Temporary verification artifacts live under `.triphos/` and are not part of the canonical record.
+
+## Runtime contracts
+
+- Define runtime contracts with `zod` schema first when data crosses an external or persisted boundary: API DTOs, form values, env-derived values, URL/search params, and persisted store snapshots.
+- Derive the corresponding TypeScript type with `z.infer<typeof Schema>` so validation and static types stay tied together.
+- Pure UI props and internal computation-only types may remain plain TypeScript types when no runtime validation boundary exists.

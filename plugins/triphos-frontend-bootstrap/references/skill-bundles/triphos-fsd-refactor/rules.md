@@ -83,7 +83,7 @@ app → pages → widgets → features → entities → shared
 - **비즈니스 로직 + 상태.** 공식 정의: "data model: schemas, interfaces, stores, business logic."
 - 이 세그먼트에 들어가는 것:
   - Zustand/Jotai/Redux 스토어
-  - 타입/인터페이스/zod 스키마
+  - 타입/인터페이스/zod 스키마 (`z.infer` 타입 포함)
   - 비즈니스 로직 hook (`useAddMedicine`, `useMedicineForm` 등 — 서버 상태나 도메인 결정을 다룸)
   - 데이터용 Context provider (사용자 정보, 권한 등)
 - **들어가면 안 되는 것**: `hooks/`, `types/`, `stores/` 같은 essence 기반 하위 폴더. 공식 안티패턴.
@@ -340,6 +340,7 @@ export type { Prescription } from '../model/types';
 - 컴포넌트/타입: `PascalCase`
 - 훅: `useXxx`
 - 세그먼트 하위 폴더 만들 때 essence 기반 이름(`hooks/`, `types/`, `components/`) **금지**. 목적 기반 이름만 허용 (`form/`, `validation/` 등).
+- 런타임 검증이 필요한 계약(API DTO, form/env/persisted state)은 `zod` schema를 먼저 두고 타입은 `z.infer`로 파생한다. 순수 UI props/내부 계산 타입은 plain TypeScript type을 허용한다.
 
 ---
 

@@ -237,9 +237,19 @@ expectTextIncludes(
   'docs/plans/active/<date>-<slug>/PLAN.md',
   'Expected AGENTS.md to describe the plan record layout',
 );
+expectTextIncludes(agents, '`zod` schema', 'Expected AGENTS.md to require zod schema-first runtime contracts');
+expectTextIncludes(agents, '`z.infer`', 'Expected AGENTS.md to require z.infer-derived types');
 
 const claudeGuidance = readFileSync(resolve(target, 'CLAUDE.md'), 'utf8');
 expectTextIncludes(claudeGuidance, 'docs/README.md', 'Expected CLAUDE.md to route to docs/README.md');
+expectTextIncludes(claudeGuidance, '`zod` schema', 'Expected CLAUDE.md to require zod schema-first runtime contracts');
+expectTextIncludes(claudeGuidance, '`z.infer`', 'Expected CLAUDE.md to require z.infer-derived types');
+
+const architectureDocs = readFileSync(resolve(target, 'docs/architecture/README.md'), 'utf8');
+expectTextIncludes(architectureDocs, '## Runtime contracts', 'Expected architecture docs to describe runtime contracts');
+expectTextIncludes(architectureDocs, '`zod` schema first', 'Expected architecture docs to require zod schema-first contracts');
+expectTextIncludes(architectureDocs, '`z.infer<typeof Schema>`', 'Expected architecture docs to derive types with z.infer');
+expectTextIncludes(architectureDocs, 'Pure UI props', 'Expected architecture docs to allow plain TypeScript for pure UI props');
 
 const codexSessionStart = readFileSync(resolve(target, 'scripts/hooks/codex-session-start.mjs'), 'utf8');
 expectTextIncludes(codexSessionStart, 'docs/README.md', 'Expected codex session-start hook to mention docs/README.md');
@@ -255,6 +265,7 @@ expect(packageJson.scripts?.build === 'vite build', 'Expected package.json scrip
 expect(packageJson.scripts?.preview === 'vite preview', 'Expected package.json scripts.preview to stay "vite preview"');
 expect(packageJson.scripts?.prd === 'vite build', 'Expected package.json scripts.prd to be "vite build"');
 expect(packageJson.dependencies?.['@lukemorales/query-key-factory'], 'Expected package.json to include @lukemorales/query-key-factory');
+expect(packageJson.dependencies?.zod, 'Expected package.json to include zod for runtime contract schemas');
 expect(packageJson.scripts?.['capture:dom'] === 'node ./scripts/capture-dom.mjs', 'Expected package.json scripts.capture:dom');
 expect(packageJson.scripts?.['capture:screenshot'] === 'node ./scripts/capture-screenshot.mjs', 'Expected package.json scripts.capture:screenshot');
 expect(packageJson.scripts?.['verify:fsd'] === 'node ./scripts/verify-fsd.mjs', 'Expected package.json scripts.verify:fsd');

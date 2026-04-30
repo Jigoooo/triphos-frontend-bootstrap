@@ -13,6 +13,7 @@ This file captures the approved official reference set for the bootstrap.
 - `@lukemorales/query-key-factory`
 - `framer-motion`
 - `@floating-ui/react`
+- Zod 4
 - TypeScript 6.0
 
 ## Official references
@@ -35,6 +36,9 @@ This file captures the approved official reference set for the bootstrap.
   - https://devblogs.microsoft.com/typescript/announcing-typescript-6-0/
   - `exactOptionalPropertyTypes`: https://www.typescriptlang.org/tsconfig/exactOptionalPropertyTypes.html
   - `noUncheckedIndexedAccess`: https://www.typescriptlang.org/tsconfig/noUncheckedIndexedAccess.html
+- Zod 4:
+  - https://zod.dev/
+  - Runtime-validated contracts are schema-first; derive TypeScript types with `z.infer`.
 
 ## SSR baseline
 

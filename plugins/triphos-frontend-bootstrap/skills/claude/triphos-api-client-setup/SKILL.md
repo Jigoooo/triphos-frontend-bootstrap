@@ -17,6 +17,7 @@ triggers: ["api 셋업", "apiWithAdapter", "entity api", "새 entity API", "raw 
 - 기존 raw `fetch` / `axios` 호출을 `apiWithAdapter` 패턴으로 migration
 - auth bootstrap, token refresh, transformRequest/Response, retryConfig 같은 고급 customization
 - 프로젝트별 응답 shape 차이에 맞춘 adapter/type 조정
+- API DTO, form/env/persisted state처럼 런타임 검증이 필요한 계약의 `zod` schema-first 정의
 </Use_When>
 
 <Do_Not_Use_When>
@@ -62,6 +63,7 @@ API 레이어는 매번 같은 한 세트(api + query-keys + query-options + mut
 - entities API 호출은 `apiWithAdapter<T>(api.method(...))` 형태를 기본으로 한다.
 - query key는 `@lukemorales/query-key-factory`로 관리한다.
 - feature는 entity의 `queryOptions` / `mutationOptions` wrapper를 `useQuery` / `useMutation`에 직접 넣어 사용한다.
+- 런타임 검증이 필요한 API 계약은 `zod` schema를 먼저 정의하고 타입은 `z.infer`로 파생한다. 순수 UI props/내부 계산 타입은 plain TypeScript type을 허용한다.
 - 프로젝트별 응답 shape가 다르면 무작정 템플릿을 복사하지 말고 adapter/type을 먼저 맞춘다.
 - 작업 후에는 `pnpm verify:api`, `pnpm lint`, `pnpm typecheck`를 통과시킨다.
 
@@ -69,7 +71,7 @@ API 레이어는 매번 같은 한 세트(api + query-keys + query-options + mut
 1. **계약 확인** — 작업 시작 전에 `src/shared/api/adapter/`, `src/shared/api/wrapper/api-with-adapter.ts`, `src/app/providers/api-bootstrap.ts`, `src/shared/api/lib/api-url.ts`, `.env`, `src/shared/api/type/api-type.ts`를 읽고 기존 baseline과 템플릿 기본값이 남아 있는지 확인한다.
 2. **baseline 스캔** — `src/entities/**/api`, `src/entities/**/model/query-keys.ts`, `query-options.ts`, `mutation-options.ts` 존재 여부를 스캔하고 누락 파일을 리포트한다.
 3. **모드별 진행**:
-   - `add`: 새 entity는 `api`, `query-keys`, `query-options`, `mutation-options`, public `index.ts` export를 한 세트로 처리.
+   - `add`: 새 entity는 `api`, zod schema-first DTO/type, `query-keys`, `query-options`, `mutation-options`, public `index.ts` export를 한 세트로 처리.
    - `migrate`: `fetch(`, `axios`, `@jigoooo/api-client` 직접 호출, `api.get/post/put/patch/delete`를 전체 `src/`에서 검색하고 각 후보를 `migrate`/`defer`/`pass` 중 하나로 분류.
    - `customize`: auth bootstrap, token refresh, transform/retry는 `src/shared/api/adapter/`와 `api-bootstrap.ts`에서 변경. 프로젝트별 응답 shape는 adapter/type 조정 우선.
 4. **검증** — `pnpm verify:api`, `pnpm lint`, `pnpm typecheck` 통과.
@@ -79,6 +81,7 @@ API 레이어는 매번 같은 한 세트(api + query-keys + query-options + mut
 - 스캔: `rg "fetch\("`, `rg "axios"`, `rg "@jigoooo/api-client"`, `rg "api\.(get|post|put|patch|delete)\("`
 - 검증: `pnpm verify:api`, `pnpm lint`, `pnpm typecheck`
 - query key: `@lukemorales/query-key-factory`
+- schema/type: `zod` schema + `z.infer`
 - 백엔드 계약 확인 — 코드/OpenAPI/문서/사용자 지시 중 실제 근거가 있는 것을 기준으로 사용
 </Tool_Usage>
 
@@ -92,6 +95,7 @@ API 레이어는 매번 같은 한 세트(api + query-keys + query-options + mut
 <Final_Checklist>
 - [ ] 계약 확인: `adapter/`, `api-with-adapter.ts`, `api-bootstrap.ts`, `api-url.ts`, `.env`, `api-type.ts` 모두 검토
 - [ ] 새 entity 추가 시 `api` + `query-keys` + `query-options` + `mutation-options` + public `index.ts` 한 세트로 처리
+- [ ] 런타임 검증이 필요한 DTO/form/env/persisted state 계약은 `zod` schema-first + `z.infer` 적용
 - [ ] migration 시 raw HTTP 후보 모두 분류 (`migrate`/`defer`/`pass`)
 - [ ] 백엔드 계약 근거 확인 또는 사용자 confirm
 - [ ] `pnpm verify:api`, `pnpm lint`, `pnpm typecheck` 통과 (또는 verifier 부재 시 대체 검증 결과 보고)

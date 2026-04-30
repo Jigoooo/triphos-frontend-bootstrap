@@ -10,6 +10,7 @@
 - `@jigoooo/api-client`
 - `@lukemorales/query-key-factory`
 - `@floating-ui/react`
+- `zod`
 - `date-fns`
 - `framer-motion`
 - `lucide-react`

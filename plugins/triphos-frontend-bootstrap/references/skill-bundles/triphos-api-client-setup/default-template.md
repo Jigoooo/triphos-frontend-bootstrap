@@ -4,6 +4,7 @@
 > `http://localhost:3001/api` 계열 URL과 `success/data/message/timestamp/error/statusCode` 같은 필드명은 템플릿 예시다. 저장소/문서/사용자 지시로 실제 계약이 확인되지 않으면 이 값을 유지할지 교체할지 먼저 묻고 진행한다.
 > API 관련 작업은 최소 `response-adapter`, `api-with-adapter`, `api-bootstrap` 섹션을 먼저 읽고 기존 baseline을 확장하는 방식으로 진행한다.
 > 스킬 호출 시 먼저 `@jigoooo/api-client` 최신 docs를 조회해 이 템플릿이 여전히 유효한지 확인한다. 유효하지 않으면 이 파일을 먼저 업데이트한 뒤 사용자 작업을 진행한다.
+> API DTO, form/env/persisted state처럼 런타임 검증이 필요한 계약은 `zod` schema-first로 정의하고 TypeScript 타입은 `z.infer`로 파생한다.
 
 ## 목차
 
@@ -37,6 +38,8 @@ src/
 ---
 
 ## 1. `shared/adapter/api-type.ts` — 타입 정의
+
+프로젝트별 요청/응답 DTO는 `zod` schema를 먼저 두고 `z.infer`로 타입을 파생한다. 아래 generic adapter shape는 baseline 설명용이며, 실제 백엔드 계약을 검증해야 하는 경우 schema로 승격한다.
 
 ```ts
 export type ApiArgs<P = object, Q = object, D = object> = {

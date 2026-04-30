@@ -28,6 +28,7 @@
 - API 호출은 `src/shared/api/`와 `apiWithAdapter` baseline을 따른다. raw `fetch`, 직접 `axios`, bare `api.get/post` 반환은 baseline 위반이다.
 - API 관련 요청이 들어오면 구현 전에 최소 `src/shared/api/adapter/`, `src/shared/api/wrapper/api-with-adapter.ts`, `src/app/providers/api-bootstrap.ts`를 먼저 확인하고 기존 baseline을 확장하는 방식으로 작업한다.
 - `VITE_API_URL=http://localhost`, `VITE_API_PORT=3001`, `VITE_SUFFIX_API_ENDPOINT=api`, `success/data/message/timestamp/error/statusCode` 같은 템플릿 기본값은 실제 백엔드 계약으로 간주하지 않는다. 저장소 코드, 백엔드 문서, 사용자 지시 어디에도 실제 계약이 없으면 API 작업 전에 유지/교체 여부를 사용자에게 반드시 확인한다.
+- 외부 입력/API DTO/form/env/persisted state처럼 런타임 검증이 필요한 계약은 `zod` schema를 먼저 정의하고 타입은 `z.infer`로 파생한다. 순수 UI props/내부 계산 타입은 TypeScript type을 허용한다.
 - query key는 `@lukemorales/query-key-factory`로 관리하고, entity `model/`에 `query-keys.ts`, `query-options.ts`, `mutation-options.ts`를 둔다.
 - feature는 entity wrapper를 `useQuery`, `useMutation`에 직접 넣어 사용하고 query key/mutationFn을 다시 inline 정의하지 않는다.
 - React, Vite, TypeScript, MCP 설정을 바꿀 때는 공식 문서나 MCP-backed reference를 먼저 확인한다.
