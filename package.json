@@ -1,6 +1,6 @@
 {
   "name": "@jigoooo/triphos-frontend-bootstrap",
-  "version": "0.12.5",
+  "version": "0.12.6",
   "description": "npx installer and dual-plugin marketplace source for Triphos frontend bootstrapping.",
   "author": "Jigoooo",
   "license": "MIT",
@@ -66,7 +66,9 @@
     "smoke:init:ssr": "node plugins/triphos-frontend-bootstrap/scripts/smoke-init.mjs --template app-ssr",
     "traces:summary": "node ./scripts/traces-summary.mjs",
     "verify:repo": "pnpm run validate:structure && pnpm run check:template && pnpm run check:template:ssr && pnpm run check:parity && pnpm run check:bundles && pnpm run check:routing && pnpm test && pnpm run smoke:init && pnpm run smoke:init:ssr",
-    "prepublishOnly": "pnpm run sync:versions && pnpm run verify:repo",
+    "release:preflight": "node ./scripts/release-guard.mjs prepublish",
+    "release:verify": "node ./scripts/release-guard.mjs verify",
+    "prepublishOnly": "pnpm run sync:versions && pnpm run verify:repo && pnpm run release:preflight",
     "publish:dry": "npm publish --dry-run"
   }
 }
